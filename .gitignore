@@ -44,3 +44,9 @@ Thumbs.db
 
 # Ignore API keys file
 /src/environments/environment.ts
+.idea/workspace.xml
+
+# Firebase
+.firebase
+*-debug.log
+.runtimeconfig.json
