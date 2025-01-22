@@ -1,0 +1,36 @@
+<div>
+  <h2>Login</h2>
+  <form #loginForm="ngForm" (ngSubmit)="login()">
+    <div>
+      <label for="email">Email:</label>
+      <input [(ngModel)]="emaiLoginl" id="email2" name="email" required type="text"/>
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input [(ngModel)]="passwordLogin" id="password2" name="password" required type="password"/>
+    </div>
+    <button [disabled]="!loginForm.form.valid" type="submit">Login</button>
+  </form>
+</div>
+
+
+<p *ngIf="authState$ | async as user">
+  Logged in as: {{ user?.email }}
+  <button (click)="logout()">Logout</button>
+</p>
+
+
+<div>
+  <h2>Register</h2>
+  <form #registerForm="ngForm" (ngSubmit)="register()">
+    <div>
+      <label for="email">Email:</label>
+      <input [(ngModel)]="emailRegister" id="email" name="email" required type="text"/>
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input [(ngModel)]="passwordRegister" id="password" name="password" required type="password"/>
+    </div>
+    <button [disabled]="!registerForm.form.valid" type="submit">Register</button>
+  </form>
+</div>
