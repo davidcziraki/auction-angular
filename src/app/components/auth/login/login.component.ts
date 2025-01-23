@@ -12,7 +12,7 @@ import { AsyncPipe, NgIf } from '@angular/common';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  emaiLoginl: string = '';
+  emaiLogin: string = '';
   passwordLogin: string = '';
 
   emailRegister: string = '';
@@ -40,7 +40,7 @@ export class LoginComponent {
 
   login() {
     this.authService
-      .loginUser(this.emaiLoginl, this.passwordLogin)
+      .loginUser(this.emaiLogin, this.passwordLogin)
       .then((user) => {
         // Handle success (e.g., redirect to dashboard or home page)
       })
