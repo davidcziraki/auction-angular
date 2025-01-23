@@ -1,11 +1,7 @@
-
-
 <p *ngIf="authState$ | async as user">
   Logged in as: {{ user?.email }}
   <button (click)="logout()">Logout</button>
 </p>
-
-
 
 
 <div class="surface-card p-4 shadow-2 border-round w-full lg:w-6">
@@ -41,25 +37,28 @@
       <a class="font-medium no-underline ml-2 text-blue-500 text-right cursor-pointer">Forgot password?</a>
     </div>
 
-    <button class="w-full" icon="pi pi-user" label="Sign In" pButton pRipple (click)="login()"></button>
+    <button (click)="login()" class="w-full" icon="pi pi-user" label="Sign In" pButton pRipple></button>
   </div>
 
   <!-- Registration Form -->
   <div *ngIf="isRegistering">
     <label class="block text-900 font-medium mb-2" for="emailRegister">Email</label>
-    <input class="w-full mb-3" id="emailRegister" [(ngModel)]="emailRegister" pInputText placeholder="Email address" type="email">
+    <input [(ngModel)]="emailRegister" class="w-full mb-3" id="emailRegister" pInputText placeholder="Email address"
+           type="email">
 
     <label class="block text-900 font-medium mb-2" for="firstName">First Name</label>
-    <input class="w-full mb-3" id="firstName" [(ngModel)]="firstName" pInputText placeholder="First Name" type="text">
+    <input [(ngModel)]="firstName" class="w-full mb-3" id="firstName" pInputText placeholder="First Name" type="text">
 
     <label class="block text-900 font-medium mb-2" for="lastName">Surname</label>
-    <input class="w-full mb-3" id="lastName" [(ngModel)]="lastName" pInputText placeholder="Surname" type="text">
+    <input [(ngModel)]="lastName" class="w-full mb-3" id="lastName" pInputText placeholder="Surname" type="text">
 
     <label class="block text-900 font-medium mb-2" for="dob">Date of Birth</label>
-    <input class="w-full mb-3" id="dob" [(ngModel)]="dob" pInputText placeholder="Date of Birth" type="date">
+    <input [(ngModel)]="dob" class="w-full mb-3" id="dob" pInputText placeholder="Date of Birth" type="date">
 
     <label class="block text-900 font-medium mb-2" for="passwordRegister">Password</label>
-    <input class="w-full mb-3" id="passwordRegister" [(ngModel)]="passwordRegister" pInputText placeholder="Password" type="password">
+    <input [(ngModel)]="passwordRegister" class="w-full mb-3" id="passwordRegister" pInputText placeholder="Password"
+           type="password">
 
-    <button class="w-full" icon="pi pi-user" label="Register" pButton pRipple (click)="register()"></button>
+    <button (click)="register()" class="w-full" icon="pi pi-user" label="Register" pButton pRipple></button>
   </div>
+</div>
