@@ -5,14 +5,13 @@
 <!--</ul>-->
 
 
-<h1>Angular Router App</h1>
-<nav>
-  <ul>
-    <li><a ariaCurrentWhenActive="page" routerLink="/home" routerLinkActive="active">Home</a></li>
-    <li><a ariaCurrentWhenActive="page" routerLink="/login" routerLinkActive="active">Login</a>
-    </li>
-  </ul>
-</nav><!-- The routed views render in the <router-outlet>-->
+<div class="card">
+  <p-menubar [model]="menuItems"/>
+</div>
+
+<h1>Car Auction</h1>
+
 <div class="container">
   <router-outlet></router-outlet>
 </div>
+

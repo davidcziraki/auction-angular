@@ -63,6 +63,7 @@ export const appConfig: ApplicationConfig = {
           darkModeSelector: 'none',
         },
       },
+      ripple: true, // Enable ripple effect globally
     }),
   ],
 };
