@@ -4,10 +4,44 @@
 <!--  }-->
 <!--</ul>-->
 
+<div
+  class="bg-bluegray-900 text-gray-100 p-3 flex justify-content-between lg:justify-content-center align-items-center flex-wrap">
+  <div class="font-bold mr-8">🔥 Get started!</div>
+  <div class="align-items-center hidden lg:flex">
+    <span class="line-height-3">Learn how our auctions work ></span>
+  </div>
+  <a class="flex align-items-center ml-2 mr-8">
+    <a class="text-white" href="#"><span class="underline font-bold">Learn More</span></a>
+  </a>
+  <a
+    class="flex align-items-center no-underline justify-content-center border-circle text-gray-50 hover:bg-bluegray-700 cursor-pointer transition-colors transition-duration-150"
+    pRipple
+    style="width:2rem; height: 2rem">
+    <i class="pi pi-times"></i>
+  </a>
+</div>
 
 <div class="card">
-  <p-menubar [model]="menuItems"/>
+  <p-menubar [model]="menuItems">
+    <ng-template pTemplate="end">
+      <div class="flex items-center gap-4">
+        <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
+        <p-avatar
+          (click)="menu.toggle($event)"
+          [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png'"
+          shape="circle"
+          styleClass="cursor-pointer"
+        />
+      </div>
+    </ng-template>
+  </p-menubar>
 </div>
+
+
+<p *ngIf="authState$ | async as user">
+  Logged in as: {{ user?.email }}
+</p>
+
 
 <h1>Car Auction</h1>
 
@@ -15,3 +49,61 @@
   <router-outlet></router-outlet>
 </div>
 
+
+<!-- Login/Register Dialog -->
+<p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" [style]="{width: '30rem'}" header="Account">
+  <div class="surface-card p-4 shadow-2 border-round w-full">
+    <div class="text-center mb-5">
+      <img alt="Logo" class="mb-3" height="50" src="favicon.ico">
+      <div class="text-900 text-3xl font-medium mb-3">
+        <span *ngIf="!isRegistering">Welcome Back</span>
+        <span *ngIf="isRegistering">Register</span>
+      </div>
+      <span class="text-600 font-medium line-height-3">
+        <span *ngIf="!isRegistering">Don't have an account?</span>
+        <span *ngIf="isRegistering">Already have an account?</span>
+      </span>
+      <a (click)="toggleForm()" class="font-medium no-underline ml-2 text-blue-500 cursor-pointer">
+        <span *ngIf="!isRegistering">Create today!</span>
+        <span *ngIf="isRegistering">Back to Sign In</span>
+      </a>
+    </div>
+
+    <!-- Login Form -->
+    <div *ngIf="!isRegistering">
+      <label class="block text-900 font-medium mb-2" for="emailLogin">Email</label>
+      <input [(ngModel)]="emaiLogin" class="w-full mb-3" id="emailLogin" pInputText placeholder="Email address"
+             type="text">
+
+      <label class="block text-900 font-medium mb-2" for="passwordLogin">Password</label>
+      <input [(ngModel)]="passwordLogin" class="w-full mb-3" id="passwordLogin" pInputText placeholder="Password"
+             type="password">
+
+      <div class="flex align-items-center justify-content-between mb-6">
+        <p-checkbox [binary]="true" id="rememberMe" styleClass="mr-2"></p-checkbox>
+        <label class="text-900" for="rememberMe">Remember me</label>
+      </div>
+
+      <button (click)="login()" class="w-full" icon="pi pi-user" label="Sign In" pButton pRipple></button>
+    </div>
+
+    <!-- Registration Form -->
+    <div *ngIf="isRegistering">
+      <label class="block text-900 font-medium mb-2" for="emailRegister">Email</label>
+      <input [(ngModel)]="emailRegister" class="w-full mb-3" id="emailRegister" pInputText placeholder="Email address"
+             type="email">
+
+      <label class="block text-900 font-medium mb-2" for="firstName">First Name</label>
+      <input [(ngModel)]="firstName" class="w-full mb-3" id="firstName" pInputText placeholder="First Name" type="text">
+
+      <label class="block text-900 font-medium mb-2" for="dob">Date of Birth</label>
+      <input [(ngModel)]="dob" class="w-full mb-3" id="dob" pInputText placeholder="Date of Birth" type="date">
+
+      <label class="block text-900 font-medium mb-2" for="passwordRegister">Password</label>
+      <input [(ngModel)]="passwordRegister" class="w-full mb-3" id="passwordRegister" pInputText placeholder="Password"
+             type="password">
+
+      <button (click)="register()" class="w-full" icon="pi pi-user" label="Register" pButton pRipple></button>
+    </div>
+  </div>
+</p-dialog>

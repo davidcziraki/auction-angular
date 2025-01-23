@@ -1,32 +1,92 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { collection, collectionData, Firestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { MegaMenuModule } from 'primeng/megamenu';
-import { routes } from './app.routes';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { User } from '@angular/fire/auth';
+import { AuthService } from './services/auth.service';
+import { Avatar } from 'primeng/avatar';
+import { Menu } from 'primeng/menu';
+import { Dialog } from 'primeng/dialog';
+import { Checkbox } from 'primeng/checkbox';
+import { FormsModule } from '@angular/forms';
+import { InputText } from 'primeng/inputtext';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { FirestoreService } from './services/firestore.service';
+import { UserModel } from './models/user';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MegaMenuModule, MenubarModule],
+  imports: [
+    RouterOutlet,
+    MegaMenuModule,
+    MenubarModule,
+    AsyncPipe,
+    NgIf,
+    Avatar,
+    Menu,
+    Dialog,
+    Checkbox,
+    FormsModule,
+    InputText,
+    ButtonDirective,
+    Ripple,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
   title = 'finalyear';
-  routes = routes;
   menuItems: MenuItem[] | undefined;
+  authState$!: Observable<User | null>;
+  user: User | null = null;
 
+  // Dialog state
+  displayDialog: boolean = false;
+  isRegistering: boolean = false;
+
+  // Form fields
+  emaiLogin: string = '';
+  passwordLogin: string = '';
+  emailRegister: string = '';
+  passwordRegister: string = '';
+  firstName: string = '';
+  lastName: string = '';
+  dob: string = '';
+
+  userMenu: MenuItem[] = [];
   firestore: Firestore = inject(Firestore);
   items$: Observable<any[]>;
 
-  constructor() {
+  constructor(
+    private authService: AuthService,
+    private firestoreService: FirestoreService,
+    private router: Router,
+  ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
   }
 
+  showDialog() {
+    this.displayDialog = true;
+  }
+
+  toggleForm() {
+    this.isRegistering = !this.isRegistering;
+  }
+
   ngOnInit() {
+    this.authState$ = this.authService.authState$;
+
+    this.authState$.subscribe((user) => {
+      this.user = user;
+      this.updateUserMenu();
+    });
+
     this.menuItems = [
       {
         label: 'Home',
@@ -38,15 +98,71 @@ export class AppComponent implements OnInit {
         icon: 'pi pi-fw pi-search',
         routerLink: '/search',
       },
+    ];
+  }
+
+  updateUserMenu() {
+    this.userMenu = [
       {
-        label: 'Login',
-        icon: 'pi pi-fw pi-user',
-        routerLink: '/login',
+        label: this.user ? 'Logout' : 'Login',
+        icon: this.user ? 'pi pi-sign-out' : 'pi pi-sign-in',
+        command: () => (this.user ? this.logout() : this.showDialog()),
       },
     ];
   }
 
+  login() {
+    this.authService
+      .loginUser(this.emaiLogin, this.passwordLogin)
+      .then((user) => {
+        console.log('Login successful:', user);
+        this.displayDialog = false;
+      })
+      .catch((error) => {
+        console.error('Login error:', error);
+      });
+  }
+
+  register() {
+    this.authService
+      .createUser(this.emailRegister, this.passwordRegister)
+      .then((user) => {
+        const newUser: UserModel = {
+          forename: this.firstName,
+          surname: this.lastName,
+          DOB: new Date(this.dob),
+          email: this.emailRegister,
+          userID: user.uid,
+          admin: false,
+        };
+
+        this.firestoreService
+          .addUser(newUser)
+          .then(() => {
+            console.log('User registered successfully.');
+            this.displayDialog = false;
+          })
+          .catch((error) => {
+            console.error('Error adding user:', error);
+          });
+      })
+      .catch((error) => {
+        console.error('Registration error:', error);
+      });
+  }
+
+  logout() {
+    this.authService
+      .logout()
+      .then(() => {
+        this.user = null;
+      })
+      .catch((error) => {
+        console.error('Logout error:', error);
+      });
+  }
+
   trackByName(index: number, item: any): number {
-    return item.name; // Return the unique identifier
+    return item.name;
   }
 }
