@@ -6,7 +6,7 @@
 
 <div *ngIf="bannerVisible"
      class="text-white p-1.5 flex justify-content-between lg:justify-content-center align-items-center flex-wrap"
-     style="background-color: #0c4a6e;">
+     style="background-color: #1e3a8a;">
   <div class="font-medium mr-8"><i class="pi pi-info-circle mr-1"></i> Get started!</div>
   <div class="align-items-center hidden lg:flex">
     <span class="line-height-3">Learn how our auctions work</span>
@@ -77,7 +77,7 @@
         <span *ngIf="!isRegistering">Don't have an account?</span>
         <span *ngIf="isRegistering">Already have an account?</span>
       </span>
-      <a (click)="toggleForm()" class="font-medium no-underline ml-2 text-blue-500 cursor-pointer">
+      <a (click)="toggleForm()" class="font-semibold no-underline ml-2 text-blue-500 cursor-pointer">
         <span *ngIf="!isRegistering">Create today!</span>
         <span *ngIf="isRegistering">Back to Sign In</span>
       </a>
@@ -94,10 +94,13 @@
              type="password">
 
       <div class="flex align-items-center justify-content-between mb-6">
-        <p-checkbox [binary]="true" id="rememberMe" styleClass="mr-2"></p-checkbox>
-        <label class="text-900" for="rememberMe">Remember me</label>
+        <div class="flex align-items-center">
+          <p-checkbox [binary]="true" id="rememberme1" styleClass="mr-2"></p-checkbox>
+          <label class="text-900" for="rememberme1">Remember me</label>
+        </div>
+        <a class="font-semibold no-underline ml-2 text-blue-500 text-right cursor-pointer text-primary">Forgot
+          password?</a>
       </div>
-
       <button (click)="login()" class="w-full" icon="pi pi-user" label="Sign In" pButton pRipple></button>
     </div>
 
@@ -110,6 +113,9 @@
       <label class="block text-900 font-medium mb-2" for="firstName">First Name</label>
       <input [(ngModel)]="firstName" class="w-full mb-3" id="firstName" pInputText placeholder="First Name" type="text">
 
+      <label class="block text-900 font-medium mb-2" for="firstName">First Name</label>
+      <input [(ngModel)]="lastName" class="w-full mb-3" id="lastName" pInputText placeholder="Surname" type="text">
+
       <label class="block text-900 font-medium mb-2" for="dob">Date of Birth</label>
       <input [(ngModel)]="dob" class="w-full mb-3" id="dob" pInputText placeholder="Date of Birth" type="date">
 
@@ -121,3 +127,51 @@
     </div>
   </div>
 </p-dialog>
+
+
+<footer class="surface-section text-white py-6 mt-6 footerBottom">
+  <div class="grid grid-nogutter px-6 md:px-8 lg:px-12 text-center md:text-left">
+    <div class="col-12 md:col-4">
+      <h4 class="font-medium text-xl mb-3 outlined-text">Car Auction Marketplace</h4>
+      <p class="text-sm text-gray-300">Buy and sell used cars with confidence. Our platform connects buyers and sellers
+        in a seamless auction experience.</p>
+    </div>
+
+    <div class="col-12 md:col-2 mt-4 md:mt-0">
+      <h5 class="font-semibold text-lg mb-3 outlined-text">Company</h5>
+      <ul class="list-none p-0 m-0">
+        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/about">About Us</a></li>
+        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/contact">Contact</a></li>
+        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/careers">Careers</a></li>
+      </ul>
+    </div>
+
+    <div class="col-12 md:col-2 mt-4 md:mt-0">
+      <h5 class="font-semibold text-lg mb-3 outlined-text">Support</h5>
+      <ul class="list-none p-0 m-0">
+        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/faq">FAQs</a></li>
+        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/help">Help Center</a></li>
+        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/terms">Terms of Service</a></li>
+      </ul>
+    </div>
+
+    <div class="col-12 md:col-4 mt-4 md:mt-0">
+      <h5 class="font-semibold text-lg mb-3 outlined-text">Stay Connected</h5>
+      <div class="flex justify-center md:justify-start gap-4">
+        <a class="text-gray-300 hover:text-white transition-colors" href="https://facebook.com">
+          <i class="pi pi-facebook text-2xl"></i>
+        </a>
+        <a class="text-gray-300 hover:text-white transition-colors" href="https://twitter.com">
+          <i class="pi pi-twitter text-2xl"></i>
+        </a>
+        <a class="text-gray-300 hover:text-white transition-colors" href="https://instagram.com">
+          <i class="pi pi-instagram text-2xl"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-6 border-t border-gray-700 pt-4 text-gray-400 text-sm">
+    2025 Car Auction Marketplace. All Rights Reserved.
+  </div>
+</footer>

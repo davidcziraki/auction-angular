@@ -21,20 +21,38 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
 
+// const MyPreset = definePreset(Aura, {
+//   semantic: {
+//     primary: {
+//       50: '{blue.50}',
+//       100: '{blue.100}',
+//       200: '{blue.200}',
+//       300: '{blue.300}',
+//       400: '{blue.900}',
+//       500: '{blue.900}',
+//       600: '{blue.950}',
+//       700: '{blue.950}',
+//       800: '{blue.900}',
+//       900: '{blue.900}',
+//       950: '{blue.950}',
+//     },
+//   },
+// });
+
 const MyPreset = definePreset(Aura, {
   semantic: {
     primary: {
-      50: '{sky.50}',
-      100: '{sky.100}',
-      200: '{sky.200}',
-      300: '{sky.300}',
-      400: '{sky.900}',
-      500: '{sky.900}',
-      600: '{sky.950}',
-      700: '{sky.950}',
-      800: '{sky.900}',
-      900: '{sky.900}',
-      950: '{sky.950}',
+      50: '{blue.400}',
+      100: '{blue.500}',
+      200: '{blue.600}',
+      300: '{blue.700}',
+      400: '{blue.800}',
+      500: '{blue.900}',
+      600: '{blue.950}',
+      700: '{blue.950}',
+      800: '{blue.950}',
+      900: '{blue.950}',
+      950: '{blue.950}',
     },
   },
 });
