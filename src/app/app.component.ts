@@ -1,11 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { collection, collectionData, Firestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { Router, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { User } from '@angular/fire/auth';
 import { AuthService } from './services/auth.service';
 import { Avatar } from 'primeng/avatar';
@@ -25,7 +25,6 @@ import { UserModel } from './models/user';
     RouterOutlet,
     MegaMenuModule,
     MenubarModule,
-    AsyncPipe,
     NgIf,
     Avatar,
     Menu,
@@ -35,6 +34,7 @@ import { UserModel } from './models/user';
     InputText,
     ButtonDirective,
     Ripple,
+    RouterLink,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -44,6 +44,7 @@ export class AppComponent implements OnInit {
   menuItems: MenuItem[] | undefined;
   authState$!: Observable<User | null>;
   user: User | null = null;
+  bannerVisible = true;
 
   // Dialog state
   displayDialog: boolean = false;
@@ -65,7 +66,6 @@ export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,
-    private router: Router,
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
@@ -160,6 +160,10 @@ export class AppComponent implements OnInit {
       .catch((error) => {
         console.error('Logout error:', error);
       });
+  }
+
+  closeBanner() {
+    this.bannerVisible = false;
   }
 
   trackByName(index: number, item: any): number {

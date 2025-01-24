@@ -1,0 +1,28 @@
+.banner {
+  background-image: url('/carbanner.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 35vh;
+  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.96);
+  margin-top: 4vh;
+  display: grid;
+}
+
+.iconfield-container {
+  width: 60%;
+}
+
+.search-input {
+  width: 100%;
+}
+
+.p-inputicon-custom {
+  width: 300%;
+}
+
+.outlined-text {
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Smooth black outline */
+}
+
+

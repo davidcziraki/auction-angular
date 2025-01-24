@@ -4,46 +4,60 @@
 <!--  }-->
 <!--</ul>-->
 
-<div
-  class="bg-bluegray-900 text-gray-100 p-3 flex justify-content-between lg:justify-content-center align-items-center flex-wrap">
-  <div class="font-bold mr-8">🔥 Get started!</div>
+<div *ngIf="bannerVisible"
+     class="text-white p-1.5 flex justify-content-between lg:justify-content-center align-items-center flex-wrap"
+     style="background-color: #0c4a6e;">
+  <div class="font-medium mr-8"><i class="pi pi-info-circle mr-1"></i> Get started!</div>
   <div class="align-items-center hidden lg:flex">
-    <span class="line-height-3">Learn how our auctions work ></span>
+    <span class="line-height-3">Learn how our auctions work</span>
   </div>
-  <a class="flex align-items-center ml-2 mr-8">
-    <a class="text-white" href="#"><span class="underline font-bold">Learn More</span></a>
+  <a class="flex align-items-center ml-2 mr-8" routerLink="/search" style="color: inherit; text-decoration: none;">
+
+    <span class="underline font-medium">Learn More</span>
   </a>
   <a
-    class="flex align-items-center no-underline justify-content-center border-circle text-gray-50 hover:bg-bluegray-700 cursor-pointer transition-colors transition-duration-150"
+    (click)="closeBanner()"
+    class="flex align-items-center no-underline justify-content-center border-circle text-white hover:bg-bluegray-700 cursor-pointer transition-colors transition-duration-150"
     pRipple
     style="width:2rem; height: 2rem">
     <i class="pi pi-times"></i>
   </a>
 </div>
 
+
 <div class="card">
   <p-menubar [model]="menuItems">
     <ng-template pTemplate="end">
       <div class="flex items-center gap-4">
         <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
-        <p-avatar
-          (click)="menu.toggle($event)"
-          [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png'"
-          shape="circle"
-          styleClass="cursor-pointer"
-        />
+
+        <!-- Avatar and Logged In As Text -->
+
+        <!-- Conditionally display "Logged in as" or "Log in" -->
+        <p *ngIf="user; else loginText" class="ml-2">
+          Logged in as: {{ user?.email }}
+        </p>
+        <ng-template #loginText>
+          <p class="ml-2 cursor-pointer">
+            <a (click)="showDialog() "
+            >Log in</a>
+          </p>
+        </ng-template>
+
+        <!-- Avatar -->
+        <div class="flex items-center">
+          <p-avatar
+            (click)="menu.toggle($event)"
+            [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png'"
+            shape="circle"
+            styleClass="cursor-pointer align-self-center"
+          />
+        </div>
       </div>
     </ng-template>
   </p-menubar>
 </div>
 
-
-<p *ngIf="authState$ | async as user">
-  Logged in as: {{ user?.email }}
-</p>
-
-
-<h1>Car Auction</h1>
 
 <div class="container">
   <router-outlet></router-outlet>
