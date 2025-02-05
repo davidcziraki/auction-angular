@@ -1,33 +1,38 @@
-<!--<div *ngFor="let auction of auctions">-->
-<!--  <p>{{ auction.name }}</p>-->
-<!--  <p>{{ auction.price }}</p>-->
-<!--  <p>{{ auction.id }}</p>-->
-<!--  <p>{{ auction.endTime }}</p>-->
-<!--</div>-->
 
 
-<!--<div *ngFor="let auction of auctions">-->
-<!--  <p><strong>{{ auction.name }}</strong></p>-->
-<!--  <p>Price: {{ auction.price }}</p>-->
-<!--  <p>Auction ID: {{ auction.id }}</p>-->
-<!--  <p>Ends At: {{ auction.endTimeDate | date:'EEE MMM dd yyyy HH:mm:ss' }}</p>-->
+<div class="spinner" *ngIf="isLoading">
+  <p-progressSpinner ariaLabel="Loading auctions..." >
+  </p-progressSpinner>
+</div>
 
-<!--  &lt;!&ndash; Display the auction image &ndash;&gt;-->
-<!--  <img [src]="auction.imageUrl" alt="Auction Image" style="max-width: 300px; height: auto;">-->
-<!--  <hr>-->
-<!--</div>-->
+<div class="auction-list">
 
+    <div *ngFor="let auction of auctions">  <a [routerLink]="['/auction', auction.id]" class="block no-underline">
 
-<div *ngFor="let auction of auctions">
-  <p><strong>{{ auction.name }}</strong></p>
-  <p>Price: {{ auction.price }}</p>
-  <p>Auction ID: {{ auction.id }}</p>
-  <p>Ends At: {{ auction.endTimeDate | date:'EEE MMM dd yyyy HH:mm:ss' }}</p>
+    <p-card [style]="{ width: '25rem', overflow: 'hidden' }" >
+        <ng-template #header>
+          <img [src]="auction.imageUrl" alt="Auction Image" class="w-full"/>
+        </ng-template>
+        <ng-template #title>
+          {{ auction.name }}
+        </ng-template>
+<!--        <ng-template #subtitle>-->
+<!--          Ends At: {{ auction.endTimeDate | date:'EEE MMM dd yyyy HH:mm:ss' }}-->
+<!--        </ng-template>-->
+      <ng-template #subtitle>
+Filler temporary text to be used for Auction subtitles.      </ng-template>
+        <p style="font-weight: bold;">
+          Price: {{ auction.price | currency: 'HUF ' }}
+        </p>
 
-  <!-- Display countdown if it's available -->
-  <p *ngIf="auction.countdown">Time Left: {{ auction.countdown }}</p>
+        <!-- Display countdown if it's available -->
+        <p *ngIf="auction.countdown" style="font-weight: bold;">
+        {{ auction.countdown }}
+        </p>
+        <ng-template #footer>
 
-  <!-- Display the auction image -->
-  <img [src]="auction.imageUrl" alt="Auction Image" style="max-width: 300px; height: auto;">
-  <hr>
+        </ng-template>
+      </p-card>
+  </a>
+
 </div>

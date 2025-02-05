@@ -1,16 +1,21 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Auction } from '../../models/auction';
-import { DatePipe, NgForOf, NgIf } from '@angular/common';
+import { CurrencyPipe, NgForOf, NgIf } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
+import { Card } from 'primeng/card';
+import { RouterLink } from '@angular/router';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-search',
-  imports: [NgForOf, DatePipe, NgIf],
+  imports: [NgForOf, NgIf, Card, CurrencyPipe, RouterLink, ProgressSpinner],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
 })
 export class SearchComponent implements OnInit, OnDestroy {
   auctions: Auction[] = [];
+  loadedImages: Set<string> = new Set();
+  isLoading: boolean = false;
   private countdownInterval?: number;
 
   constructor(private storageService: StorageService) {}
@@ -27,11 +32,42 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   async loadAuctions() {
     try {
-      this.auctions = await this.storageService.loadAuctions();
+      this.isLoading = true;
+      const auctionData = await this.storageService.loadAuctions();
+
+      // Wait for all images to load
+      await Promise.all(
+        auctionData.map(
+          (auction) =>
+            new Promise<void>((resolve) => {
+              const img = new Image();
+              img.onload = () => {
+                if (auction.id != null) {
+                  this.loadedImages.add(auction.id);
+                }
+                resolve();
+              };
+              img.onerror = () => {
+                // Handle error but still resolve
+                console.error(`Failed to load image for auction ${auction.id}`);
+                resolve();
+              };
+              img.src = auction.imageUrl || '';
+            }),
+        ),
+      );
+
+      this.auctions = auctionData;
       this.startGlobalCountdown();
     } catch (error) {
       console.error('Error loading auctions:', error);
+    } finally {
+      this.isLoading = false;
     }
+  }
+
+  isImageLoaded(auctionId: string): boolean {
+    return this.loadedImages.has(auctionId);
   }
 
   private startGlobalCountdown() {

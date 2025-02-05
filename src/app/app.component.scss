@@ -2,9 +2,20 @@
   margin-bottom: 2%;
 }
 
+@media (min-width: 768px) {
+
+
+  .footerBottom {
+
+    position: fixed;
+
+  }
+
+}
+
+
 .footerBottom {
   background-color: #3e4e4e !important;
-  position: fixed;
   bottom: 0;
   width: 100%;
 }
