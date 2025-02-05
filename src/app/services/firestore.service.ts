@@ -1,22 +1,27 @@
 import { inject, Injectable } from '@angular/core';
 import {
   collection,
+  collectionData,
   CollectionReference,
   doc,
   Firestore,
   setDoc,
 } from '@angular/fire/firestore';
 import { UserModel } from '../models/user';
+import { Observable } from 'rxjs';
+import { Auction } from '../models/auction';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirestoreService {
   usersCollection: CollectionReference; // Declare users collection reference
+  auctionsCollection: CollectionReference;
   private firestore = inject(Firestore);
 
   constructor() {
     this.usersCollection = collection(this.firestore, 'users');
+    this.auctionsCollection = collection(this.firestore, 'auctions');
   }
 
   async addUser(user: UserModel) {
@@ -28,5 +33,12 @@ export class FirestoreService {
     } catch (e) {
       console.error('Error adding document: ', e);
     }
+  }
+
+  // Get all auctions
+  getAuctions(): Observable<Auction[]> {
+    return collectionData(this.auctionsCollection, {
+      idField: 'id',
+    }) as Observable<Auction[]>;
   }
 }

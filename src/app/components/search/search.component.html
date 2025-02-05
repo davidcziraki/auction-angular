@@ -1,1 +1,33 @@
-<p>search works!</p>
+<!--<div *ngFor="let auction of auctions">-->
+<!--  <p>{{ auction.name }}</p>-->
+<!--  <p>{{ auction.price }}</p>-->
+<!--  <p>{{ auction.id }}</p>-->
+<!--  <p>{{ auction.endTime }}</p>-->
+<!--</div>-->
+
+
+<!--<div *ngFor="let auction of auctions">-->
+<!--  <p><strong>{{ auction.name }}</strong></p>-->
+<!--  <p>Price: {{ auction.price }}</p>-->
+<!--  <p>Auction ID: {{ auction.id }}</p>-->
+<!--  <p>Ends At: {{ auction.endTimeDate | date:'EEE MMM dd yyyy HH:mm:ss' }}</p>-->
+
+<!--  &lt;!&ndash; Display the auction image &ndash;&gt;-->
+<!--  <img [src]="auction.imageUrl" alt="Auction Image" style="max-width: 300px; height: auto;">-->
+<!--  <hr>-->
+<!--</div>-->
+
+
+<div *ngFor="let auction of auctions">
+  <p><strong>{{ auction.name }}</strong></p>
+  <p>Price: {{ auction.price }}</p>
+  <p>Auction ID: {{ auction.id }}</p>
+  <p>Ends At: {{ auction.endTimeDate | date:'EEE MMM dd yyyy HH:mm:ss' }}</p>
+
+  <!-- Display countdown if it's available -->
+  <p *ngIf="auction.countdown">Time Left: {{ auction.countdown }}</p>
+
+  <!-- Display the auction image -->
+  <img [src]="auction.imageUrl" alt="Auction Image" style="max-width: 300px; height: auto;">
+  <hr>
+</div>
