@@ -1,6 +1,6 @@
 .auction-list {
   display: flex;
-  gap: 3vw;
+  gap: 8vw;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -19,4 +19,15 @@
 .primeng-card {
   background-color: #f5f5f5;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+@media (max-width: 768px) {
+  .auction-list {
+    margin-top: -50vw;
+    scale: 0.7;
+
+  }
+
+
 }

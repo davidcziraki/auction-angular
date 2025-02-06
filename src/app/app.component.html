@@ -4,26 +4,6 @@
 <!--  }-->
 <!--</ul>-->
 
-<div *ngIf="bannerVisible"
-     class="text-white p-1.5 flex justify-content-between lg:justify-content-center align-items-center flex-wrap"
-     style="background-color: #1e3a8a;">
-  <div class="font-medium mr-8"><i class="pi pi-info-circle mr-1"></i> Get started!</div>
-  <div class="align-items-center hidden lg:flex">
-    <span class="line-height-3">Learn how our auctions work</span>
-  </div>
-  <a class="flex align-items-center ml-2 mr-8" routerLink="/search" style="color: inherit; text-decoration: none;">
-
-    <span class="underline font-medium">Learn More</span>
-  </a>
-  <a
-    (click)="closeBanner()"
-    class="flex align-items-center no-underline justify-content-center border-circle text-white hover:bg-bluegray-700 cursor-pointer transition-colors transition-duration-150"
-    pRipple
-    style="width:2rem; height: 2rem">
-    <i class="pi pi-times"></i>
-  </a>
-</div>
-
 
 <div class="card">
   <p-menubar [model]="menuItems">
@@ -56,6 +36,22 @@
       </div>
     </ng-template>
   </p-menubar>
+</div>
+
+<div *ngIf="bannerVisible" class="homepage-banner">
+  <div class="banner-content">
+    <i class="pi pi-info-circle banner-icon"></i>
+    <span class="banner-text">Get started!</span>
+  </div>
+  <div class="learn-more">
+    <span>Learn how our auctions work</span>
+  </div>
+  <a class="learn-more-link" routerLink="/search">
+    <span>Learn More</span>
+  </a>
+  <a (click)="closeBanner()" class="close-button">
+    <i class="pi pi-times"></i>
+  </a>
 </div>
 
 

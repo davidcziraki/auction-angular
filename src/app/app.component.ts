@@ -94,9 +94,19 @@ export class AppComponent implements OnInit {
         routerLink: '/home',
       },
       {
-        label: 'Search',
+        label: 'Auctions',
         icon: 'pi pi-fw pi-search',
         routerLink: '/search',
+      },
+      {
+        label: 'Contact',
+        icon: 'pi pi-fw pi-address-book',
+        routerLink: '',
+      },
+      {
+        label: 'User Management',
+        icon: 'pi pi-fw pi-warehouse',
+        routerLink: '',
       },
     ];
   }

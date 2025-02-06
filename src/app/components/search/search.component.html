@@ -1,38 +1,39 @@
-
-
-<div class="spinner" *ngIf="isLoading">
-  <p-progressSpinner ariaLabel="Loading auctions..." >
-  </p-progressSpinner>
+<div *ngIf="isLoading" class="spinner">
+  <p-progressSpinner ariaLabel="Loading auctions..."></p-progressSpinner>
 </div>
 
 <div class="auction-list">
-
-    <div *ngFor="let auction of auctions">  <a [routerLink]="['/auction', auction.id]" class="block no-underline">
-
-    <p-card [style]="{ width: '25rem', overflow: 'hidden' }" >
+  <div *ngFor="let auction of auctions">
+    <a [routerLink]="['/auction', auction.id]" class="block no-underline">
+      <p-card [style]="{ width: '25rem', overflow: 'hidden' }">
         <ng-template #header>
           <img [src]="auction.imageUrl" alt="Auction Image" class="w-full"/>
         </ng-template>
         <ng-template #title>
           {{ auction.name }}
         </ng-template>
-<!--        <ng-template #subtitle>-->
-<!--          Ends At: {{ auction.endTimeDate | date:'EEE MMM dd yyyy HH:mm:ss' }}-->
-<!--        </ng-template>-->
-      <ng-template #subtitle>
-Filler temporary text to be used for Auction subtitles.      </ng-template>
+
+        <!-- Uncommented this subtitle section for clarity -->
+        <ng-template #subtitle>
+          Filler temporary text to be used for Auction subtitles.
+        </ng-template>
+
         <p style="font-weight: bold;">
           Price: {{ auction.price | currency: 'HUF ' }}
         </p>
 
         <!-- Display countdown if it's available -->
         <p *ngIf="auction.countdown" style="font-weight: bold;">
-        {{ auction.countdown }}
+          {{ auction.countdown }}
         </p>
-        <ng-template #footer>
 
+        <ng-template #footer>
+          <!-- Footer content goes here (if any) -->
         </ng-template>
       </p-card>
-  </a>
+    </a>
+  </div>
+</div> <!-- Closing div for auction-list -->
 
-</div>
+
+

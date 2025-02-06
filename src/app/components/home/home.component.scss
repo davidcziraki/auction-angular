@@ -8,9 +8,6 @@
   display: grid;
 }
 
-.iconfield-container {
-  width: 60%;
-}
 
 .search-input {
   width: 100%;
@@ -20,9 +17,32 @@
   width: 300%;
 }
 
+
 .outlined-text {
+  font-size: 2rem;
   color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Smooth black outline */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+@media (min-width: 768px) {
+  .iconfield-container {
+    width: 30%;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .outlined-text {
+    font-size: 1.1rem !important;
+  }
+
+  .search-bar {
+    margin-top: 8vw;
+  }
+
+  .iconfield-container {
+    width: 90%;
+  }
 }
 
 

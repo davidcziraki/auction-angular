@@ -1,0 +1,68 @@
+<div class="auction-bar">
+  <!-- Back Button -->
+  <button [routerLink]="['/search']" class="back-button" icon="pi pi-chevron-left" pButton></button>
+
+  <!-- Current Bid -->
+  <div class="auction-info">
+    <div class="price">
+      <span class="currency">HUF </span>
+      <span class="amount">{{ auction?.price | number }}</span>
+    </div>
+    <div class="label">CURRENT BID</div>
+  </div>
+
+  <!-- Countdown Timer -->
+  <div class="auction-info">
+    <span class="countdown">{{ auction?.countdown }}</span>
+    <div class="label">{{ auction?.endTimeDate | date: 'h:mm a' }}</div>
+  </div>
+
+  <!-- Bids Count -->
+  <div class="auction-info">
+    <span class="bids">{{ bids }}</span>
+    <div class="label">BIDS</div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="actions">
+    <button class="watch-button" icon="pi pi-heart" label="WATCH" pButton></button>
+    <button class="share-button" icon="pi pi-share-alt" label="SHARE" pButton></button>
+    <button class="calendar-button" icon="pi pi-calendar-plus" pButton></button>
+  </div>
+
+  <!-- Place Bid Button -->
+  <button label="PLACE BID" pButton pRipple></button>
+</div>
+
+
+<!--<div *ngIf="auction" class="auction-detail">-->
+<!--  <p-card [style]="{ width: '30rem', overflow: 'hidden' }">-->
+<!--    <ng-template #header>-->
+<!--      <img [src]="auction.imageUrl" alt="Auction Image" class="w-full"/>-->
+<!--    </ng-template>-->
+
+<!--    <ng-template #title>-->
+<!--      {{ auction.name }}-->
+<!--    </ng-template>-->
+
+<!--    <ng-template #subtitle>-->
+<!--      Auction ends at: {{ auction.endTimeDate | date:'EEE MMM dd' }}-->
+<!--    </ng-template>-->
+
+
+<!--  </p-card>-->
+<!--</div>-->
+
+
+<div class="gallery">
+  <div class="main-image">
+    <img [src]="mainImage" alt="Main Image">
+  </div>
+  <div class="thumbnail-images">
+    <div *ngFor="let image of thumbnailImages; let i = index" class="thumbnail">
+      <img [src]="image" alt="Thumbnail {{i + 1}}">
+    </div>
+  </div>
+</div>
+
+

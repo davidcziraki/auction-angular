@@ -1,5 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, Firestore, getDocs } from '@angular/fire/firestore';
+import {
+  collection,
+  doc,
+  Firestore,
+  getDoc,
+  getDocs,
+} from '@angular/fire/firestore';
 import { Auction } from '../models/auction';
 import { getStorage, ref } from 'firebase/storage';
 import { getDownloadURL } from '@angular/fire/storage';
@@ -51,6 +57,44 @@ export class StorageService {
     } catch (error) {
       console.error('Error fetching auctions: ', error);
       throw error; // Re-throw the error for the caller to handle
+    }
+  }
+
+  async getAuction(id: string): Promise<Auction | null> {
+    console.log(`Fetching auction with ID: ${id}`);
+
+    try {
+      // Reference to the specific auction document
+      const auctionRef = doc(this.db, 'auctions', id);
+      const auctionSnap = await getDoc(auctionRef);
+
+      if (!auctionSnap.exists()) {
+        console.warn(`Auction with ID ${id} not found.`);
+        return null; // Return null if auction doesn't exist
+      }
+
+      const auctionData: Auction = {
+        id: auctionSnap.id,
+        ...auctionSnap.data(),
+      } as Auction;
+
+      // Convert Firestore timestamp to Date
+      auctionData.endTimeDate = <Date>auctionData.endtime?.toDate();
+
+      try {
+        // Fetch image URL from Firebase Storage
+        const imageRef = ref(this.storage, `${auctionData.id}.jpg`);
+        auctionData.imageUrl = await getDownloadURL(imageRef);
+        console.log(`Fetched image for auction ${id}`);
+      } catch (imageError) {
+        console.error(`Error fetching image for auction ${id}:`, imageError);
+        auctionData.imageUrl = 'assets/error.jpg'; // Fallback image
+      }
+
+      return auctionData;
+    } catch (error) {
+      console.error('Error fetching auction:', error);
+      throw error;
     }
   }
 }

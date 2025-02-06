@@ -1,5 +1,5 @@
 .card {
-  margin-bottom: 2%;
+  margin-bottom: 1%;
 }
 
 @media (min-width: 768px) {
@@ -22,4 +22,101 @@
 
 .container {
   overflow: hidden;
+}
+
+
+//BANNER
+/* Base styles for all screen sizes */
+.homepage-banner {
+  background-color: #1e3a8a;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+}
+
+.banner-icon {
+  margin-right: 0.5rem;
+}
+
+.banner-text {
+  font-weight: 500;
+}
+
+.learn-more {
+  display: none; /* Hidden by default */
+}
+
+.learn-more-link {
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.close-button {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.15s;
+}
+
+.close-button:hover {
+  background-color: #4b5563; /* Bluegray-700 */
+}
+
+/* Mobile styles (default) */
+@media (max-width: 1023px) {
+  .homepage-banner {
+    justify-content: center;
+    align-items: center;
+    gap: 10%;
+  }
+
+  .banner-content {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .learn-more-link {
+    color: inherit;
+
+  }
+
+
+}
+
+/* Desktop styles (for large screens) */
+@media (min-width: 1024px) {
+  .homepage-banner {
+    flex-direction: row; /* Arrange content horizontally */
+    justify-content: center;
+    align-items: center;
+    padding: 0.50rem 1.5rem;
+    margin-bottom: 1vw;
+
+  }
+
+  .learn-more {
+    display: block; /* Show on desktop */
+    margin-left: 1rem;
+  }
+
+  .learn-more-link {
+    margin-left: 2rem;
+    color: inherit;
+  }
+
+  .close-button {
+    margin-left: 2rem;
+  }
 }
