@@ -93,6 +93,12 @@ export class AuctionDetailComponent {
     const minutes = Math.floor((timeLeft % 3600000) / 60000); // 1000 * 60
     const seconds = Math.floor((timeLeft % 60000) / 1000);
 
-    this.auction['countdown'] = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    if (days >= 1) {
+      this.auction['countdown'] = `${days}d ${hours}h`;
+    } else if (hours >= 1) {
+      this.auction['countdown'] = `${hours}h ${minutes}m`;
+    } else {
+      this.auction['countdown'] = `${minutes}m ${seconds}s`;
+    }
   }
 }
