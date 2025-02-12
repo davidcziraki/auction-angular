@@ -6,7 +6,7 @@
   <div class="auction-info">
     <div class="price">
       <span class="currency">HUF </span>
-      <span class="amount">{{ auction?.price | number }}</span>
+      <span class="amount">{{ (auction$ | async)?.price | number }}</span>
     </div>
     <div class="label">CURRENT BID</div>
   </div>
@@ -31,27 +31,8 @@
   </div>
 
   <!-- Place Bid Button -->
-  <button label="PLACE BID" pButton pRipple></button>
+  <button (click)="openBidding()" label="PLACE BID" pButton pRipple></button>
 </div>
-
-
-<!--<div *ngIf="auction" class="auction-detail">-->
-<!--  <p-card [style]="{ width: '30rem', overflow: 'hidden' }">-->
-<!--    <ng-template #header>-->
-<!--      <img [src]="auction.imageUrl" alt="Auction Image" class="w-full"/>-->
-<!--    </ng-template>-->
-
-<!--    <ng-template #title>-->
-<!--      {{ auction.name }}-->
-<!--    </ng-template>-->
-
-<!--    <ng-template #subtitle>-->
-<!--      Auction ends at: {{ auction.endTimeDate | date:'EEE MMM dd' }}-->
-<!--    </ng-template>-->
-
-
-<!--  </p-card>-->
-<!--</div>-->
 
 
 <div class="gallery">
@@ -63,6 +44,34 @@
       <img [src]="image" alt="Thumbnail {{i + 1}}">
     </div>
   </div>
+</div>
+
+
+<p-toast class="custom-toast"></p-toast>
+
+
+<!-- BIDDING MODAL -->
+<div *ngIf="displayBidDialog">
+  <p-dialog [(visible)]="displayBidDialog" [closable]="true" [modal]="true" [ngClass]="'bidding-modal'">
+    <div class="bidding-modal-container">
+      <div class="bidding-modal-header">
+        <div class="title">Place Your Bid</div>
+        <span class="current-bid">
+          Current Highest Bid: HUF <strong>{{ (auction$ | async)?.price | number }}</strong>
+        </span>
+      </div>
+
+      <!-- Bidding Form -->
+      <div class="bidding-modal-form">
+        <label for="bidAmount">Your Bid Amount</label>
+        <input [(ngModel)]="bidAmount" id="bidAmount" min="{{ auction?.price }}" pInputText
+               placeholder="Enter your bid" type="number">
+      </div>
+
+      <button (click)="placeBid()" class="bidding-modal-button" icon="pi pi-check" label="Place Bid" pButton pRipple>
+      </button>
+    </div>
+  </p-dialog>
 </div>
 
 

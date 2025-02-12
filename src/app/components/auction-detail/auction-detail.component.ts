@@ -6,6 +6,13 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { GalleriaModule } from 'primeng/galleria';
+import { Dialog } from 'primeng/dialog';
+import { FormsModule } from '@angular/forms';
+import { InputText } from 'primeng/inputtext';
+import { AuctionService } from '../../services/auction.service';
+import { Observable } from 'rxjs';
+import { MessageService } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-auction-detail',
@@ -16,13 +23,22 @@ import { GalleriaModule } from 'primeng/galleria';
     RouterLink,
     Ripple,
     GalleriaModule,
+    Dialog,
+    FormsModule,
+    InputText,
+    Toast,
   ],
   templateUrl: './auction-detail.component.html',
   styleUrl: './auction-detail.component.scss',
+  providers: [MessageService],
 })
 export class AuctionDetailComponent {
   auction: Auction | null = null;
+  auction$!: Observable<Auction | null>;
+
   bids: number = 21;
+  displayBidDialog: boolean = false;
+  bidAmount = 0;
 
   mainImage: string = 'test.jpg';
 
@@ -42,13 +58,22 @@ export class AuctionDetailComponent {
   constructor(
     private route: ActivatedRoute,
     private storageService: StorageService,
+    private auctionService: AuctionService,
+    private messageService: MessageService,
   ) {}
 
-  async ngOnInit() {
-    this.route.params.subscribe(async (params) => {
+  ngOnInit() {
+    this.route.params.subscribe((params) => {
       const id = params['id'];
-      await this.loadAuction(id);
-      this.startCountdown();
+      this.auction$ = this.storageService.getAuction(id);
+
+      // Subscribe to auction$ to store the latest auction data in a variable
+      this.auction$.subscribe((auctionData) => {
+        if (auctionData) {
+          this.auction = auctionData;
+          this.startCountdown();
+        }
+      });
     });
   }
 
@@ -58,11 +83,62 @@ export class AuctionDetailComponent {
     }
   }
 
-  async loadAuction(id: string) {
+  loadAuction(id: string) {
+    this.auction$ = this.storageService.getAuction(id);
+    console.log(this.auction$);
+  }
+
+  openBidding() {
+    this.displayBidDialog = true;
+  }
+
+  async placeBid() {
+    if (!this.auction || !this.auction.id) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Auction ID is missing',
+      });
+      return;
+    }
+
+    if (this.auction.endTimeDate < new Date()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Auction Expired',
+        detail: 'Auction has ended.',
+      });
+      return;
+    }
+
+    if (this.bidAmount <= this.auction.price) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Outbid',
+        detail: 'Bid too low.',
+      });
+      return;
+    }
+
     try {
-      this.auction = await this.storageService.getAuction(id);
+      await this.auctionService.addBid(
+        this.auction.id,
+        this.bidAmount,
+        'testUser',
+      );
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Bid Placed',
+        detail: `Bid successful`,
+      });
+      this.displayBidDialog = false; // Close the bid modal
     } catch (error) {
-      console.error('Error loading auction:', error);
+      console.error('Error placing bid:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to place bid. Please try again.',
+      });
     }
   }
 

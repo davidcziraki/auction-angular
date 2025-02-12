@@ -80,6 +80,54 @@
 }
 
 
+/* Bidding Modal Styles */
+.bidding-modal {
+  width: 30rem;
+}
+
+.bidding-modal-container {
+  background: var(--surface-card);
+  padding: 1rem;
+  box-shadow: var(--shadow-2);
+  border-radius: var(--border-round);
+  width: 100%;
+}
+
+.bidding-modal-header {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.bidding-modal-header .title {
+  color: var(--text-900);
+  font-size: 1.875rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+.bidding-modal-header .current-bid {
+  color: var(--text-600);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.bidding-modal-form label {
+  display: block;
+  color: var(--text-900);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.bidding-modal-form input {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.bidding-modal-button {
+  width: 100%;
+}
+
+
 @media (max-width: 768px) {
   .auction-bar {
     display: flex;
@@ -100,6 +148,8 @@
     margin-top: 3vw;
     margin-bottom: 30%;
   }
+
+
 }
 
 
