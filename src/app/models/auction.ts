@@ -8,4 +8,5 @@ export interface Auction {
   endTimeDate: Date;
   imageUrl?: string;
   countdown?: string;
+  winnerID?: string;
 }

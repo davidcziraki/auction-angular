@@ -18,6 +18,7 @@ import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { FirestoreService } from './services/firestore.service';
 import { UserModel } from './models/user';
+import { AuctionService } from './services/auction.service';
 
 @Component({
   selector: 'app-root',
@@ -66,6 +67,7 @@ export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,
+    private auctionService: AuctionService,
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
@@ -80,6 +82,8 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.auctionService.checkAuctionsPeriodically();
+
     this.authState$ = this.authService.authState$;
 
     this.authState$.subscribe((user) => {
@@ -99,13 +103,13 @@ export class AppComponent implements OnInit {
         routerLink: '/search',
       },
       {
-        label: 'Contact',
-        icon: 'pi pi-fw pi-address-book',
-        routerLink: '',
-      },
-      {
         label: 'User Management',
         icon: 'pi pi-fw pi-warehouse',
+        routerLink: 'user-management',
+      },
+      {
+        label: 'Contact',
+        icon: 'pi pi-fw pi-address-book',
         routerLink: '',
       },
     ];
