@@ -45,3 +45,39 @@
 }
 
 
+// WHY CHOOSE US?
+.why-choose-us {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #283342;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #283342;
+
+}
+
+/* FLEX GRID TO ENSURE NO INLINE STYLES */
+.features-container {
+  display: grid;
+  grid-template-columns: 33% 33% 33%;
+  justify-items: center;
+}
+
+.feature-card {
+  width: 300px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
