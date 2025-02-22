@@ -61,44 +61,6 @@ export class StorageService {
     }
   }
 
-  // async getAuction(id: string): Promise<Auction | null> {
-  //   console.log(`Fetching auction with ID: ${id}`);
-  //
-  //   try {
-  //     // Reference to the specific auction document
-  //     const auctionRef = doc(this.db, 'auctions', id);
-  //     const auctionSnap = await getDoc(auctionRef);
-  //
-  //     if (!auctionSnap.exists()) {
-  //       console.warn(`Auction with ID ${id} not found.`);
-  //       return null; // Return null if auction doesn't exist
-  //     }
-  //
-  //     const auctionData: Auction = {
-  //       id: auctionSnap.id,
-  //       ...auctionSnap.data(),
-  //     } as Auction;
-  //
-  //     // Convert Firestore timestamp to Date
-  //     auctionData.endTimeDate = <Date>auctionData.endtime?.toDate();
-  //
-  //     try {
-  //       // Fetch image URL from Firebase Storage
-  //       const imageRef = ref(this.storage, `${auctionData.id}.jpg`);
-  //       auctionData.imageUrl = await getDownloadURL(imageRef);
-  //       console.log(`Fetched image for auction ${id}`);
-  //     } catch (imageError) {
-  //       console.error(`Error fetching image for auction ${id}:`, imageError);
-  //       auctionData.imageUrl = 'assets/error.jpg'; // Fallback image
-  //     }
-  //
-  //     return auctionData;
-  //   } catch (error) {
-  //     console.error('Error fetching auction:', error);
-  //     throw error;
-  //   }
-  // }
-
   getAuction(id: string): Observable<Auction | null> {
     console.log(`Listening for real-time updates on auction ID: ${id}`);
 

@@ -108,7 +108,7 @@ export class AppComponent implements OnInit {
         routerLink: '/search',
       },
       {
-        label: 'User Management',
+        label: 'Account',
         icon: 'pi pi-fw pi-warehouse',
         routerLink: 'user-management',
       },
@@ -116,6 +116,11 @@ export class AppComponent implements OnInit {
         label: 'Contact',
         icon: 'pi pi-fw pi-address-book',
         routerLink: '',
+      },
+      {
+        label: 'Admin Panel',
+        icon: 'pi pi-fw pi-shield',
+        routerLink: 'admin',
       },
     ];
   }
