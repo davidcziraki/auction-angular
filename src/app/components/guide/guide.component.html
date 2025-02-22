@@ -1,0 +1,100 @@
+<div class="how-it-works">
+  <h2>How it works</h2>
+
+  <!-- Toggle Button for Buyer/Seller Guide -->
+  <div class="toggle-container">
+    <div class="toggle-wrapper">
+      <p-inputSwitch [(ngModel)]="isBuyerGuide"></p-inputSwitch>
+    </div>
+    <span *ngIf="isBuyerGuide">Buyer</span>
+    <span *ngIf="!isBuyerGuide">Seller</span>
+  </div>
+
+  <div *ngIf="isBuyerGuide" class="grid-container">
+
+    <!-- Buyer Guide -->
+    <div class="step-card">
+      <div class="step-icon">
+        <i class="pi pi-eye" style="font-size: 3rem"></i>
+      </div>
+      <h3>01</h3>
+      <h4>Find something special in our curated auctions</h4>
+      <p>Explore our hand-picked auctions. Once you find your dream car, explore the photos, read the description, and
+        reach out with any questions.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-icon">
+        <i class="pi pi-credit-card" style="font-size: 3rem"></i>
+      </div>
+      <h3>02</h3>
+      <h4>Place your bid</h4>
+      <p>Register your card to verify your bid’s legitimacy. We hold 6% of your total bid amount until the auction
+        ends.
+        If you don’t win, we release the hold immediately.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-icon">
+        <i class="pi pi-check-square" style="font-size: 3rem"></i>
+      </div>
+      <h3>03</h3>
+      <h4>Agree your payment terms</h4>
+      <p>Pay the seller directly or use our trusted escrow partner. Our support team is here to assist you. Arrange
+        collection and drive into the sunset!</p>
+    </div>
+  </div>
+
+  <div *ngIf="!isBuyerGuide" class="grid-container">
+
+    <!-- Seller Guide -->
+    <div class="step-card">
+      <div class="step-icon">
+        <i class="pi pi-car" style="font-size: 3rem"></i>
+      </div>
+      <h3>01</h3>
+      <h4>List your car</h4>
+      <p>Upload high-quality photos and a detailed description of your car. Set a starting bid and auction
+        duration.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-icon">
+        <i class="pi pi-chart-line" style="font-size: 3rem"></i>
+      </div>
+      <h3>02</h3>
+      <h4>Receive bids</h4>
+      <p>Watch as buyers place their bids. You’ll receive notifications when new bids come in. The highest bid
+        wins.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-icon">
+        <i class="pi pi-money-bill" style="font-size: 3rem"></i>
+      </div>
+      <h3>03</h3>
+      <h4>Finalize the sale</h4>
+      <p>Connect with the winning bidder and arrange payment. Secure the transaction through our escrow partner or
+        direct payment.</p>
+    </div>
+  </div>
+
+</div>
+
+
+<div class="hero-container">
+  <div class="hero-content">
+    <section>
+      <span class="hero-title">All caught up?</span>
+      <div class="hero-subtitle">Get started now!</div>
+
+
+      <p-button [raised]="true" label="View Cars" size="large"></p-button>
+      <p-button label="Register" severity="secondary" size="large" variant="outlined"></p-button>
+    </section>
+  </div>
+
+  <div class="hero-image">
+    <img alt="Image" class="responsive-image" src="carbanner.jpg">
+  </div>
+</div>

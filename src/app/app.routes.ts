@@ -4,6 +4,7 @@ import { SearchComponent } from './components/search/search.component';
 import { LoginComponent } from './components/auth/login/login.component';
 import { AuctionDetailComponent } from './components/auction-detail/auction-detail.component';
 import { AccountManageComponent } from './components/auth/account-manage/account-manage.component';
+import { GuideComponent } from './components/guide/guide.component';
 
 export const routes: Routes = [
   {
@@ -16,4 +17,5 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'auction/:id', component: AuctionDetailComponent },
   { path: 'user-management', component: AccountManageComponent },
+  { path: 'guide', component: GuideComponent },
 ];
