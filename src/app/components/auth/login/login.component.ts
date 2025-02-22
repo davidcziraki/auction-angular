@@ -3,25 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
 import { Observable } from 'rxjs';
 import { User } from '@angular/fire/auth';
-import { AsyncPipe, NgIf } from '@angular/common';
-import { Checkbox } from 'primeng/checkbox';
-import { ButtonDirective } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
-import { Ripple } from 'primeng/ripple';
 import { FirestoreService } from '../../../services/firestore.service';
 import { UserModel } from '../../../models/user';
 
 @Component({
   selector: 'app-login',
-  imports: [
-    FormsModule,
-    AsyncPipe,
-    NgIf,
-    Checkbox,
-    ButtonDirective,
-    InputText,
-    Ripple,
-  ],
+  imports: [FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })

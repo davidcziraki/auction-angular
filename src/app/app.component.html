@@ -8,7 +8,7 @@
 
         <!-- Conditionally display "Logged in as" or "Log in" -->
         <p *ngIf="user; else loginText" class="ml-2">
-          Logged in as: {{ user?.email }}
+          Logged in as: {{ user.email }}
         </p>
         <ng-template #loginText>
           <p class="ml-2 cursor-pointer">
