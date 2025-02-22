@@ -27,6 +27,18 @@
   .iconfield-container {
     width: 30%;
   }
+
+  .features-container {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    justify-items: center;
+  }
+
+  .feature-card {
+    width: 300px;
+    transition: transform 0.3s ease-in-out;
+  }
+
 }
 
 
@@ -42,6 +54,18 @@
   .iconfield-container {
     width: 90%;
   }
+
+  .features-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    justify-items: center;
+  }
+
+  .feature-card {
+    width: 200px;
+    transition: transform 0.3s ease-in-out;
+  }
+
 }
 
 
@@ -65,17 +89,6 @@
 
 }
 
-/* FLEX GRID TO ENSURE NO INLINE STYLES */
-.features-container {
-  display: grid;
-  grid-template-columns: 33% 33% 33%;
-  justify-items: center;
-}
-
-.feature-card {
-  width: 300px;
-  transition: transform 0.3s ease-in-out;
-}
 
 .feature-card:hover {
   transform: translateY(-5px);
