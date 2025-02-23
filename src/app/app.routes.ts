@@ -6,6 +6,7 @@ import { AuctionDetailComponent } from './components/auction-detail/auction-deta
 import { AccountManageComponent } from './components/auth/account-manage/account-manage.component';
 import { GuideComponent } from './components/guide/guide.component';
 import { AdminComponent } from './components/auth/admin/admin.component';
+import { AngularFireAuthGuard } from '@angular/fire/compat/auth-guard';
 
 export const routes: Routes = [
   {
@@ -17,7 +18,15 @@ export const routes: Routes = [
   { path: 'search', component: SearchComponent },
   { path: 'login', component: LoginComponent },
   { path: 'auction/:id', component: AuctionDetailComponent },
-  { path: 'user-management', component: AccountManageComponent },
+  {
+    path: 'user-management',
+    component: AccountManageComponent,
+    canActivate: [AngularFireAuthGuard],
+  },
   { path: 'guide', component: GuideComponent },
-  { path: 'admin', component: AdminComponent },
+  {
+    path: 'admin',
+    component: AdminComponent,
+    canActivate: [AngularFireAuthGuard],
+  },
 ];

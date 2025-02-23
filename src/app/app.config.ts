@@ -22,6 +22,7 @@ import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { FIREBASE_OPTIONS } from '@angular/fire/compat';
 
 const MyPreset = definePreset(Aura, {
   semantic: {
@@ -57,6 +58,7 @@ export const appConfig: ApplicationConfig = {
     provideDatabase(() => getDatabase()),
     provideFunctions(() => getFunctions()),
     provideStorage(() => getStorage()),
+    { provide: FIREBASE_OPTIONS, useValue: firebaseConfig },
 
     // PRIMENG
     provideAnimationsAsync(),
