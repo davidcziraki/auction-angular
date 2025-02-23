@@ -91,7 +91,7 @@ export class AdminComponent implements OnInit {
       cellStyle: { display: 'flex', alignItems: 'center' },
     },
     {
-      field: 'Seller',
+      field: 'seller',
       filter: true,
       cellStyle: { display: 'flex', alignItems: 'center' },
     },
