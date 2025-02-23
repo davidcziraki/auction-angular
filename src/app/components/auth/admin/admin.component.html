@@ -33,7 +33,7 @@
   </p-button>
 </div>
 
-<!-- Auction Dialog -->
+<!-- New Auction Dialog -->
 <p-dialog
   [(visible)]="newAuctionDialog"
   [contentStyle]="{height: '1000px', overflow: 'auto'}"
@@ -62,10 +62,11 @@
     <div class="p-field p-col-12 p-md-6">
       <label for="endtime">End Date</label>
       <p-calendar
-        [(ngModel)]="newAuction.endtime"
+        [(ngModel)]="newAuction.endTimeDate"
         [showIcon]="true"
         [showTime]="true"
-        dateFormat="yy-mm-dd"
+        class="form-control"
+        dateFormat="dd MM yy"
         hourFormat="24"
         id="endtime"
         required>
@@ -141,3 +142,54 @@
 
   </ag-grid-angular>
 </div>
+
+
+<!-- Edit Modal -->
+<p-dialog [(visible)]="displayEditModal" [closable]="true" [style]="{width: '1200px', height: '1000px'}"
+          header="Edit Auction"
+
+          modal="true">
+  <div *ngIf="selectedAuction">
+
+    <!-- Car Title -->
+    <label>Car Title:</label>
+    <input [(ngModel)]="selectedAuction.name" class="form-control" type="text"/>
+
+    <!-- Seller -->
+    <label>Seller:</label>
+    <input [(ngModel)]="selectedAuction.seller" class="form-control" type="text"/>
+
+    <!-- End Date -->
+    <label>End Date:</label>
+    <p-calendar
+      [(ngModel)]="selectedAuction.endTimeDate"
+      [showIcon]="true"
+      [showTime]="true"
+      class="form-control"
+      dateFormat="dd MM yy"
+      hourFormat="24">
+    </p-calendar>
+
+    <!-- Starting Price -->
+    <label>Starting Price (HUF):</label>
+    <input [(ngModel)]="selectedAuction.price" class="form-control" type="number"/>
+
+    <!-- Upload New Image -->
+    <label>Upload New Image:</label>
+    <p-fileupload
+      (onSelect)="onImageSelected($event)"
+      [auto]="false"
+      accept="image/*"
+      chooseLabel="Change Image"
+      mode="basic"
+      name="auctionImage">
+    </p-fileupload>
+
+    <!-- Footer Buttons -->
+    <div class="modal-footer">
+      <button (click)="updateAuction()" class="btn btn-primary">Save Changes</button>
+      <button (click)="displayEditModal = false" class="btn btn-secondary">Cancel</button>
+    </div>
+
+  </div>
+</p-dialog>

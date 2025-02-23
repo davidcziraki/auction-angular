@@ -40,7 +40,7 @@ export class AuctionDetailComponent {
   displayBidDialog: boolean = false;
   bidAmount = 0;
 
-  mainImage: string = 'test.jpg';
+  mainImage: string = '';
 
   thumbnailImages: string[] = [
     'placeholder.png',
@@ -67,10 +67,10 @@ export class AuctionDetailComponent {
       const id = params['id'];
       this.auction$ = this.storageService.getAuction(id);
 
-      // Subscribe to auction$ to store the latest auction data in a variable
       this.auction$.subscribe((auctionData) => {
         if (auctionData) {
           this.auction = auctionData;
+          this.preloadAuctionImage(auctionData.imageUrl);
           this.startCountdown();
         }
       });
@@ -140,6 +140,23 @@ export class AuctionDetailComponent {
         detail: 'Failed to place bid. Please try again.',
       });
     }
+  }
+
+  private preloadAuctionImage(imageUrl: string | undefined) {
+    if (!imageUrl) {
+      console.error('No image URL provided.');
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      this.mainImage = imageUrl; // Update the main image after loading
+      console.log('Image loaded:', imageUrl);
+    };
+    img.onerror = () => {
+      console.error('Failed to load image:', imageUrl);
+    };
+    img.src = imageUrl;
   }
 
   private startCountdown() {

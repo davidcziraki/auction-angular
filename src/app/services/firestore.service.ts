@@ -8,6 +8,7 @@ import {
   doc,
   Firestore,
   setDoc,
+  Timestamp,
   updateDoc,
 } from '@angular/fire/firestore';
 import { UserModel } from '../models/user';
@@ -99,6 +100,35 @@ export class FirestoreService {
       }
     } catch (error) {
       console.error('Error deleting auction:', error);
+    }
+  }
+
+  async updateAuction(auction: Auction, newImage?: File) {
+    try {
+      if (!auction.id) throw new Error('Auction ID is missing.');
+
+      const auctionRef = doc(this.firestore, 'auctions', auction.id);
+
+      // 🔹 Convert `endTimeDate` to Firestore Timestamp
+      const updateData: Partial<Auction> = {
+        name: auction.name,
+        seller: auction.seller,
+        endtime: Timestamp.fromDate(auction.endTimeDate),
+        price: auction.price,
+        status: auction.status,
+      };
+
+      // 🔹 Handle image update if a new image is provided
+      if (newImage) {
+        const imageRef = ref(this.storage, `auction-images/${auction.id}.jpg`);
+        await uploadBytes(imageRef, newImage);
+        updateData.imageUrl = await getDownloadURL(imageRef);
+      }
+
+      await updateDoc(auctionRef, updateData);
+      console.log(`Auction ${auction.id} updated successfully.`);
+    } catch (error) {
+      console.error('Error updating auction:', error);
     }
   }
 

@@ -14,6 +14,7 @@ import { FirestoreService } from '../../../services/firestore.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-admin',
@@ -28,6 +29,7 @@ import { MessageService } from 'primeng/api';
     Calendar,
     FileUpload,
     FileUploadModule,
+    NgIf,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -41,6 +43,14 @@ export class AdminComponent implements OnInit {
   newAuction: Auction = {
     name: '',
     seller: '',
+    endTimeDate: new Date(),
+    price: 0,
+    status: 'active',
+  };
+
+  selectedAuction: Auction = {
+    name: '',
+    seller: '',
     endtime: Timestamp.now(),
     endTimeDate: new Date(),
     price: 0,
@@ -52,6 +62,7 @@ export class AdminComponent implements OnInit {
   filteredAuctions: Auction[] = [];
   selectedFilter: string = 'all';
   searchQuery: string = '';
+  displayEditModal: boolean = false;
 
   public newTheme = themeAlpine.withPart(colorSchemeDarkBlue);
 
@@ -130,7 +141,7 @@ export class AdminComponent implements OnInit {
       cellRenderer: (params: any) => {
         const auctionId = params.data.id;
         return `
-        <button class="btn btn-primary">Edit</button>
+        <button class="btn btn-primary edit-auction">Edit</button>
         <button class="btn btn-danger delete-auction" data-id="${auctionId}">Delete</button>
       `;
       },
@@ -143,7 +154,13 @@ export class AdminComponent implements OnInit {
         if (params.event.target.classList.contains('delete-auction')) {
           const auction = params.data;
           if (auction) {
-            this.onDeleteAuction(auction); // ✅ Call function directly
+            this.onDeleteAuction(auction);
+          }
+        }
+        if (params.event.target.classList.contains('edit-auction')) {
+          const auction = params.data;
+          if (auction) {
+            this.openEditModal(auction);
           }
         }
       },
@@ -206,16 +223,28 @@ export class AdminComponent implements OnInit {
     this.newAuctionDialog = true;
   }
 
+  openEditModal(auction: Auction) {
+    this.selectedAuction = { ...auction };
+
+    if (this.selectedAuction.endtime instanceof Timestamp) {
+      this.selectedAuction.endTimeDate = this.selectedAuction.endtime.toDate();
+    }
+
+    this.displayEditModal = true;
+  }
+
   async createAuction() {
     if (
       !this.newAuction.name ||
       !this.newAuction.seller ||
-      !this.newAuction.endtime ||
+      !this.newAuction.endTimeDate || // Use endTimeDate for validation
       !this.newAuction.price
     ) {
       alert('Please fill in all fields.');
       return;
     }
+
+    this.newAuction.endtime = Timestamp.fromDate(this.newAuction.endTimeDate);
 
     try {
       await this.firestoreService.addAuction(
@@ -262,6 +291,33 @@ export class AdminComponent implements OnInit {
           detail: 'Failed to delete auction!',
         });
       }
+    }
+  }
+
+  async updateAuction() {
+    if (!this.selectedAuction) return;
+
+    try {
+      await this.firestoreService.updateAuction(
+        this.selectedAuction,
+        this.selectedImage || undefined,
+      );
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Auction updated successfully!',
+      });
+
+      this.displayEditModal = false;
+      this.fetchAuctions();
+    } catch (error) {
+      console.error('Error updating auction:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to update auction!',
+      });
     }
   }
 }
