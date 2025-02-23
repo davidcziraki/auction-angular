@@ -7,6 +7,8 @@ export interface Auction {
   endtime?: Timestamp;
   endTimeDate: Date;
   imageUrl?: string;
+  seller: string;
+  status: string;
   countdown?: string;
   winnerID?: string;
 }

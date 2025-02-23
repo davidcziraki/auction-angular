@@ -20,24 +20,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
-
-// const MyPreset = definePreset(Aura, {
-//   semantic: {
-//     primary: {
-//       50: '{blue.50}',
-//       100: '{blue.100}',
-//       200: '{blue.200}',
-//       300: '{blue.300}',
-//       400: '{blue.900}',
-//       500: '{blue.900}',
-//       600: '{blue.950}',
-//       700: '{blue.950}',
-//       800: '{blue.900}',
-//       900: '{blue.900}',
-//       950: '{blue.950}',
-//     },
-//   },
-// });
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 const MyPreset = definePreset(Aura, {
   semantic: {
@@ -57,8 +41,11 @@ const MyPreset = definePreset(Aura, {
   },
 });
 
+ModuleRegistry.registerModules([AllCommunityModule]);
+
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideHttpClient(withFetch()),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideFirebaseApp(() => initializeApp(firebaseConfig)),

@@ -36,7 +36,10 @@ export class StorageService {
 
         try {
           // Construct the image reference and fetch the download URL using auction ID
-          const imageRef = ref(this.storage, `${auctionData.id}.jpg`);
+          const imageRef = ref(
+            this.storage,
+            `auction-images/${auctionData.id}.jpg`,
+          );
           auctionData.imageUrl = await getDownloadURL(imageRef); // Assign image URL to imageUrl property
           console.log(`Fetched image for auction ${doc.id}`);
         } catch (imageError) {
