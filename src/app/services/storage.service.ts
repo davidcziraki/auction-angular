@@ -19,7 +19,7 @@ export class StorageService {
   private db = inject(Firestore);
 
   async loadAuctions(): Promise<Auction[]> {
-    console.log('listAuctionsWithImages function called');
+    console.log('loadAuctions function called');
 
     try {
       // Fetch all documents from the 'auctions' collection
@@ -36,7 +36,10 @@ export class StorageService {
 
         try {
           // Construct the image reference and fetch the download URL using auction ID
-          const imageRef = ref(this.storage, `${auctionData.id}.jpg`);
+          const imageRef = ref(
+            this.storage,
+            `auction-images/${auctionData.id}.jpg`,
+          );
           auctionData.imageUrl = await getDownloadURL(imageRef); // Assign image URL to imageUrl property
           console.log(`Fetched image for auction ${doc.id}`);
         } catch (imageError) {
@@ -44,7 +47,7 @@ export class StorageService {
             `Error fetching image for auction ${doc.id}: `,
             imageError,
           );
-          auctionData.imageUrl = 'assets/error.jpg'; // Fallback image
+          auctionData.imageUrl = 'missing.jpg'; // Fallback image
         }
 
         return auctionData;
@@ -77,7 +80,10 @@ export class StorageService {
         };
 
         // Fetch image URL dynamically from Firebase Storage
-        const imageRef = ref(this.storage, `${auction.id}.jpg`);
+        const imageRef = ref(
+          this.storage,
+          `auction-images/${auctionData.id}.jpg`,
+        );
         return from(getDownloadURL(imageRef)).pipe(
           map((url) => {
             auction.imageUrl = url;

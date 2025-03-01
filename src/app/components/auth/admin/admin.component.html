@@ -1,64 +1,195 @@
-<div class="card">
-  <p-table
-    #dt
-    [(selection)]="selectedAuctions"
-    [globalFilterFields]="['title', 'seller']"
-    [loading]="loading"
-    [paginator]="true"
-    [rowHover]="true"
-    [rowsPerPageOptions]="[10, 25, 50]"
-    [rows]="10"
-    [showCurrentPageReport]="true"
-    [value]="auctions"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-    dataKey="id"
+<div class="filter-tabs">
+  <p-button
+    (click)="filterStatus('all')"
+    [severity]="selectedFilter === 'all' ? 'primary' : 'secondary'"
+    label="All">
+  </p-button>
+
+  <p-button
+    (click)="filterStatus('active')"
+    [severity]="selectedFilter === 'active' ? 'info' : 'secondary'"
+    label="Active">
+  </p-button>
+
+  <p-button
+    (click)="filterStatus('paused')"
+    [severity]="selectedFilter === 'paused' ? 'warn' : 'secondary'"
+    label="Paused">
+  </p-button>
+
+  <p-button
+    (click)="filterStatus('completed')"
+    [severity]="selectedFilter === 'completed' ? 'success' : 'secondary'"
+    label="Complete">
+  </p-button>
+
+  <!-- Add Auction Button (Aligned to the Right) -->
+  <p-button
+    (click)="openNewAuctionDialog()"
+    icon="pi pi-plus"
+    label="New Auction"
+    severity="primary"
   >
-    
-    <ng-template #header>
-      <tr>
-        <th style="width: 4rem">
-          <p-tableHeaderCheckbox/>
-        </th>
-        <th>
-          <p-columnFilter
-            ariaLabel="Filter Name"
-            field="name"
-            placeholder="Search by name"
-            type="text"
-          ></p-columnFilter>
-        </th>
-        <th pSortableColumn="seller">Seller</th>
-        <th pSortableColumn="endTimeDate">End Time</th>
-        <th>Image</th>
-        <th pSortableColumn="price">Price</th>
-        <th>Actions</th>
-      </tr>
-    </ng-template>
-
-    <ng-template #body let-auction>
-      <tr>
-        <td>
-          <p-tableCheckbox [value]="auction"/>
-        </td>
-        <td>{{ auction.name }}</td>
-        <td>{{ auction.seller }}</td>
-        <td>{{ auction.endTimeDate | date: 'medium' }}</td>
-
-        <td>
-          <img [src]="auction.imageUrl" alt="Auction Image" height="180" width="250"/>
-        </td>
-        <td>{{ auction.price | currency: 'HUF ' }}</td>
-
-        <td>
-          <p-button icon="pi pi-eye" label="View"/>
-        </td>
-      </tr>
-    </ng-template>
-
-    <ng-template #emptymessage>
-      <tr>
-        <td colspan="6">No auctions found.</td>
-      </tr>
-    </ng-template>
-  </p-table>
+  </p-button>
 </div>
+
+<!-- New Auction Dialog -->
+<p-dialog
+  [(visible)]="newAuctionDialog"
+  [contentStyle]="{height: '1000px', overflow: 'auto'}"
+  [dismissableMask]="true"
+  [modal]="true"
+  [style]="{width: '1200px', height: '1000px'}"
+
+  header="Create New Auction">
+
+
+  <div class="p-fluid p-formgrid p-grid">
+
+    <!-- Car Title -->
+    <div class="p-field p-col-12 p-md-6">
+      <label for="name">Car Title</label>
+      <input [(ngModel)]="newAuction.name" id="name" pInputText required/>
+    </div>
+
+    <!-- Seller -->
+    <div class="p-field p-col-12 p-md-6">
+      <label for="seller">Seller</label>
+      <input [(ngModel)]="newAuction.seller" id="seller" pInputText required/>
+    </div>
+
+    <!-- End Date -->
+    <div class="p-field p-col-12 p-md-6">
+      <label for="endtime">End Date</label>
+      <p-calendar
+        [(ngModel)]="newAuction.endTimeDate"
+        [showIcon]="true"
+        [showTime]="true"
+        class="form-control"
+        dateFormat="dd MM yy"
+        hourFormat="24"
+        id="endtime"
+        required>
+      </p-calendar>
+    </div>
+
+    <!-- Starting Price -->
+    <div class="p-field p-col-12 p-md-6">
+      <label for="price">Starting Price (HUF)</label>
+      <input [(ngModel)]="newAuction.price" id="price" pInputText required type="number"/>
+    </div>
+
+    <!-- Image Upload -->
+    <div class="p-field p-col-12">
+      <label>Upload Car Image</label>
+      <!--      <p-fileupload-->
+      <!--        (onSelect)="onImageSelected($event)"-->
+      <!--        accept="image/*"-->
+      <!--        maxFileSize="2000000"-->
+      <!--        mode="basic"-->
+      <!--        name="image">-->
+      <!--      </p-fileupload>-->
+
+      <p-fileupload #fu
+                    (onSelect)="onImageSelected($event)"
+                    accept="image/*"
+                    chooseIcon="pi pi-upload"
+                    chooseLabel="Choose"
+                    maxFileSize="1000000"
+                    mode="basic"
+                    name="image">
+      </p-fileupload>
+
+
+    </div>
+
+  </div>
+
+  <!-- Footer Buttons -->
+  <ng-template pTemplate="footer">
+    <div class="p-d-flex p-jc-end">
+      <p-button
+        (click)="newAuctionDialog = false"
+        class="p-mr-2"
+        icon="pi pi-times"
+        label="Cancel"
+        severity="secondary">
+      </p-button>
+      <p-button
+        (click)="createAuction()"
+        icon="pi pi-check"
+        label="Create"
+
+        severity="success">
+      </p-button>
+    </div>
+  </ng-template>
+
+</p-dialog>
+
+
+<div class="grid-container">
+  <ag-grid-angular
+    [columnDefs]="colDefs"
+    [context]="this"
+    [paginationPageSizeSelector]="paginationPageSizeSelector"
+    [paginationPageSize]="paginationPageSize"
+    [pagination]="true"
+    [rowData]="filteredAuctions"
+    [theme]="newTheme"
+    style="width: 100%; height: 100%; text-align: center"
+  >
+
+  </ag-grid-angular>
+</div>
+
+
+<!-- Edit Modal -->
+<p-dialog [(visible)]="displayEditModal" [closable]="true" [style]="{width: '1200px', height: '1000px'}"
+          header="Edit Auction"
+
+          modal="true">
+  <div *ngIf="selectedAuction">
+
+    <!-- Car Title -->
+    <label>Car Title:</label>
+    <input [(ngModel)]="selectedAuction.name" class="form-control" type="text"/>
+
+    <!-- Seller -->
+    <label>Seller:</label>
+    <input [(ngModel)]="selectedAuction.seller" class="form-control" type="text"/>
+
+    <!-- End Date -->
+    <label>End Date:</label>
+    <p-calendar
+      [(ngModel)]="selectedAuction.endTimeDate"
+      [showIcon]="true"
+      [showTime]="true"
+      class="form-control"
+      dateFormat="dd MM yy"
+      hourFormat="24">
+    </p-calendar>
+
+    <!-- Starting Price -->
+    <label>Starting Price (HUF):</label>
+    <input [(ngModel)]="selectedAuction.price" class="form-control" type="number"/>
+
+    <!-- Upload New Image -->
+    <label>Upload New Image:</label>
+    <p-fileupload
+      (onSelect)="onImageSelected($event)"
+      [auto]="false"
+      accept="image/*"
+      chooseLabel="Change Image"
+      mode="basic"
+      name="auctionImage">
+    </p-fileupload>
+
+    <!-- Footer Buttons -->
+    <div class="modal-footer">
+      <button (click)="updateAuction()" class="btn btn-primary">Save Changes</button>
+      <button (click)="displayEditModal = false" class="btn btn-secondary">Cancel</button>
+    </div>
+
+  </div>
+</p-dialog>

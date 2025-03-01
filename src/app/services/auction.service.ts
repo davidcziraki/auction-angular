@@ -58,6 +58,10 @@ export class AuctionService {
   }
 
   async addBid(auctionID: string, bidPrice: number, userID: string) {
+    if (!userID) {
+      throw new Error('User ID is missing');
+    }
+
     try {
       const auctionDocRef = doc(this.firestore, `auctions/${auctionID}`);
       const bidsCollectionRef = collection(
@@ -91,7 +95,7 @@ export class AuctionService {
 
         // Add the bid document inside the transaction
         const bidDocRef = doc(bidsCollectionRef);
-        transaction.set(bidDocRef, { bid: bidPrice, userID: this.user?.uid });
+        transaction.set(bidDocRef, { bid: bidPrice, userID: userID });
 
         // Update the highest bid in the auction document
         transaction.update(auctionDocRef, { price: bidPrice });
