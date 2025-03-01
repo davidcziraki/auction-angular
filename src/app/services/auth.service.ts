@@ -2,7 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import {
   Auth,
   authState,
+  browserLocalPersistence,
+  browserSessionPersistence,
   createUserWithEmailAndPassword,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut,
   User,
@@ -49,23 +52,30 @@ export class AuthService {
   }
 
   // Login user
-  async loginUser(email: string, password: string): Promise<any> {
+  async loginUser(
+    email: string,
+    password: string,
+    rememberMe: boolean,
+  ): Promise<any> {
     try {
+      // Set persistence based on "Remember Me" checkbox
+      const persistenceType = rememberMe
+        ? browserLocalPersistence
+        : browserSessionPersistence;
+      await setPersistence(this.auth, persistenceType);
+
       const userCredential = await signInWithEmailAndPassword(
         this.auth,
         email,
         password,
       );
-      // Signed in
-      const user = userCredential.user;
-      console.log('User signed in:', user);
-      return user;
+      console.log('User signed in:', userCredential.user);
+      return userCredential.user;
     } catch (error: any) {
-      // Proper error handling with FirebaseError type
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error(`Error code: ${errorCode}, Error message: ${errorMessage}`);
-      throw new Error(errorMessage); // Rethrow or handle accordingly
+      console.error(
+        `Error code: ${error.code}, Error message: ${error.message}`,
+      );
+      throw new Error(error.message);
     }
   }
 

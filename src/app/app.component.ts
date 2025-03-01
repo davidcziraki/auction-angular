@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { collection, collectionData, Firestore } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
 import { NgIf } from '@angular/common';
-import { User } from '@angular/fire/auth';
+import { Auth, getIdTokenResult, User } from '@angular/fire/auth';
 import { AuthService } from './services/auth.service';
 import { Avatar } from 'primeng/avatar';
 import { Menu } from 'primeng/menu';
@@ -46,6 +46,9 @@ export class AppComponent implements OnInit {
   authState$!: Observable<User | null>;
   user: User | null = null;
   bannerVisible = true;
+  isLoggedIn: boolean = false;
+  isAdmin$ = new BehaviorSubject<boolean>(false); // Store admin status
+  rememberMe: boolean = false;
 
   // Dialog state
   displayDialog: boolean = false;
@@ -68,6 +71,7 @@ export class AppComponent implements OnInit {
     private authService: AuthService,
     private firestoreService: FirestoreService,
     private auctionService: AuctionService,
+    private auth: Auth,
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
@@ -86,42 +90,46 @@ export class AppComponent implements OnInit {
 
     this.authState$ = this.authService.authState$;
 
-    this.authState$.subscribe((user) => {
+    this.authState$.subscribe(async (user) => {
       this.user = user;
+      this.isLoggedIn = !!user;
+
+      if (user) {
+        const tokenResult = await getIdTokenResult(user);
+        this.isAdmin$.next(!!tokenResult.claims['admin']);
+      } else {
+        this.isAdmin$.next(false);
+      }
+
+      this.setMenuItems();
       this.updateUserMenu();
     });
+  }
 
+  setMenuItems() {
     this.menuItems = [
-      {
-        label: 'Home',
-        icon: 'pi pi-fw pi-home',
-        routerLink: '/home',
-      },
-      {
-        label: 'Guide',
-        icon: 'pi pi-fw pi-info-circle',
-        routerLink: '/guide',
-      },
-      {
-        label: 'Auctions',
-        icon: 'pi pi-fw pi-search',
-        routerLink: '/search',
-      },
-      {
-        label: 'Account',
-        icon: 'pi pi-fw pi-warehouse',
-        routerLink: 'user-management',
-      },
-      {
-        label: 'Contact',
-        icon: 'pi pi-fw pi-address-book',
-        routerLink: '',
-      },
-      {
-        label: 'Admin Panel',
-        icon: 'pi pi-fw pi-shield',
-        routerLink: 'admin',
-      },
+      { label: 'Home', icon: 'pi pi-fw pi-home', routerLink: '/home' },
+      { label: 'Guide', icon: 'pi pi-fw pi-info-circle', routerLink: '/guide' },
+      { label: 'Auctions', icon: 'pi pi-fw pi-search', routerLink: '/search' },
+      ...(this.isLoggedIn
+        ? [
+            {
+              label: 'Account',
+              icon: 'pi pi-fw pi-warehouse',
+              routerLink: 'user-management',
+            },
+          ]
+        : []),
+      { label: 'Contact', icon: 'pi pi-fw pi-address-book', routerLink: '' },
+      ...(this.isAdmin$.value
+        ? [
+            {
+              label: 'Admin Panel',
+              icon: 'pi pi-fw pi-shield',
+              routerLink: 'admin',
+            },
+          ]
+        : []),
     ];
   }
 
@@ -137,7 +145,7 @@ export class AppComponent implements OnInit {
 
   login() {
     this.authService
-      .loginUser(this.emaiLogin, this.passwordLogin)
+      .loginUser(this.emaiLogin, this.passwordLogin, this.rememberMe)
       .then((user) => {
         console.log('Login successful:', user);
         this.displayDialog = false;
