@@ -65,16 +65,16 @@ export class LoginComponent {
       });
   }
 
-  login() {
-    this.authService
-      .loginUser(this.emaiLogin, this.passwordLogin)
-      .then((user) => {
-        // Handle success (e.g., redirect to dashboard or home page)
-      })
-      .catch((error) => {
-        // Handle error (e.g., show error message to user)
-      });
-  }
+  // login() {
+  //   this.authService
+  //     .loginUser(this.emaiLogin, this.passwordLogin, this.rem)
+  //     .then((user) => {
+  //       // Handle success (e.g., redirect to dashboard or home page)
+  //     })
+  //     .catch((error) => {
+  //       // Handle error (e.g., show error message to user)
+  //     });
+  // }
 
   logout() {
     this.authService
