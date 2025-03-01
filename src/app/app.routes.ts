@@ -7,6 +7,9 @@ import { AccountManageComponent } from './components/auth/account-manage/account
 import { GuideComponent } from './components/guide/guide.component';
 import { AdminComponent } from './components/auth/admin/admin.component';
 import { AngularFireAuthGuard } from '@angular/fire/compat/auth-guard';
+import { hasCustomClaim } from '@angular/fire/auth-guard';
+
+const adminOnly = () => hasCustomClaim('admin');
 
 export const routes: Routes = [
   {
@@ -28,5 +31,6 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminComponent,
     canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: adminOnly },
   },
 ];
