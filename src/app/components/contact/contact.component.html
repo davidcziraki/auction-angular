@@ -1,0 +1,77 @@
+<div class="contact-container">
+  <p-card>
+    <ng-template pTemplate="title">Contact Us</ng-template>
+
+    <ng-template pTemplate="content">
+      <p>Have questions? Reach out to us!</p>
+
+      <form #contactForm="ngForm" (ngSubmit)="submitForm()">
+        <!-- Name Field -->
+        <div class="field">
+          <label for="name">Name</label>
+          <input
+            #name="ngModel"
+            [(ngModel)]="contactData.name"
+            class="w-full"
+            id="name"
+            name="name"
+            pInputText
+            required
+            type="text"
+          />
+          <small *ngIf="name.invalid && name.touched" class="p-error"
+          >Name is required</small
+          >
+        </div>
+
+        <!-- Email Field -->
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            #email="ngModel"
+            [(ngModel)]="contactData.email"
+            class="w-full"
+            email
+            id="email"
+            name="email"
+            pInputText
+            required
+            type="email"
+          />
+          <small *ngIf="email.invalid && email.touched" class="p-error"
+          >Valid email is required</small
+          >
+        </div>
+
+        <!-- Message Field -->
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea
+            #message="ngModel"
+            [(ngModel)]="contactData.message"
+            class="w-full"
+            id="message"
+            name="message"
+
+            required
+            rows="4"
+          ></textarea>
+          <small *ngIf="message.invalid && message.touched" class="p-error"
+          >Message is required</small
+          >
+        </div>
+
+        <!-- Submit Button -->
+        <p-button
+          [disabled]="contactForm.invalid"
+          class="w-full"
+          icon="pi pi-envelope"
+          label="Send Message"
+          type="submit"
+        ></p-button>
+      </form>
+    </ng-template>
+  </p-card>
+
+  <p-toast></p-toast>
+</div>

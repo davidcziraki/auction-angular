@@ -53,9 +53,10 @@ export class AppComponent implements OnInit {
   // Dialog state
   displayDialog: boolean = false;
   isRegistering: boolean = false;
+  passwordError = '';
 
   // Form fields
-  emaiLogin: string = '';
+  emailLogin: string = '';
   passwordLogin: string = '';
   emailRegister: string = '';
   passwordRegister: string = '';
@@ -120,7 +121,11 @@ export class AppComponent implements OnInit {
             },
           ]
         : []),
-      { label: 'Contact', icon: 'pi pi-fw pi-address-book', routerLink: '' },
+      {
+        label: 'Contact',
+        icon: 'pi pi-fw pi-address-book',
+        routerLink: 'contact',
+      },
       ...(this.isAdmin$.value
         ? [
             {
@@ -145,7 +150,7 @@ export class AppComponent implements OnInit {
 
   login() {
     this.authService
-      .loginUser(this.emaiLogin, this.passwordLogin, this.rememberMe)
+      .loginUser(this.emailLogin, this.passwordLogin, this.rememberMe)
       .then((user) => {
         console.log('Login successful:', user);
         this.displayDialog = false;
@@ -156,6 +161,15 @@ export class AppComponent implements OnInit {
   }
 
   register() {
+    this.passwordError = '';
+
+    // Validate password strength
+    if (!this.validatePassword(this.passwordRegister)) {
+      this.passwordError =
+        'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and be at least 6 characters long.';
+      return;
+    }
+
     this.authService
       .createUser(this.emailRegister, this.passwordRegister)
       .then((user) => {
@@ -198,7 +212,23 @@ export class AppComponent implements OnInit {
     this.bannerVisible = false;
   }
 
-  trackByName(index: number, item: any): number {
-    return item.name;
+  async forgotPassword() {
+    if (!this.emailLogin) {
+      alert('Please enter your email first.');
+      return;
+    }
+
+    try {
+      await this.authService.sendPasswordReset(this.emailLogin);
+      alert('Password reset email sent. Please check your inbox.');
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      alert('Failed to send reset email. Please try again.');
+    }
+  }
+
+  validatePassword(password: string): boolean {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
+    return regex.test(password);
   }
 }

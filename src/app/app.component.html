@@ -1,5 +1,10 @@
 <div class="card">
   <p-menubar [model]="menuItems">
+    <ng-template pTemplate="start">
+      <img alt="Logo" class="menu-logo" src="logo.png"/>
+      <img alt="Logo" class="menu-logo-mobile" src="logo.ico"/>
+    </ng-template>
+
     <ng-template pTemplate="end">
       <div class="flex items-center gap-4">
         <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
@@ -54,19 +59,19 @@
 
 
 <!-- Login/Register Dialog -->
-<p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" [style]="{width: '30rem'}">
-  <div class="surface-card p-4 shadow-2 border-round w-full">
-    <div class="text-center mb-5">
-      <img alt="Logo" class="mb-3" height="50" src="favicon.ico">
-      <div class="text-900 text-3xl font-medium mb-3">
+<p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" class="auth-dialog">
+  <div class="auth-container">
+    <div class="auth-header">
+      <img alt="Logo" class="auth-logo" src="logo.ico">
+      <div class="auth-title">
         <span *ngIf="!isRegistering">Welcome Back</span>
         <span *ngIf="isRegistering">Register</span>
       </div>
-      <span class="text-600 font-medium line-height-3">
+      <span class="auth-subtitle">
         <span *ngIf="!isRegistering">Don't have an account?</span>
         <span *ngIf="isRegistering">Already have an account?</span>
       </span>
-      <a (click)="toggleForm()" class="font-semibold no-underline ml-2 text-blue-500 cursor-pointer">
+      <a (click)="toggleForm()" class="auth-toggle">
         <span *ngIf="!isRegistering">Create today!</span>
         <span *ngIf="isRegistering">Back to Sign In</span>
       </a>
@@ -74,45 +79,44 @@
 
     <!-- Login Form -->
     <div *ngIf="!isRegistering">
-      <label class="block text-900 font-medium mb-2" for="emailLogin">Email</label>
-      <input [(ngModel)]="emaiLogin" class="w-full mb-3" id="emailLogin" pInputText placeholder="Email address"
-             type="text">
+      <label for="emailLogin">Email</label>
+      <input [(ngModel)]="emailLogin" id="emailLogin" pInputText placeholder="Email address" type="text">
 
-      <label class="block text-900 font-medium mb-2" for="passwordLogin">Password</label>
-      <input [(ngModel)]="passwordLogin" class="w-full mb-3" id="passwordLogin" pInputText placeholder="Password"
-             type="password">
+      <label for="passwordLogin">Password</label>
+      <input [(ngModel)]="passwordLogin" id="passwordLogin" pInputText placeholder="Password" type="password">
 
-      <div class="flex align-items-center justify-content-between mb-6">
-        <div class="flex align-items-center">
-          <p-checkbox [(ngModel)]="rememberMe" [binary]="true" id="rememberme1" styleClass="mr-2"></p-checkbox>
-          <label class="text-900" for="rememberme1">Remember me</label>
+      <div class="auth-options">
+        <div class="auth-remember">
+          <p-checkbox [(ngModel)]="rememberMe" [binary]="true" id="rememberme1"></p-checkbox>
+          <label for="rememberme1">Remember me</label>
         </div>
-        <a class="font-semibold no-underline ml-2 text-blue-500 text-right cursor-pointer text-primary">Forgot
-          password?</a>
+        <a (click)="forgotPassword()" class="auth-forgot">Forgot password?</a>
       </div>
-      <button (click)="login()" class="w-full" icon="pi pi-user" label="Sign In" pButton pRipple></button>
+
+
+      <button (click)="login()" class="auth-button" icon="pi pi-user" label="Sign In" pButton pRipple></button>
     </div>
 
     <!-- Registration Form -->
     <div *ngIf="isRegistering">
-      <label class="block text-900 font-medium mb-2" for="emailRegister">Email</label>
-      <input [(ngModel)]="emailRegister" class="w-full mb-3" id="emailRegister" pInputText placeholder="Email address"
-             type="email">
+      <label for="emailRegister">Email</label>
+      <input [(ngModel)]="emailRegister" id="emailRegister" pInputText placeholder="Email address" type="email">
 
-      <label class="block text-900 font-medium mb-2" for="firstName">First Name</label>
-      <input [(ngModel)]="firstName" class="w-full mb-3" id="firstName" pInputText placeholder="First Name" type="text">
+      <label for="firstName">First Name</label>
+      <input [(ngModel)]="firstName" id="firstName" pInputText placeholder="First Name" type="text">
 
-      <label class="block text-900 font-medium mb-2" for="firstName">First Name</label>
-      <input [(ngModel)]="lastName" class="w-full mb-3" id="lastName" pInputText placeholder="Surname" type="text">
+      <label for="lastName">Surname</label>
+      <input [(ngModel)]="lastName" id="lastName" pInputText placeholder="Surname" type="text">
 
-      <label class="block text-900 font-medium mb-2" for="dob">Date of Birth</label>
-      <input [(ngModel)]="dob" class="w-full mb-3" id="dob" pInputText placeholder="Date of Birth" type="date">
+      <label for="dob">Date of Birth</label>
+      <input [(ngModel)]="dob" id="dob" pInputText placeholder="Date of Birth" type="date">
 
-      <label class="block text-900 font-medium mb-2" for="passwordRegister">Password</label>
-      <input [(ngModel)]="passwordRegister" class="w-full mb-3" id="passwordRegister" pInputText placeholder="Password"
-             type="password">
+      <label for="passwordRegister">Password</label>
+      <input [(ngModel)]="passwordRegister" id="passwordRegister" pInputText placeholder="Password" type="password">
 
-      <button (click)="register()" class="w-full" icon="pi pi-user" label="Register" pButton pRipple></button>
+      <p *ngIf="passwordError" class="auth-error">{{ passwordError }}</p>
+
+      <button (click)="register()" class="auth-button" icon="pi pi-user" label="Register" pButton pRipple></button>
     </div>
   </div>
 </p-dialog>

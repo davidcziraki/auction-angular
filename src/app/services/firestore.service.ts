@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   Firestore,
+  getDoc,
   setDoc,
   Timestamp,
   updateDoc,
@@ -51,6 +52,31 @@ export class FirestoreService {
     return collectionData(this.auctionsCollection, {
       idField: 'id',
     }) as Observable<Auction[]>;
+  }
+
+  async getUserDetailsByEmail(email: string): Promise<any> {
+    try {
+      const userDocRef = doc(this.firestore, `users/${email}`);
+      const userSnap = await getDoc(userDocRef);
+
+      if (userSnap.exists()) {
+        return userSnap.data(); // Returns user details from Firestore
+      } else {
+        console.error('User document not found!');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      throw error;
+    }
+  }
+
+  async updateUserDetails(
+    email: string,
+    updates: { forename?: string; surname?: string },
+  ): Promise<void> {
+    const userRef = doc(this.firestore, `users/${email}`);
+    await updateDoc(userRef, updates);
   }
 
   // Add New Auction

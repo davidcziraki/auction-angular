@@ -5,9 +5,13 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
   signOut,
+  updateEmail,
+  updatePassword,
   User,
 } from '@angular/fire/auth';
 import { Observable, Subscription } from 'rxjs';
@@ -30,7 +34,7 @@ export class AuthService {
     this.authSubscription.unsubscribe();
   }
 
-  // Create a new user
+  // Create a new user and send email verification
   async createUser(email: string, password: string): Promise<any> {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -38,16 +42,22 @@ export class AuthService {
         email,
         password,
       );
-      // Signed up
+
       const user = userCredential.user;
       console.log('User signed up:', user);
+
+      // Send verification email
+      if (user) {
+        await sendEmailVerification(user);
+        console.log('Verification email sent.');
+      }
+
       return user;
     } catch (error: any) {
-      // Proper error handling with FirebaseError type
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error(`Error code: ${errorCode}, Error message: ${errorMessage}`);
-      throw new Error(errorMessage); // Rethrow or handle accordingly
+      console.error(
+        `Error code: ${error.code}, Error message: ${error.message}`,
+      );
+      throw new Error(error.message);
     }
   }
 
@@ -90,5 +100,24 @@ export class AuthService {
       console.error('Sign-out failed:', errorMessage);
       throw new Error(errorMessage); // Rethrow for handling in the UI
     }
+  }
+
+  async updateUserEmail(newEmail: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('No authenticated user found');
+
+    await updateEmail(user, newEmail);
+  }
+
+  async updateUserPassword(newPassword: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('No authenticated user found');
+
+    await updatePassword(user, newPassword);
+  }
+
+  async sendPasswordReset(email: string): Promise<void> {
+    if (!email) throw new Error('Email is required for password reset');
+    await sendPasswordResetEmail(this.auth, email);
   }
 }
