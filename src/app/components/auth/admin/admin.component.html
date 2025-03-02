@@ -61,7 +61,7 @@
     <!-- End Date -->
     <div class="p-field p-col-12 p-md-6">
       <label for="endtime">End Date</label>
-      <p-calendar
+      <p-datePicker
         [(ngModel)]="newAuction.endTimeDate"
         [showIcon]="true"
         [showTime]="true"
@@ -70,7 +70,7 @@
         hourFormat="24"
         id="endtime"
         required>
-      </p-calendar>
+      </p-datePicker>
     </div>
 
     <!-- Starting Price -->
@@ -161,14 +161,14 @@
 
     <!-- End Date -->
     <label>End Date:</label>
-    <p-calendar
+    <p-datePicker
       [(ngModel)]="selectedAuction.endTimeDate"
       [showIcon]="true"
       [showTime]="true"
       class="form-control"
       dateFormat="dd MM yy"
       hourFormat="24">
-    </p-calendar>
+    </p-datePicker>
 
     <!-- Starting Price -->
     <label>Starting Price (HUF):</label>

@@ -16,3 +16,79 @@ p-table {
 p-button {
   margin-top: 10px;
 }
+
+
+.account-management {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .account-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+
+    label {
+      font-weight: bold;
+    }
+
+    span {
+      flex-grow: 1;
+      text-align: left;
+      margin-left: 10px;
+    }
+
+    input {
+      flex-grow: 1;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .edit-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+
+    .save-button {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .cancel-button {
+      background-color: #6c757d;
+      color: white;
+    }
+  }
+
+  .field-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+  }
+}
+
+

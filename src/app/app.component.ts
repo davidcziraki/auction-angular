@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { collection, collectionData, Firestore } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
 import { NgIf } from '@angular/common';
-import { User } from '@angular/fire/auth';
+import { getIdTokenResult, User } from '@angular/fire/auth';
 import { AuthService } from './services/auth.service';
 import { Avatar } from 'primeng/avatar';
 import { Menu } from 'primeng/menu';
@@ -45,14 +45,19 @@ export class AppComponent implements OnInit {
   menuItems: MenuItem[] | undefined;
   authState$!: Observable<User | null>;
   user: User | null = null;
+  userFirestore: UserModel | null = null;
   bannerVisible = true;
+  isLoggedIn: boolean = false;
+  isAdmin$ = new BehaviorSubject<boolean>(false); // Store admin status
+  rememberMe: boolean = false;
 
   // Dialog state
   displayDialog: boolean = false;
   isRegistering: boolean = false;
+  passwordError = '';
 
   // Form fields
-  emaiLogin: string = '';
+  emailLogin: string = '';
   passwordLogin: string = '';
   emailRegister: string = '';
   passwordRegister: string = '';
@@ -86,42 +91,60 @@ export class AppComponent implements OnInit {
 
     this.authState$ = this.authService.authState$;
 
-    this.authState$.subscribe((user) => {
+    this.authState$.subscribe(async (user) => {
       this.user = user;
+      this.isLoggedIn = !!user;
+
+      if (user) {
+        if (this.user?.email) {
+          const userDetails = await this.firestoreService.getUserDetailsByEmail(
+            this.user.email,
+          );
+
+          if (userDetails) {
+            this.userFirestore = { ...userDetails };
+          }
+        }
+
+        const tokenResult = await getIdTokenResult(user);
+        this.isAdmin$.next(!!tokenResult.claims['admin']);
+      } else {
+        this.isAdmin$.next(false);
+      }
+
+      this.setMenuItems();
       this.updateUserMenu();
     });
+  }
 
+  setMenuItems() {
     this.menuItems = [
-      {
-        label: 'Home',
-        icon: 'pi pi-fw pi-home',
-        routerLink: '/home',
-      },
-      {
-        label: 'Guide',
-        icon: 'pi pi-fw pi-info-circle',
-        routerLink: '/guide',
-      },
-      {
-        label: 'Auctions',
-        icon: 'pi pi-fw pi-search',
-        routerLink: '/search',
-      },
-      {
-        label: 'Account',
-        icon: 'pi pi-fw pi-warehouse',
-        routerLink: 'user-management',
-      },
+      { label: 'Home', icon: 'pi pi-fw pi-home', routerLink: '/home' },
+      { label: 'Auctions', icon: 'pi pi-fw pi-search', routerLink: '/search' },
+      { label: 'Guide', icon: 'pi pi-fw pi-info-circle', routerLink: '/guide' },
+      ...(this.isLoggedIn
+        ? [
+            {
+              label: 'Account',
+              icon: 'pi pi-fw pi-warehouse',
+              routerLink: 'user-management',
+            },
+          ]
+        : []),
       {
         label: 'Contact',
         icon: 'pi pi-fw pi-address-book',
-        routerLink: '',
+        routerLink: 'contact',
       },
-      {
-        label: 'Admin Panel',
-        icon: 'pi pi-fw pi-shield',
-        routerLink: 'admin',
-      },
+      ...(this.isAdmin$.value
+        ? [
+            {
+              label: 'Admin Panel',
+              icon: 'pi pi-fw pi-shield',
+              routerLink: 'admin',
+            },
+          ]
+        : []),
     ];
   }
 
@@ -137,9 +160,8 @@ export class AppComponent implements OnInit {
 
   login() {
     this.authService
-      .loginUser(this.emaiLogin, this.passwordLogin)
+      .loginUser(this.emailLogin, this.passwordLogin, this.rememberMe)
       .then((user) => {
-        console.log('Login successful:', user);
         this.displayDialog = false;
       })
       .catch((error) => {
@@ -148,6 +170,15 @@ export class AppComponent implements OnInit {
   }
 
   register() {
+    this.passwordError = '';
+
+    // Validate password strength
+    if (!this.validatePassword(this.passwordRegister)) {
+      this.passwordError =
+        'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and be at least 6 characters long.';
+      return;
+    }
+
     this.authService
       .createUser(this.emailRegister, this.passwordRegister)
       .then((user) => {
@@ -190,7 +221,23 @@ export class AppComponent implements OnInit {
     this.bannerVisible = false;
   }
 
-  trackByName(index: number, item: any): number {
-    return item.name;
+  async forgotPassword() {
+    if (!this.emailLogin) {
+      alert('Please enter your email first.');
+      return;
+    }
+
+    try {
+      await this.authService.sendPasswordReset(this.emailLogin);
+      alert('Password reset email sent. Please check your inbox.');
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      alert('Failed to send reset email. Please try again.');
+    }
+  }
+
+  validatePassword(password: string): boolean {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
+    return regex.test(password);
   }
 }

@@ -1,9 +1,39 @@
 <p-tabView>
   <p-tabPanel header="Account Settings">
-    <div class="settings-container">
-      <h2>Account Settings</h2>
-      <p>Manage your personal details, security settings, and preferences.</p>
-      <p-button icon="pi pi-user-edit" label="Edit Profile"></p-button>
+    <div class="account-management">
+      <h2>Account Management</h2>
+
+      <div *ngFor="let field of ['email', 'forename', 'surname', 'password']" class="account-field">
+        <label>{{ field.charAt(0).toUpperCase() + field.slice(1) }}</label>
+
+        <div class="field-container">
+          <span *ngIf="editingField !== field">
+            {{ field === 'password' ? '*****' : userData[field] }}
+          </span>
+
+          <input
+            *ngIf="editingField === field && field !== 'password'"
+            [(ngModel)]="userData[field]"
+            [type]="field === 'email' ? 'email' : 'text'"
+          />
+
+          <input
+            *ngIf="editingField === field && field === 'password'"
+            [(ngModel)]="newPassword"
+            placeholder="Enter new password"
+            type="password"
+          />
+
+          <button (click)="editField(field)" class="edit-button" icon="pi pi-pencil" pButton>
+            Edit
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="editingField" class="button-group">
+        <button (click)="saveChanges()" class="save-button" pButton>Save</button>
+        <button (click)="cancelEdit()" class="cancel-button" pButton>Cancel</button>
+      </div>
     </div>
   </p-tabPanel>
 
