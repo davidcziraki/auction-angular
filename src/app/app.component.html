@@ -1,173 +1,173 @@
-<div class="card">
-  <p-menubar [model]="menuItems">
-    <ng-template pTemplate="start">
-      <img alt="Logo" class="menu-logo" src="logo.png"/>
-      <img alt="Logo" class="menu-logo-mobile" src="logo.ico"/>
-    </ng-template>
+<div class="wrapper">
+  <div class="card">
+    <p-menubar [model]="menuItems">
+      <ng-template pTemplate="start">
+        <img alt="Logo" class="menu-logo" src="logo.png"/>
+        <img alt="Logo" class="menu-logo-mobile" src="logo.ico"/>
+      </ng-template>
 
-    <ng-template pTemplate="end">
-      <div class="flex items-center gap-4">
-        <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
+      <ng-template pTemplate="end">
+        <div class="flex items-center gap-4">
+          <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
 
-        <!-- Avatar and Logged In As Text -->
+          <!-- Avatar and Logged In As Text -->
 
-        <!-- Conditionally display "Logged in as" or "Log in" -->
-        <p *ngIf="user; else loginText" class="ml-2">
-          Logged in as: {{ user.email }}
-        </p>
-        <ng-template #loginText>
-          <p class="ml-2 cursor-pointer">
-            <a (click)="showDialog() "
-            >Log in</a>
+          <!-- Conditionally display "Logged in as" or "Log in" -->
+          <p *ngIf="user; else loginText" class="ml-2">
+            Logged in as: {{ user.email }}
           </p>
-        </ng-template>
+          <ng-template #loginText>
+            <p class="ml-2 cursor-pointer">
+              <a (click)="showDialog() "
+              >Log in</a>
+            </p>
+          </ng-template>
 
-        <!-- Avatar -->
-        <div class="flex items-center">
-          <p-avatar
-            (click)="menu.toggle($event)"
-            [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"
-            shape="circle"
-            styleClass="cursor-pointer align-self-center"
-          />
+          <!-- Avatar -->
+          <div class="flex items-center">
+            <p-avatar
+              (click)="menu.toggle($event)"
+              [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"
+              shape="circle"
+              styleClass="cursor-pointer align-self-center"
+            />
+          </div>
         </div>
-      </div>
-    </ng-template>
-  </p-menubar>
-</div>
-
-<div *ngIf="bannerVisible" class="homepage-banner">
-  <div class="banner-content">
-    <i class="pi pi-info-circle banner-icon"></i>
-    <span class="banner-text">Get started!</span>
+      </ng-template>
+    </p-menubar>
   </div>
-  <div class="learn-more">
-    <span>Learn how our auctions work</span>
+
+  <div *ngIf="bannerVisible" class="homepage-banner">
+    <div class="banner-content">
+      <i class="pi pi-info-circle banner-icon"></i>
+      <span class="banner-text">Get started!</span>
+    </div>
+    <div class="learn-more">
+      <span>Learn how our auctions work</span>
+    </div>
+    <a (click)="closeBanner()" class="learn-more-link" routerLink="/guide">
+      <span>Learn More</span>
+    </a>
+    <a (click)="closeBanner()" class="close-button">
+      <i class="pi pi-times"></i>
+    </a>
   </div>
-  <a (click)="closeBanner()" class="learn-more-link" routerLink="/guide">
-    <span>Learn More</span>
-  </a>
-  <a (click)="closeBanner()" class="close-button">
-    <i class="pi pi-times"></i>
-  </a>
-</div>
 
 
-<div class="container">
-  <router-outlet></router-outlet>
-</div>
+  <div class="main-container">
+    <router-outlet></router-outlet> <!-- Main content -->
+  </div>
 
 
-<!-- Login/Register Dialog -->
-<p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" class="auth-dialog">
-  <div class="auth-container">
-    <div class="auth-header">
-      <img alt="Logo" class="auth-logo" src="logo.ico">
-      <div class="auth-title">
-        <span *ngIf="!isRegistering">Welcome Back</span>
-        <span *ngIf="isRegistering">Register</span>
-      </div>
-      <span class="auth-subtitle">
+  <!-- Login/Register Dialog -->
+  <p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" class="auth-dialog">
+    <div class="auth-container">
+      <div class="auth-header">
+        <img alt="Logo" class="auth-logo" src="logo.ico">
+        <div class="auth-title">
+          <span *ngIf="!isRegistering">Welcome Back</span>
+          <span *ngIf="isRegistering">Register</span>
+        </div>
+        <span class="auth-subtitle">
         <span *ngIf="!isRegistering">Don't have an account?</span>
         <span *ngIf="isRegistering">Already have an account?</span>
       </span>
-      <a (click)="toggleForm()" class="auth-toggle">
-        <span *ngIf="!isRegistering">Create today!</span>
-        <span *ngIf="isRegistering">Back to Sign In</span>
-      </a>
-    </div>
-
-    <!-- Login Form -->
-    <div *ngIf="!isRegistering">
-      <label for="emailLogin">Email</label>
-      <input [(ngModel)]="emailLogin" id="emailLogin" pInputText placeholder="Email address" type="text">
-
-      <label for="passwordLogin">Password</label>
-      <input [(ngModel)]="passwordLogin" id="passwordLogin" pInputText placeholder="Password" type="password">
-
-      <div class="auth-options">
-        <div class="auth-remember">
-          <p-checkbox [(ngModel)]="rememberMe" [binary]="true" id="rememberme1"></p-checkbox>
-          <label for="rememberme1">Remember me</label>
-        </div>
-        <a (click)="forgotPassword()" class="auth-forgot">Forgot password?</a>
+        <a (click)="toggleForm()" class="auth-toggle">
+          <span *ngIf="!isRegistering">Create today!</span>
+          <span *ngIf="isRegistering">Back to Sign In</span>
+        </a>
       </div>
 
+      <!-- Login Form -->
+      <div *ngIf="!isRegistering">
+        <label for="emailLogin">Email</label>
+        <input [(ngModel)]="emailLogin" id="emailLogin" pInputText placeholder="Email address" type="text">
 
-      <button (click)="login()" class="auth-button" icon="pi pi-user" label="Sign In" pButton pRipple></button>
+        <label for="passwordLogin">Password</label>
+        <input [(ngModel)]="passwordLogin" id="passwordLogin" pInputText placeholder="Password" type="password">
+
+        <div class="auth-options">
+          <div class="auth-remember">
+            <p-checkbox [(ngModel)]="rememberMe" [binary]="true" id="rememberme1"></p-checkbox>
+            <label for="rememberme1">Remember me</label>
+          </div>
+          <a (click)="forgotPassword()" class="auth-forgot">Forgot password?</a>
+        </div>
+
+
+        <button (click)="login()" class="auth-button" icon="pi pi-user" label="Sign In" pButton pRipple></button>
+      </div>
+
+      <!-- Registration Form -->
+      <div *ngIf="isRegistering">
+        <label for="emailRegister">Email</label>
+        <input [(ngModel)]="emailRegister" id="emailRegister" pInputText placeholder="Email address" type="email">
+
+        <label for="firstName">First Name</label>
+        <input [(ngModel)]="firstName" id="firstName" pInputText placeholder="First Name" type="text">
+
+        <label for="lastName">Surname</label>
+        <input [(ngModel)]="lastName" id="lastName" pInputText placeholder="Surname" type="text">
+
+        <label for="dob">Date of Birth</label>
+        <input [(ngModel)]="dob" id="dob" pInputText placeholder="Date of Birth" type="date">
+
+        <label for="passwordRegister">Password</label>
+        <input [(ngModel)]="passwordRegister" id="passwordRegister" pInputText placeholder="Password" type="password">
+
+        <p *ngIf="passwordError" class="auth-error">{{ passwordError }}</p>
+
+        <button (click)="register()" class="auth-button" icon="pi pi-user" label="Register" pButton pRipple></button>
+      </div>
+    </div>
+  </p-dialog>
+
+
+  <footer class="footer">
+    <div class="footer-container">
+      <!-- Company Info -->
+      <div class="footer-section">
+        <h4>CarLicit</h4>
+        <p>Buy and sell used cars with confidence. Our platform connects buyers and sellers in a seamless auction
+          experience.</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-section">
+        <h5>Quick Links</h5>
+        <ul>
+          <li><a routerLink="/guide">Get Started</a></li>
+          <li><a routerLink="/search">Auctions</a></li>
+          <li><a routerLink="/faq">FAQs</a></li>
+          <li><a routerLink="/terms">Terms of Service</a></li>
+        </ul>
+      </div>
+
+      <!-- Support -->
+      <div class="footer-section">
+        <h5>Support</h5>
+        <ul>
+          <li><a routerLink="/contact">Contact Us</a></li>
+          <li><a routerLink="/user-management">Account Management</a></li>
+          <li><a routerLink="/careers">Careers</a></li>
+        </ul>
+      </div>
+
+      <!-- Social Media -->
+      <div class="footer-section">
+        <h5>Follow Us</h5>
+        <div class="social-icons">
+          <a href="https://facebook.com" target="_blank"><i class="pi pi-facebook"></i></a>
+          <a href="https://twitter.com" target="_blank"><i class="pi pi-twitter"></i></a>
+          <a href="https://instagram.com" target="_blank"><i class="pi pi-instagram"></i></a>
+        </div>
+      </div>
     </div>
 
-    <!-- Registration Form -->
-    <div *ngIf="isRegistering">
-      <label for="emailRegister">Email</label>
-      <input [(ngModel)]="emailRegister" id="emailRegister" pInputText placeholder="Email address" type="email">
-
-      <label for="firstName">First Name</label>
-      <input [(ngModel)]="firstName" id="firstName" pInputText placeholder="First Name" type="text">
-
-      <label for="lastName">Surname</label>
-      <input [(ngModel)]="lastName" id="lastName" pInputText placeholder="Surname" type="text">
-
-      <label for="dob">Date of Birth</label>
-      <input [(ngModel)]="dob" id="dob" pInputText placeholder="Date of Birth" type="date">
-
-      <label for="passwordRegister">Password</label>
-      <input [(ngModel)]="passwordRegister" id="passwordRegister" pInputText placeholder="Password" type="password">
-
-      <p *ngIf="passwordError" class="auth-error">{{ passwordError }}</p>
-
-      <button (click)="register()" class="auth-button" icon="pi pi-user" label="Register" pButton pRipple></button>
+    <!-- Copyright -->
+    <div class="footer-bottom">
+      <p>&copy; 2025 CarLicit. All rights reserved.</p>
     </div>
-  </div>
-</p-dialog>
+  </footer>
 
-
-<!--FOOTER-->
-<!--<footer class="surface-section text-white py-6 mt-6 footerBottom">-->
-<!--  <div class="grid grid-nogutter px-6 md:px-8 lg:px-12 text-center md:text-left">-->
-<!--    <div class="col-12 md:col-4">-->
-<!--      <h4 class="font-medium text-xl mb-3 outlined-text">Car Auction Marketplace</h4>-->
-<!--      <p class="text-sm text-gray-300">Buy and sell used cars with confidence. Our platform connects buyers and sellers-->
-<!--        in a seamless auction experience.</p>-->
-<!--    </div>-->
-
-<!--    <div class="col-12 md:col-2 mt-4 md:mt-0">-->
-<!--      <h5 class="font-semibold text-lg mb-3 outlined-text">Company</h5>-->
-<!--      <ul class="list-none p-0 m-0">-->
-<!--        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/about">About Us</a></li>-->
-<!--        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/contact">Contact</a></li>-->
-<!--        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/careers">Careers</a></li>-->
-<!--      </ul>-->
-<!--    </div>-->
-
-<!--    <div class="col-12 md:col-2 mt-4 md:mt-0">-->
-<!--      <h5 class="font-semibold text-lg mb-3 outlined-text">Support</h5>-->
-<!--      <ul class="list-none p-0 m-0">-->
-<!--        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/faq">FAQs</a></li>-->
-<!--        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/help">Help Center</a></li>-->
-<!--        <li><a class="text-gray-300 hover:text-white transition-colors" routerLink="/terms">Terms of Service</a></li>-->
-<!--      </ul>-->
-<!--    </div>-->
-
-<!--    <div class="col-12 md:col-4 mt-4 md:mt-0">-->
-<!--      <h5 class="font-semibold text-lg mb-3 outlined-text">Stay Connected</h5>-->
-<!--      <div class="flex justify-center md:justify-start gap-4">-->
-<!--        <a class="text-gray-300 hover:text-white transition-colors" href="https://facebook.com">-->
-<!--          <i class="pi pi-facebook text-2xl"></i>-->
-<!--        </a>-->
-<!--        <a class="text-gray-300 hover:text-white transition-colors" href="https://twitter.com">-->
-<!--          <i class="pi pi-twitter text-2xl"></i>-->
-<!--        </a>-->
-<!--        <a class="text-gray-300 hover:text-white transition-colors" href="https://instagram.com">-->
-<!--          <i class="pi pi-instagram text-2xl"></i>-->
-<!--        </a>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
-
-<!--  <div class="text-center mt-6 border-t border-gray-700 pt-4 text-gray-400 text-sm">-->
-<!--    2025 Car Auction Marketplace. All Rights Reserved.-->
-<!--  </div>-->
-<!--</footer>-->
-
-
+</div>
