@@ -9,12 +9,12 @@ import { ColDef, colorSchemeDarkBlue, themeAlpine } from 'ag-grid-community';
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
-import { Calendar } from 'primeng/calendar';
 import { FirestoreService } from '../../../services/firestore.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
 import { NgIf } from '@angular/common';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-admin',
@@ -26,10 +26,10 @@ import { NgIf } from '@angular/common';
     Button,
     Dialog,
     InputText,
-    Calendar,
     FileUpload,
     FileUploadModule,
     NgIf,
+    DatePickerModule,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',

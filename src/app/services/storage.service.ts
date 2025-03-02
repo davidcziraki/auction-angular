@@ -41,7 +41,7 @@ export class StorageService {
             `auction-images/${auctionData.id}.jpg`,
           );
           auctionData.imageUrl = await getDownloadURL(imageRef); // Assign image URL to imageUrl property
-          console.log(`Fetched image for auction ${doc.id}`);
+          // console.log(`Fetched image for auction ${doc.id}`);
         } catch (imageError) {
           console.error(
             `Error fetching image for auction ${doc.id}: `,

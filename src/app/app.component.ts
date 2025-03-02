@@ -152,7 +152,6 @@ export class AppComponent implements OnInit {
     this.authService
       .loginUser(this.emailLogin, this.passwordLogin, this.rememberMe)
       .then((user) => {
-        console.log('Login successful:', user);
         this.displayDialog = false;
       })
       .catch((error) => {

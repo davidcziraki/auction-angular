@@ -26,7 +26,7 @@ export class AuthService {
 
   constructor() {
     this.authSubscription = this.authState$.subscribe((user: User | null) => {
-      console.log('User Authed:', user);
+      // console.log('User Authed:', user);
     });
   }
 
@@ -79,7 +79,6 @@ export class AuthService {
         email,
         password,
       );
-      console.log('User signed in:', userCredential.user);
       return userCredential.user;
     } catch (error: any) {
       console.error(
