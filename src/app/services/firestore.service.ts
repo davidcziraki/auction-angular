@@ -146,9 +146,7 @@ export class FirestoreService {
 
       // 🔹 Handle image update if a new image is provided
       if (newImage) {
-        const imageRef = ref(this.storage, `auction-images/${auction.id}.jpg`);
-        await uploadBytes(imageRef, newImage);
-        updateData.imageUrl = await getDownloadURL(imageRef);
+        updateData.imageUrl = await this.uploadImage(auction.id, newImage);
       }
 
       await updateDoc(auctionRef, updateData);
@@ -158,9 +156,77 @@ export class FirestoreService {
     }
   }
 
+  // 🔹 Upload Image after Resizing
   private async uploadImage(auctionId: string, file: File): Promise<string> {
+    console.log('Original file:', file.name, file.type, file.size);
+
+    const resizedFile = await this.resizeImage(file, 640, 480);
+
+    console.log(
+      'Resized file:',
+      resizedFile.name,
+      resizedFile.type,
+      resizedFile.size,
+    );
+
     const imageRef = ref(this.storage, `auction-images/${auctionId}.jpg`);
-    await uploadBytes(imageRef, file);
+    await uploadBytes(imageRef, resizedFile);
+
     return getDownloadURL(imageRef);
+  }
+
+  private async resizeImage(
+    file: File,
+    width: number,
+    height: number,
+  ): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        img.src = event.target?.result as string;
+      };
+
+      img.onload = () => {
+        console.log('Original dimensions:', img.width, img.height);
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        console.log('Canvas resized to:', canvas.width, canvas.height);
+
+        // Convert canvas to File for Firebase compatibility
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const resizedFile = new File([blob], file.name, {
+                type: file.type,
+                lastModified: Date.now(),
+              });
+
+              console.log(
+                'Final resized file:',
+                resizedFile.size,
+                resizedFile.type,
+              );
+
+              resolve(resizedFile);
+            } else {
+              reject(new Error('Image resizing failed'));
+            }
+          },
+          file.type,
+          0.9,
+        );
+      };
+
+      reader.readAsDataURL(file);
+    });
   }
 }

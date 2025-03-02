@@ -74,7 +74,7 @@ export class AdminComponent implements OnInit {
       field: 'imageUrl',
       headerName: 'Image',
       cellRenderer: (params: { value: any }) => {
-        const imageUrl = params.value ? params.value : 'missing.jpg';
+        const imageUrl = params.value ? params.value : 'placeholder.png';
         return `<img src="${params.value}" width="250" height="160" style="border-radius: 10px; " alt="">`;
       },
       autoHeight: true,

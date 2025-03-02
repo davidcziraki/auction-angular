@@ -10,6 +10,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+
 }
 
 
@@ -85,13 +86,13 @@ html, body {
 .wrapper {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  min-height: 100vh; /* Ensure full viewport height */
+  min-height: 100vh;
+  overflow: hidden;
+
 }
 
-
-.container {
-  //overflow: hidden;
-  flex: 1;
+.flex.items-center {
+  flex-wrap: wrap;
 }
 
 
@@ -152,7 +153,8 @@ html, body {
 //AUTH
 /* Dialog Styles */
 .auth-dialog {
-  width: 30rem;
+  max-width: 90vw;
+  width: 400px;
 }
 
 /* Container */

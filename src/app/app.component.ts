@@ -6,7 +6,7 @@ import { MegaMenuModule } from 'primeng/megamenu';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
 import { NgIf } from '@angular/common';
-import { Auth, getIdTokenResult, User } from '@angular/fire/auth';
+import { getIdTokenResult, User } from '@angular/fire/auth';
 import { AuthService } from './services/auth.service';
 import { Avatar } from 'primeng/avatar';
 import { Menu } from 'primeng/menu';
@@ -45,6 +45,7 @@ export class AppComponent implements OnInit {
   menuItems: MenuItem[] | undefined;
   authState$!: Observable<User | null>;
   user: User | null = null;
+  userFirestore: UserModel | null = null;
   bannerVisible = true;
   isLoggedIn: boolean = false;
   isAdmin$ = new BehaviorSubject<boolean>(false); // Store admin status
@@ -72,7 +73,6 @@ export class AppComponent implements OnInit {
     private authService: AuthService,
     private firestoreService: FirestoreService,
     private auctionService: AuctionService,
-    private auth: Auth,
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
@@ -96,6 +96,16 @@ export class AppComponent implements OnInit {
       this.isLoggedIn = !!user;
 
       if (user) {
+        if (this.user?.email) {
+          const userDetails = await this.firestoreService.getUserDetailsByEmail(
+            this.user.email,
+          );
+
+          if (userDetails) {
+            this.userFirestore = { ...userDetails };
+          }
+        }
+
         const tokenResult = await getIdTokenResult(user);
         this.isAdmin$.next(!!tokenResult.claims['admin']);
       } else {
@@ -110,8 +120,8 @@ export class AppComponent implements OnInit {
   setMenuItems() {
     this.menuItems = [
       { label: 'Home', icon: 'pi pi-fw pi-home', routerLink: '/home' },
-      { label: 'Guide', icon: 'pi pi-fw pi-info-circle', routerLink: '/guide' },
       { label: 'Auctions', icon: 'pi pi-fw pi-search', routerLink: '/search' },
+      { label: 'Guide', icon: 'pi pi-fw pi-info-circle', routerLink: '/guide' },
       ...(this.isLoggedIn
         ? [
             {

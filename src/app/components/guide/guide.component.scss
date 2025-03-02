@@ -8,21 +8,11 @@
 .grid-container {
   display: flex;
   justify-content: center;
-  gap: 2rem;
   flex-wrap: wrap;
 }
 
 /* Individual Step Card */
-.step-card {
-  padding: 2rem;
-  text-align: center;
-  width: 300px;
-  transition: transform 0.2s ease-in-out;
-}
 
-.step-card:hover {
-  transform: translateY(-5px);
-}
 
 /* Step Icon */
 .step-icon {
@@ -138,11 +128,34 @@
     align-items: center;
   }
 
+  .grid-container {
+    gap: 2rem;
+  }
+
+  .step-card {
+    padding: 2rem;
+    text-align: center;
+    width: 300px;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .step-card:hover {
+    transform: translateY(-5px);
+  }
+
+
 }
 
 @media (max-width: 1023px) {
   .hero-image {
     display: none;
+  }
+
+  .step-card {
+    padding: 0.5rem;
+    text-align: center;
+    width: 300px;
+    margin-top: 5%;
   }
 }
 

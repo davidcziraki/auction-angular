@@ -3,17 +3,16 @@
 </div>
 
 <div class="auction-list">
-  <div *ngFor="let auction of auctions">
+  <div *ngFor="let auction of auctions" class="auction-card">
     <a [routerLink]="['/auction', auction.id]" class="block no-underline">
-      <p-card [style]="{ width: '25rem', overflow: 'hidden' }">
+      <p-card>
         <ng-template #header>
-          <img [src]="auction.imageUrl" alt="Auction Image" class="w-full"/>
+          <img [src]="auction.imageUrl" alt="Auction Image" class="w-full auction-image"/>
         </ng-template>
         <ng-template #title>
           {{ auction.name }}
         </ng-template>
 
-        <!-- Uncommented this subtitle section for clarity -->
         <ng-template #subtitle>
           Filler temporary text to be used for Auction subtitles.
         </ng-template>

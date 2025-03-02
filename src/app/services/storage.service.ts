@@ -47,7 +47,7 @@ export class StorageService {
             `Error fetching image for auction ${doc.id}: `,
             imageError,
           );
-          auctionData.imageUrl = 'missing.jpg'; // Fallback image
+          auctionData.imageUrl = 'placeholder.png'; // Fallback image
         }
 
         return auctionData;

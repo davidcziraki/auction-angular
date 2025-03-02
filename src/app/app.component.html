@@ -1,40 +1,43 @@
 <div class="wrapper">
   <div class="card">
-    <p-menubar [model]="menuItems">
-      <ng-template pTemplate="start">
-        <img alt="Logo" class="menu-logo" src="logo.png"/>
-        <img alt="Logo" class="menu-logo-mobile" src="logo.ico"/>
-      </ng-template>
 
-      <ng-template pTemplate="end">
-        <div class="flex items-center gap-4">
-          <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
+    <div class="menubar-container">
+      <p-menubar [model]="menuItems">
+        <ng-template pTemplate="start">
+          <img alt="Logo" class="menu-logo" src="logo.png"/>
+        </ng-template>
 
-          <!-- Avatar and Logged In As Text -->
+        <ng-template pTemplate="end">
+          <div class="flex items-center gap-4">
+            <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
 
-          <!-- Conditionally display "Logged in as" or "Log in" -->
-          <p *ngIf="user; else loginText" class="ml-2">
-            Logged in as: {{ user.email }}
-          </p>
-          <ng-template #loginText>
-            <p class="ml-2 cursor-pointer">
-              <a (click)="showDialog() "
-              >Log in</a>
+            <!-- Avatar and Logged In As Text -->
+
+            <!-- Conditionally display "Logged in as" or "Log in" -->
+            <p *ngIf="user; else loginText" class="logged-in-text">
+              {{ userFirestore?.forename }} {{ userFirestore?.surname }}
             </p>
-          </ng-template>
+            <ng-template #loginText>
+              <p class="ml-2 cursor-pointer">
+                <a (click)="showDialog() "
+                >Log in</a>
+              </p>
+            </ng-template>
 
-          <!-- Avatar -->
-          <div class="flex items-center">
-            <p-avatar
-              (click)="menu.toggle($event)"
-              [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"
-              shape="circle"
-              styleClass="cursor-pointer align-self-center"
-            />
+            <!-- Avatar -->
+            <div class="flex items-center">
+              <p-avatar
+                (click)="menu.toggle($event)"
+                [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"
+                shape="circle"
+                styleClass="cursor-pointer align-self-center"
+              />
+            </div>
           </div>
-        </div>
-      </ng-template>
-    </p-menubar>
+        </ng-template>
+      </p-menubar>
+    </div>
+
   </div>
 
   <div *ngIf="bannerVisible" class="homepage-banner">
