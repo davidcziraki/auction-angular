@@ -1,14 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Auction } from '../../models/auction';
-import { CurrencyPipe, NgForOf, NgIf } from '@angular/common';
+import { NgForOf, NgIf } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
-import { Card } from 'primeng/card';
 import { RouterLink } from '@angular/router';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-search',
-  imports: [NgForOf, NgIf, Card, CurrencyPipe, RouterLink, ProgressSpinner],
+  imports: [NgForOf, NgIf, RouterLink, ProgressSpinner],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
 })
@@ -69,6 +68,8 @@ export class SearchComponent implements OnInit, OnDestroy {
   isImageLoaded(auctionId: string): boolean {
     return this.loadedImages.has(auctionId);
   }
+
+  toggleSave(auction: Auction) {}
 
   private startGlobalCountdown() {
     // Initial update
