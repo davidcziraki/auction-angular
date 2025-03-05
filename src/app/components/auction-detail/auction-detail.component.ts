@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { getAuth } from '@angular/fire/auth';
+import { FirestoreService } from '../../services/firestore.service';
 
 @Component({
   selector: 'app-auction-detail',
@@ -61,12 +62,13 @@ export class AuctionDetailComponent {
     private storageService: StorageService,
     private auctionService: AuctionService,
     private messageService: MessageService,
+    private firestoreService: FirestoreService,
   ) {}
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
       const id = params['id'];
-      this.auction$ = this.storageService.getAuction(id);
+      this.auction$ = this.firestoreService.getAuction(id);
 
       this.auction$.subscribe((auctionData) => {
         if (auctionData) {
@@ -85,7 +87,7 @@ export class AuctionDetailComponent {
   }
 
   loadAuction(id: string) {
-    this.auction$ = this.storageService.getAuction(id);
+    this.auction$ = this.firestoreService.getAuction(id);
     console.log(this.auction$);
   }
 

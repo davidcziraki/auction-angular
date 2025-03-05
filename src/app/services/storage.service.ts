@@ -1,15 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  collection,
-  doc,
-  docData,
-  Firestore,
-  getDocs,
-} from '@angular/fire/firestore';
-import { Auction } from '../models/auction';
+import { Firestore } from '@angular/fire/firestore';
 import { getStorage, ref } from 'firebase/storage';
-import { getDownloadURL } from '@angular/fire/storage';
-import { catchError, from, map, Observable, switchMap } from 'rxjs';
+import {
+  deleteObject,
+  getDownloadURL,
+  uploadBytes,
+} from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root',
@@ -18,84 +14,56 @@ export class StorageService {
   private storage = getStorage();
   private db = inject(Firestore);
 
-  async loadAuctions(): Promise<Auction[]> {
-    console.log('loadAuctions function called');
+  /** Upload image and return URL */
+  async uploadImage(auctionId: string, file: File): Promise<string> {
+    const resizedFile = await this.resizeImage(file, 640, 480);
+    const imageRef = ref(this.storage, `auction-images/${auctionId}.jpg`);
+    await uploadBytes(imageRef, resizedFile);
+    return getDownloadURL(imageRef);
+  }
 
+  /** Delete auction image from Firebase Storage */
+  async deleteImage(auctionId: string): Promise<void> {
     try {
-      // Fetch all documents from the 'auctions' collection
-      const querySnapshot = await getDocs(collection(this.db, 'auctions'));
-      const auctions: Auction[] = [];
-
-      // Fetch image URLs for each auction in parallel
-      const auctionPromises = querySnapshot.docs.map(async (doc) => {
-        const docData = doc.data();
-        const auctionData: Auction = { id: doc.id, ...docData } as Auction;
-
-        // Date conversion
-        auctionData.endTimeDate = <Date>auctionData.endtime?.toDate();
-
-        try {
-          // Construct the image reference and fetch the download URL using auction ID
-          const imageRef = ref(
-            this.storage,
-            `auction-images/${auctionData.id}.jpg`,
-          );
-          auctionData.imageUrl = await getDownloadURL(imageRef); // Assign image URL to imageUrl property
-          // console.log(`Fetched image for auction ${doc.id}`);
-        } catch (imageError) {
-          console.error(
-            `Error fetching image for auction ${doc.id}: `,
-            imageError,
-          );
-          auctionData.imageUrl = 'placeholder.png'; // Fallback image
-        }
-
-        return auctionData;
-      });
-
-      // Wait for all promises to resolve
-      const resolvedAuctions = await Promise.all(auctionPromises);
-      auctions.push(...resolvedAuctions);
-
-      return auctions;
+      const imageRef = ref(this.storage, `auction-images/${auctionId}.jpg`);
+      await deleteObject(imageRef);
     } catch (error) {
-      console.error('Error fetching auctions: ', error);
-      throw error; // Re-throw the error for the caller to handle
+      console.error('Error deleting image:', error);
     }
   }
 
-  getAuction(id: string): Observable<Auction | null> {
-    console.log(`Listening for real-time updates on auction ID: ${id}`);
+  /** Resize image before upload */
+  private async resizeImage(
+    file: File,
+    width: number,
+    height: number,
+  ): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
 
-    const auctionRef = doc(this.db, 'auctions', id);
+      reader.onload = (event) => {
+        img.src = event.target?.result as string;
+      };
 
-    return docData(auctionRef, { idField: 'id' }).pipe(
-      switchMap((auctionData: any) => {
-        if (!auctionData) return from([null]);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
 
-        const auction: Auction = {
-          id: id,
-          ...auctionData,
-          endTimeDate: auctionData.endtime?.toDate() ?? new Date(),
-        };
-
-        // Fetch image URL dynamically from Firebase Storage
-        const imageRef = ref(
-          this.storage,
-          `auction-images/${auctionData.id}.jpg`,
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(new File([blob], file.name, { type: file.type }));
+            else reject(new Error('Image resizing failed'));
+          },
+          file.type,
+          0.9,
         );
-        return from(getDownloadURL(imageRef)).pipe(
-          map((url) => {
-            auction.imageUrl = url;
-            return auction;
-          }),
-          catchError((error) => {
-            console.error(`Error fetching image for auction ${id}:`, error);
-            auction.imageUrl = 'assets/error.jpg'; // Fallback image
-            return from([auction]); // Ensure Observable<Auction | null>
-          }),
-        );
-      }),
-    );
+      };
+
+      reader.readAsDataURL(file);
+    });
   }
 }

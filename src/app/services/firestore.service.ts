@@ -2,234 +2,165 @@ import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
   collection,
-  collectionData,
   CollectionReference,
   deleteDoc,
   doc,
+  docData,
   Firestore,
   getDoc,
+  getDocs,
   setDoc,
   Timestamp,
   updateDoc,
 } from '@angular/fire/firestore';
 import { UserModel } from '../models/user';
-import { Observable } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { Auction } from '../models/auction';
 import { getStorage, ref } from 'firebase/storage';
-import {
-  deleteObject,
-  getDownloadURL,
-  uploadBytes,
-} from '@angular/fire/storage';
+import { getDownloadURL } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirestoreService {
-  usersCollection: CollectionReference; // Declare users collection reference
-  auctionsCollection: CollectionReference;
   private firestore = inject(Firestore);
+  private usersCollection: CollectionReference = collection(
+    this.firestore,
+    'users',
+  );
+  private auctionsCollection: CollectionReference = collection(
+    this.firestore,
+    'auctions',
+  );
+
   private storage = getStorage();
 
-  constructor() {
-    this.usersCollection = collection(this.firestore, 'users');
-    this.auctionsCollection = collection(this.firestore, 'auctions');
-  }
-
-  async addUser(user: UserModel) {
+  /**  Add new user to Firestore */
+  async addUser(user: UserModel): Promise<void> {
     try {
-      const userRef = doc(this.firestore, 'users', user.email); // Set document reference using user email as the ID
-      await setDoc(userRef, user); // Set the user data in the document
-
-      console.log('Document written with ID:', user.email); // Email is used as document ID
-    } catch (e) {
-      console.error('Error adding document: ', e);
-    }
-  }
-
-  // Get all auctions
-  getAuctions(): Observable<Auction[]> {
-    return collectionData(this.auctionsCollection, {
-      idField: 'id',
-    }) as Observable<Auction[]>;
-  }
-
-  async getUserDetailsByEmail(email: string): Promise<any> {
-    try {
-      const userDocRef = doc(this.firestore, `users/${email}`);
-      const userSnap = await getDoc(userDocRef);
-
-      if (userSnap.exists()) {
-        return userSnap.data(); // Returns user details from Firestore
-      } else {
-        console.error('User document not found!');
-        return null;
-      }
+      const userRef = doc(this.firestore, 'users', user.email);
+      await setDoc(userRef, user);
     } catch (error) {
-      console.error('Error fetching user details:', error);
-      throw error;
+      console.error('Error adding user:', error);
     }
   }
 
+  /**  Get all auctions  */
+  async getAuctions(): Promise<Auction[]> {
+    const snapshot = await getDocs(this.auctionsCollection);
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+
+      return {
+        id: doc.id,
+        ...data,
+        endTimeDate: data['endtime'] ? data['endtime'].toDate() : new Date(), // Ensure it's always a Date
+      } as Auction;
+    });
+  }
+
+  /** Get a single auction with real-time updates */
+  getAuction(id: string): Observable<Auction | null> {
+    console.log(`Listening for real-time updates on auction ID: ${id}`);
+
+    const auctionRef = doc(this.firestore, 'auctions', id);
+
+    return docData(auctionRef, { idField: 'id' }).pipe(
+      switchMap((auctionData: any) => {
+        if (!auctionData) return of(null);
+
+        const auction: Auction = {
+          id: id,
+          ...auctionData,
+          endTimeDate: auctionData.endtime?.toDate() ?? new Date(),
+        };
+
+        // Fetch image URL dynamically from Firebase Storage
+        const imageRef = ref(
+          this.storage,
+          `auction-images/${auctionData.id}.jpg`,
+        );
+
+        return from(getDownloadURL(imageRef)).pipe(
+          map((url) => {
+            auction.imageUrl = url;
+            return auction;
+          }),
+          catchError((error) => {
+            console.error(`Error fetching image for auction ${id}:`, error);
+            auction.imageUrl = 'assets/error.jpg'; // Fallback image
+            return of(auction); // Use 'of()' instead of 'from([])'
+          }),
+        );
+      }),
+    );
+  }
+
+  /**  Fetch user details by email */
+  async getUserDetailsByEmail(email: string): Promise<UserModel | null> {
+    try {
+      const userSnap = await getDoc(doc(this.firestore, `users/${email}`));
+      return userSnap.exists() ? (userSnap.data() as UserModel) : null;
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      return null;
+    }
+  }
+
+  /**  Update user details */
   async updateUserDetails(
     email: string,
-    updates: { forename?: string; surname?: string },
+    updates: Partial<UserModel>,
   ): Promise<void> {
-    const userRef = doc(this.firestore, `users/${email}`);
-    await updateDoc(userRef, updates);
+    try {
+      await updateDoc(doc(this.firestore, `users/${email}`), updates);
+    } catch (error) {
+      console.error('Error updating user details:', error);
+    }
   }
 
-  // Add New Auction
-  async addAuction(auction: Auction, imageFile?: File) {
+  /**  Add new auction (image handled separately in StorageService) */
+  async addAuction(auction: Auction): Promise<string | null> {
     try {
       const { endTimeDate, ...auctionData } = auction;
-      const auctionsRef = collection(this.firestore, 'auctions');
-
-      const docRef = await addDoc(auctionsRef, {
+      const docRef = await addDoc(this.auctionsCollection, {
         ...auctionData,
         winnerID: 'empty',
         status: 'active',
         endtime: Timestamp.fromDate(endTimeDate),
       });
 
-      // Upload image if provided
-      let imageUrl = '';
-      if (imageFile) {
-        imageUrl = await this.uploadImage(docRef.id, imageFile);
-        await updateDoc(doc(this.firestore, 'auctions', docRef.id), {
-          imageUrl,
-        });
-      }
-
-      console.log(
-        'Image uploaded and Firestore updated with image URL:',
-        imageUrl,
-      );
+      return docRef.id;
     } catch (error) {
       console.error('Error adding auction:', error);
+      return null;
     }
   }
 
-  async deleteAuction(auction: Auction) {
-    if (!auction.id) {
-      console.error('Error: Auction ID is undefined.');
-      return;
-    }
-
+  /**  Delete auction */
+  async deleteAuction(auctionId: string): Promise<void> {
+    if (!auctionId) return console.error('Error: Auction ID is undefined.');
     try {
-      const auctionRef = doc(this.firestore, 'auctions', auction.id);
-      await deleteDoc(auctionRef);
-      console.log(`Auction ${auction.id} deleted from Firestore.`);
-
-      // Delete the image from Firebase Storage if it exists
-      if (auction.imageUrl) {
-        const imageRef = ref(this.storage, `auction-images/${auction.id}.jpg`);
-        await deleteObject(imageRef);
-        console.log(`Image deleted for auction ${auction.id}.`);
-      }
+      await deleteDoc(doc(this.firestore, 'auctions', auctionId));
     } catch (error) {
       console.error('Error deleting auction:', error);
     }
   }
 
-  async updateAuction(auction: Auction, newImage?: File) {
+  /**  Update auction details (supports partial updates) */
+  async updateAuction(
+    auctionId: string,
+    updates: Partial<Auction>,
+  ): Promise<void> {
+    if (!auctionId) {
+      console.error('Auction ID is missing.');
+      return;
+    }
+
     try {
-      if (!auction.id) throw new Error('Auction ID is missing.');
-
-      const auctionRef = doc(this.firestore, 'auctions', auction.id);
-
-      // 🔹 Convert `endTimeDate` to Firestore Timestamp
-      const updateData: Partial<Auction> = {
-        name: auction.name,
-        seller: auction.seller,
-        endtime: Timestamp.fromDate(auction.endTimeDate),
-        price: auction.price,
-        status: auction.status,
-      };
-
-      // 🔹 Handle image update if a new image is provided
-      if (newImage) {
-        updateData.imageUrl = await this.uploadImage(auction.id, newImage);
-      }
-
-      await updateDoc(auctionRef, updateData);
-      console.log(`Auction ${auction.id} updated successfully.`);
+      await updateDoc(doc(this.firestore, 'auctions', auctionId), updates);
     } catch (error) {
       console.error('Error updating auction:', error);
     }
-  }
-
-  // 🔹 Upload Image after Resizing
-  private async uploadImage(auctionId: string, file: File): Promise<string> {
-    console.log('Original file:', file.name, file.type, file.size);
-
-    const resizedFile = await this.resizeImage(file, 640, 480);
-
-    console.log(
-      'Resized file:',
-      resizedFile.name,
-      resizedFile.type,
-      resizedFile.size,
-    );
-
-    const imageRef = ref(this.storage, `auction-images/${auctionId}.jpg`);
-    await uploadBytes(imageRef, resizedFile);
-
-    return getDownloadURL(imageRef);
-  }
-
-  private async resizeImage(
-    file: File,
-    width: number,
-    height: number,
-  ): Promise<File> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        img.src = event.target?.result as string;
-      };
-
-      img.onload = () => {
-        console.log('Original dimensions:', img.width, img.height);
-
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        canvas.width = width;
-        canvas.height = height;
-
-        ctx?.drawImage(img, 0, 0, width, height);
-
-        console.log('Canvas resized to:', canvas.width, canvas.height);
-
-        // Convert canvas to File for Firebase compatibility
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const resizedFile = new File([blob], file.name, {
-                type: file.type,
-                lastModified: Date.now(),
-              });
-
-              console.log(
-                'Final resized file:',
-                resizedFile.size,
-                resizedFile.type,
-              );
-
-              resolve(resizedFile);
-            } else {
-              reject(new Error('Image resizing failed'));
-            }
-          },
-          file.type,
-          0.9,
-        );
-      };
-
-      reader.readAsDataURL(file);
-    });
   }
 }

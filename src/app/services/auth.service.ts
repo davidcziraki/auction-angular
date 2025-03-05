@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import {
   Auth,
   authState,
@@ -19,45 +19,35 @@ import { Observable, Subscription } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
   private auth = inject(Auth);
   authState$: Observable<User | null> = authState(this.auth);
   private authSubscription: Subscription;
 
   constructor() {
-    this.authSubscription = this.authState$.subscribe((user: User | null) => {
-      // console.log('User Authed:', user);
-    });
+    // Prevent unnecessary console logs in production
+    this.authSubscription = this.authState$.subscribe();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.authSubscription.unsubscribe();
   }
 
   // Create a new user and send email verification
-  async createUser(email: string, password: string): Promise<any> {
+  async createUser(email: string, password: string): Promise<User> {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
+      const { user } = await createUserWithEmailAndPassword(
         this.auth,
         email,
         password,
       );
 
-      const user = userCredential.user;
-      console.log('User signed up:', user);
+      if (!user) throw new Error('User creation failed');
 
-      // Send verification email
-      if (user) {
-        await sendEmailVerification(user);
-        console.log('Verification email sent.');
-      }
-
+      await sendEmailVerification(user);
       return user;
     } catch (error: any) {
-      console.error(
-        `Error code: ${error.code}, Error message: ${error.message}`,
-      );
-      throw new Error(error.message);
+      throw this.handleFirebaseError(error);
     }
   }
 
@@ -66,57 +56,73 @@ export class AuthService {
     email: string,
     password: string,
     rememberMe: boolean,
-  ): Promise<any> {
+  ): Promise<User> {
     try {
-      // Set persistence based on "Remember Me" checkbox
-      const persistenceType = rememberMe
-        ? browserLocalPersistence
-        : browserSessionPersistence;
-      await setPersistence(this.auth, persistenceType);
+      await setPersistence(
+        this.auth,
+        rememberMe ? browserLocalPersistence : browserSessionPersistence,
+      );
 
-      const userCredential = await signInWithEmailAndPassword(
+      const { user } = await signInWithEmailAndPassword(
         this.auth,
         email,
         password,
       );
-      return userCredential.user;
+
+      return user;
     } catch (error: any) {
-      console.error(
-        `Error code: ${error.code}, Error message: ${error.message}`,
-      );
-      throw new Error(error.message);
+      throw this.handleFirebaseError(error);
     }
   }
 
+  // Logout user
   async logout(): Promise<void> {
     try {
       await signOut(this.auth);
-      console.log('User signed out successfully');
     } catch (error: any) {
-      // Proper error handling with type assertion
-      const errorMessage =
-        (error as Error).message || 'An unknown error occurred';
-      console.error('Sign-out failed:', errorMessage);
-      throw new Error(errorMessage); // Rethrow for handling in the UI
+      throw this.handleFirebaseError(error);
     }
   }
 
+  // Update user email
   async updateUserEmail(newEmail: string): Promise<void> {
     const user = this.auth.currentUser;
     if (!user) throw new Error('No authenticated user found');
 
-    await updateEmail(user, newEmail);
+    try {
+      await updateEmail(user, newEmail);
+    } catch (error: any) {
+      throw this.handleFirebaseError(error);
+    }
   }
 
+  // Update user password
   async updateUserPassword(newPassword: string): Promise<void> {
     const user = this.auth.currentUser;
     if (!user) throw new Error('No authenticated user found');
 
-    await updatePassword(user, newPassword);
+    try {
+      await updatePassword(user, newPassword);
+    } catch (error: any) {
+      throw this.handleFirebaseError(error);
+    }
   }
 
+  // Send password reset email
   async sendPasswordReset(email: string): Promise<void> {
     if (!email) throw new Error('Email is required for password reset');
-    await sendPasswordResetEmail(this.auth, email);
+
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+    } catch (error: any) {
+      throw this.handleFirebaseError(error);
+    }
+  }
+
+  // Handle Firebase-specific errors with cleaner messages
+  private handleFirebaseError(error: any): Error {
+    const errorMessage = error?.message || 'An unknown error occurred';
+    console.error('Firebase Error:', errorMessage);
+    return new Error(errorMessage);
   }
 }

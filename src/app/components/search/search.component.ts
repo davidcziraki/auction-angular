@@ -4,6 +4,7 @@ import { NgForOf, NgIf } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
 import { RouterLink } from '@angular/router';
 import { ProgressSpinner } from 'primeng/progressspinner';
+import { FirestoreService } from '../../services/firestore.service';
 
 @Component({
   selector: 'app-search',
@@ -17,7 +18,10 @@ export class SearchComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   private countdownInterval?: number;
 
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private firestoreService: FirestoreService,
+  ) {}
 
   ngOnInit(): void {
     this.loadAuctions();
@@ -32,7 +36,9 @@ export class SearchComponent implements OnInit, OnDestroy {
   async loadAuctions() {
     try {
       this.isLoading = true;
-      const auctionData = await this.storageService.loadAuctions();
+
+      // Await the auctions before processing them
+      const auctionData = await this.firestoreService.getAuctions();
 
       // Wait for all images to load
       await Promise.all(

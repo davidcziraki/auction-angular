@@ -116,6 +116,7 @@ export class AuctionService {
       const endedAuctionsQuery = query(
         this.auctionsCollection,
         where('winnerID', '==', 'empty'),
+        where('status', '!=', 'expired'),
         where('endtime', '<=', new Date()),
       );
 
