@@ -13,6 +13,7 @@ import { AuctionService } from '../../services/auction.service';
 import { Observable } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
+import { getAuth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-auction-detail',
@@ -114,8 +115,21 @@ export class AuctionDetailComponent {
     if (this.bidAmount <= this.auction.price) {
       this.messageService.add({
         severity: 'error',
-        summary: 'Outbid',
+        summary: 'Error',
         detail: 'Bid too low.',
+      });
+      return;
+    }
+
+    // Get current authenticated user
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'You must be logged in to place a bid.',
       });
       return;
     }
@@ -124,20 +138,28 @@ export class AuctionDetailComponent {
       await this.auctionService.addBid(
         this.auction.id,
         this.bidAmount,
-        'testUser',
+        currentUser.uid,
       );
+
       this.messageService.add({
         severity: 'success',
         summary: 'Bid Placed',
-        detail: `Bid successful`,
+        detail: 'Bid successful',
       });
+
       this.displayBidDialog = false; // Close the bid modal
     } catch (error) {
       console.error('Error placing bid:', error);
+
+      let errorMessage = 'Failed to place bid. Please try again.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: 'Failed to place bid. Please try again.',
+        detail: errorMessage,
       });
     }
   }

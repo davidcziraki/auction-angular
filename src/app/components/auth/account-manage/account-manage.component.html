@@ -51,7 +51,7 @@
         <ng-template let-auction pTemplate="body">
           <tr>
             <td>{{ auction.name }}</td>
-            <td>{{ auction.price | currency }}</td>
+            <td> {{ auction.price | currency: 'HUF' }}</td>
             <td>{{ auction.endtime | date:'medium' }}</td>
           </tr>
         </ng-template>

@@ -85,9 +85,12 @@ export class FirestoreService {
       const { endTimeDate, ...auctionData } = auction;
       const auctionsRef = collection(this.firestore, 'auctions');
 
-      // Add auction to Firestore
-      const docRef = await addDoc(auctionsRef, auctionData);
-      console.log('Auction added with ID:', docRef.id);
+      const docRef = await addDoc(auctionsRef, {
+        ...auctionData,
+        winnerID: 'empty',
+        status: 'active',
+        endtime: Timestamp.fromDate(endTimeDate),
+      });
 
       // Upload image if provided
       let imageUrl = '';

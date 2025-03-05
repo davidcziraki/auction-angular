@@ -125,7 +125,7 @@ export class AdminComponent implements OnInit {
         let color =
           capitalizedStatus === 'Completed'
             ? 'green'
-            : capitalizedStatus === 'Paused'
+            : capitalizedStatus === 'Expired'
               ? 'orange'
               : capitalizedStatus === 'Active'
                 ? 'gray'

@@ -8,6 +8,7 @@ import { User } from '@angular/fire/auth';
 import { FirestoreService } from '../../../services/firestore.service';
 import { FormsModule } from '@angular/forms';
 import { ButtonDirective } from 'primeng/button';
+import { AuctionService } from '../../../services/auction.service';
 
 @Component({
   selector: 'app-account-manage',
@@ -41,6 +42,7 @@ export class AccountManageComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,
+    private auctionService: AuctionService,
   ) {}
 
   ngOnInit() {
@@ -57,6 +59,8 @@ export class AccountManageComponent implements OnInit {
             this.userData['forename'] = userDetails.forename || 'N/A';
             this.userData['surname'] = userDetails.surname || 'N/A';
           }
+
+          await this.loadWonAuctions(user.uid);
         } catch (error) {
           console.error('Failed to fetch Firestore user details:', error);
         }
@@ -95,5 +99,24 @@ export class AccountManageComponent implements OnInit {
 
   cancelEdit() {
     this.editingField = null;
+  }
+
+  async loadWonAuctions(userId: string) {
+    try {
+      const wonAuctionsSnapshot =
+        await this.auctionService.getWonAuctions(userId);
+      this.wonAuctions = wonAuctionsSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          endtime: data['endtime']?.toDate
+            ? data['endtime'].toDate()
+            : data['endtime'], // Convert Firestore Timestamp to Date
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching won auctions:', error);
+    }
   }
 }
