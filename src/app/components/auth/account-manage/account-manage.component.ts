@@ -9,6 +9,7 @@ import { FirestoreService } from '../../../services/firestore.service';
 import { FormsModule } from '@angular/forms';
 import { ButtonDirective } from 'primeng/button';
 import { AuctionService } from '../../../services/auction.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-account-manage',
@@ -43,6 +44,7 @@ export class AccountManageComponent implements OnInit {
     private authService: AuthService,
     private firestoreService: FirestoreService,
     private auctionService: AuctionService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -118,5 +120,9 @@ export class AccountManageComponent implements OnInit {
     } catch (error) {
       console.error('Error fetching won auctions:', error);
     }
+  }
+
+  goToCart(auctionId: string) {
+    this.router.navigate(['cart', auctionId]);
   }
 }

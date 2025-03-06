@@ -46,13 +46,21 @@
             <th>Auction Item</th>
             <th>Winning Bid</th>
             <th>End Date</th>
+            <th>Action</th> <!-- New column for the Pay button -->
           </tr>
         </ng-template>
         <ng-template let-auction pTemplate="body">
           <tr>
             <td>{{ auction.name }}</td>
-            <td> {{ auction.price | currency: 'HUF' }}</td>
+            <td>{{ auction.price | currency: 'HUF' }}</td>
             <td>{{ auction.endtime | date:'medium' }}</td>
+            <td>
+              <button
+                (click)="goToCart(auction.id)"
+                class="p-button p-button-success">
+                Pay
+              </button>
+            </td>
           </tr>
         </ng-template>
       </p-table>

@@ -10,6 +10,7 @@ import { AngularFireAuthGuard } from '@angular/fire/compat/auth-guard';
 import { hasCustomClaim } from '@angular/fire/auth-guard';
 import { ContactComponent } from './components/contact/contact.component';
 import { SellerHubComponent } from './components/seller-hub/seller-hub.component';
+import { CartComponent } from './components/cart/cart.component';
 
 const adminOnly = () => hasCustomClaim('admin');
 
@@ -25,6 +26,8 @@ export const routes: Routes = [
   { path: 'seller-hub', component: SellerHubComponent },
 
   { path: 'auction/:id', component: AuctionDetailComponent },
+  { path: 'cart/:id', component: CartComponent },
+
   {
     path: 'user-management',
     component: AccountManageComponent,

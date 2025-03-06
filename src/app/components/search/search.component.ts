@@ -110,8 +110,8 @@ export class SearchComponent implements OnInit, OnDestroy {
 
     if (!user?.uid) {
       this.messageService.add({
-        severity: 'warn',
-        summary: 'Warning',
+        severity: 'error',
+        summary: 'Error',
         detail: 'User not logged in.',
       });
       return;
