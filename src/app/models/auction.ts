@@ -11,4 +11,5 @@ export interface Auction {
   status: string;
   countdown?: string;
   winnerID?: string;
+  isFavourite?: boolean;
 }

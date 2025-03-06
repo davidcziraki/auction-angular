@@ -9,12 +9,22 @@ import {
   Firestore,
   getDoc,
   getDocs,
+  query,
   setDoc,
   Timestamp,
   updateDoc,
+  where,
 } from '@angular/fire/firestore';
 import { UserModel } from '../models/user';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import {
+  catchError,
+  forkJoin,
+  from,
+  map,
+  Observable,
+  of,
+  switchMap,
+} from 'rxjs';
 import { Auction } from '../models/auction';
 import { getStorage, ref } from 'firebase/storage';
 import { getDownloadURL } from '@angular/fire/storage';
@@ -46,21 +56,43 @@ export class FirestoreService {
   }
 
   /**  Get all auctions  */
-  async getAuctions(): Promise<Auction[]> {
+  async getAuctions(userId?: string): Promise<Auction[]> {
     const snapshot = await getDocs(this.auctionsCollection);
-    return snapshot.docs.map((doc) => {
-      const data = doc.data();
+    const auctions: Auction[] = snapshot.docs.map((doc) => {
+      const data = doc.data() as Auction;
 
       return {
-        id: doc.id,
         ...data,
-        endTimeDate: data['endtime'] ? data['endtime'].toDate() : new Date(), // Ensure it's always a Date
-      } as Auction;
+        id: doc.id,
+        endTimeDate: data.endtime ? data.endtime.toDate() : new Date(),
+        isFavourite: false, // Default value
+      };
     });
+
+    // If no user is logged in, return auctions without checking favorites
+    if (!userId) {
+      return auctions;
+    }
+
+    // Fetch favorites only if userId is provided
+    const favouritePromises = auctions.map(async (auction) => {
+      const favSnapshot = await getDocs(
+        query(
+          collection(this.firestore, `auctions/${auction.id}/favourites`),
+          where('userId', '==', userId),
+        ),
+      );
+      return {
+        ...auction,
+        isFavourite: !favSnapshot.empty,
+      };
+    });
+
+    return Promise.all(favouritePromises);
   }
 
   /** Get a single auction with real-time updates */
-  getAuction(id: string): Observable<Auction | null> {
+  getAuction(id: string, userId: string): Observable<Auction | null> {
     console.log(`Listening for real-time updates on auction ID: ${id}`);
 
     const auctionRef = doc(this.firestore, 'auctions', id);
@@ -81,15 +113,26 @@ export class FirestoreService {
           `auction-images/${auctionData.id}.jpg`,
         );
 
-        return from(getDownloadURL(imageRef)).pipe(
-          map((url) => {
-            auction.imageUrl = url;
+        return forkJoin({
+          imageUrl: from(getDownloadURL(imageRef)).pipe(
+            catchError(() => of('assets/error.jpg')),
+          ),
+          isFavourited: from(
+            getDocs(
+              query(
+                collection(this.firestore, `auctions/${id}/favourites`),
+                where('userId', '==', userId),
+              ),
+            ),
+          ).pipe(
+            map((favSnapshot) => !favSnapshot.empty),
+            catchError(() => of(false)),
+          ),
+        }).pipe(
+          map(({ imageUrl, isFavourited }) => {
+            auction.imageUrl = imageUrl;
+            auction.isFavourite = isFavourited;
             return auction;
-          }),
-          catchError((error) => {
-            console.error(`Error fetching image for auction ${id}:`, error);
-            auction.imageUrl = 'assets/error.jpg'; // Fallback image
-            return of(auction); // Use 'of()' instead of 'from([])'
           }),
         );
       }),
@@ -161,6 +204,34 @@ export class FirestoreService {
       await updateDoc(doc(this.firestore, 'auctions', auctionId), updates);
     } catch (error) {
       console.error('Error updating auction:', error);
+    }
+  }
+
+  /** Toggle auction favourites */
+  async toggleFavourites(userId: string, auctionId: string): Promise<void> {
+    try {
+      const favouritesCollection = collection(
+        this.firestore,
+        `auctions/${auctionId}/favourites`,
+      );
+
+      // Check if the user already favourited this auction
+      const q = query(favouritesCollection, where('userId', '==', userId));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        // If favourite exists, remove it
+        const favDoc = snapshot.docs[0]; // Get the first match
+        await deleteDoc(favDoc.ref);
+      } else {
+        // Otherwise, add to favourites
+        await addDoc(favouritesCollection, {
+          userId,
+          timestamp: Timestamp.now(),
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling favourites:', error);
     }
   }
 }
