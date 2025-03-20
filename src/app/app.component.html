@@ -20,15 +20,16 @@
             <ng-template #loginText>
               <p class="ml-2 cursor-pointer">
                 <a (click)="showDialog() "
-                >Log in</a>
+                >Log in / Register</a>
               </p>
             </ng-template>
+            <!--            [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"-->
 
             <!-- Avatar -->
             <div class="flex items-center">
               <p-avatar
                 (click)="menu.toggle($event)"
-                [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"
+                [image]="user ? 'blankpic.png' : 'blankpic.png'"
                 shape="circle"
                 styleClass="cursor-pointer align-self-center"
               />

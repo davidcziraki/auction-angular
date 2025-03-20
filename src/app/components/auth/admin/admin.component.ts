@@ -179,7 +179,7 @@ export class AdminComponent implements OnInit {
 
   async fetchAuctions() {
     try {
-      this.auctions = await this.storageService.loadAuctions();
+      this.auctions = await this.firestoreService.getAuctions();
       this.applyFilters();
     } catch (error) {
       console.error('Error loading auctions:', error);
@@ -188,10 +188,6 @@ export class AdminComponent implements OnInit {
 
   filterStatus(status: string) {
     this.selectedFilter = status; // No need for mapping if DB stores exact values
-    this.applyFilters();
-  }
-
-  onSearch() {
     this.applyFilters();
   }
 
@@ -237,7 +233,7 @@ export class AdminComponent implements OnInit {
     if (
       !this.newAuction.name ||
       !this.newAuction.seller ||
-      !this.newAuction.endTimeDate || // Use endTimeDate for validation
+      !this.newAuction.endTimeDate ||
       !this.newAuction.price
     ) {
       alert('Please fill in all fields.');
@@ -247,10 +243,21 @@ export class AdminComponent implements OnInit {
     this.newAuction.endtime = Timestamp.fromDate(this.newAuction.endTimeDate);
 
     try {
-      await this.firestoreService.addAuction(
-        this.newAuction,
-        this.selectedImage || undefined,
-      );
+      const auctionId = await this.firestoreService.addAuction(this.newAuction);
+      if (!auctionId) {
+        throw new Error('Failed to create auction.');
+      }
+
+      if (this.selectedImage) {
+        const imageUrl = await this.storageService.uploadImage(
+          auctionId,
+          this.selectedImage,
+        );
+        if (imageUrl) {
+          await this.firestoreService.updateAuction(auctionId, { imageUrl });
+        }
+      }
+
       this.newAuctionDialog = false;
       this.fetchAuctions(); // Refresh list
     } catch (error) {
@@ -275,7 +282,7 @@ export class AdminComponent implements OnInit {
 
     if (confirm('Are you sure you want to delete this auction?')) {
       try {
-        await this.firestoreService.deleteAuction(auction); // Calls FirestoreService function
+        await this.firestoreService.deleteAuction(auction.id);
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
@@ -295,12 +302,24 @@ export class AdminComponent implements OnInit {
   }
 
   async updateAuction() {
-    if (!this.selectedAuction) return;
+    if (!this.selectedAuction || !this.selectedAuction.id) return;
 
     try {
+      // Create an update object with the changed fields
+      const updates: Partial<Auction> = { ...this.selectedAuction };
+
+      // If an image is selected, upload it and add the URL to updates
+      if (this.selectedImage) {
+        updates.imageUrl = await this.storageService.uploadImage(
+          this.selectedAuction.id,
+          this.selectedImage,
+        );
+      }
+
+      // Call Firestore service to update the auction
       await this.firestoreService.updateAuction(
-        this.selectedAuction,
-        this.selectedImage || undefined,
+        this.selectedAuction.id,
+        updates,
       );
 
       this.messageService.add({
@@ -310,7 +329,7 @@ export class AdminComponent implements OnInit {
       });
 
       this.displayEditModal = false;
-      this.fetchAuctions();
+      await this.fetchAuctions();
     } catch (error) {
       console.error('Error updating auction:', error);
       this.messageService.add({

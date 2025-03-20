@@ -3,71 +3,40 @@
 
 </div>
 
-<!--<div class="auction-list">-->
-<!--  <div *ngFor="let auction of auctions" class="auction-card">-->
-<!--    <a [routerLink]="['/auction', auction.id]" class="auction-link">-->
-<!--      <div class="auction-image-container">-->
-<!--        <img [src]="auction.imageUrl" alt="Auction Image" class="auction-image"/>-->
+<p-toast></p-toast>
 
-<!--        &lt;!&ndash; Popular and Ending Soon Badges &ndash;&gt;-->
-<!--        <span class="auction-badge popular">POPULAR</span>-->
-<!--        &lt;!&ndash;        <span *ngIf="auction.endingSoon" class="auction-badge ending-soon">ENDING SOON</span>&ndash;&gt;-->
-
-<!--        &lt;!&ndash; Save (Heart) Icon &ndash;&gt;-->
-<!--        <button (click)="toggleSave(auction)" class="save-icon">-->
-<!--          &lt;!&ndash;          <i class="pi" [ngClass]="{'pi-heart-fill': auction.saved, 'pi-heart': !auction.saved}"></i>&ndash;&gt;-->
-<!--          <i class="pi pi-bookmark"></i>-->
-
-<!--        </button>-->
-<!--      </div>-->
-
-<!--      <div class="auction-details">-->
-<!--        <h3 class="auction-title">{{ auction.name }}</h3>-->
-<!--        <p class="auction-subtitle">Filler temporary text to be used for Auction subtitles.</p>-->
-
-<!--        <p class="auction-price">Price: <strong>HUF {{ auction.price }}</strong></p>-->
-
-<!--        &lt;!&ndash; Countdown Timer &ndash;&gt;-->
-<!--        &lt;!&ndash;        <p class="auction-status" [ngClass]="{ 'auction-ended': auction.ended }">&ndash;&gt;-->
-<!--        &lt;!&ndash;          {{ auction.ended ? 'Auction Ended' : auction.countdown }}&ndash;&gt;-->
-<!--        &lt;!&ndash;        </p>&ndash;&gt;-->
-<!--        <p *ngIf="auction.countdown" style="font-weight: bold;">-->
-<!--          {{ auction.countdown }}-->
-<!--        </p>-->
-<!--      </div>-->
-<!--    </a>-->
-<!--  </div>-->
-<!--</div>-->
 
 <div class="auction-list">
   <div *ngFor="let auction of auctions" class="auction-card">
-    <a [routerLink]="['/auction', auction.id]" class="auction-link">
-      <div class="auction-image-container">
+    <div class="auction-image-container">
+      <a [routerLink]="['/auction', auction.id]" class="auction-link">
+
         <img [src]="auction.imageUrl" alt="Auction Image" class="auction-image"/>
+      </a>
 
-        <!-- Popular Badge (Stays Over Image) -->
-        <span class="auction-badge popular">POPULAR</span>
+      <!-- Popular Badge (Stays Over Image) -->
+      <span class="auction-badge popular">POPULAR</span>
+    </div>
+
+    <div class="auction-details">
+      <h3 class="auction-title">{{ auction.name }}</h3>
+      <!--        <p class="auction-subtitle">Filler temporary text to be used for Auction subtitles.</p>-->
+
+      <p class="auction-price">Current Bid: <span class="price-number">
+          HUF {{ auction.price }}
+        </span></p>
+
+      <!-- Action Bar (Right of Countdown) -->
+      <div class="auction-footer">
+        <p *ngIf="auction.countdown" class="auction-timer">
+          {{ auction.countdown }}
+        </p>
+
+        <button (click)="toggleFavourite(auction)" class="save-icon">
+          <i [ngClass]="auction.isFavourite ? 'pi pi-heart-fill text-red-500' : 'pi pi-heart'"></i>
+        </button>
       </div>
-
-      <div class="auction-details">
-        <h3 class="auction-title">{{ auction.name }}</h3>
-        <p class="auction-subtitle">Filler temporary text to be used for Auction subtitles.</p>
-
-        <p class="auction-price">Price: <strong>HUF {{ auction.price }}</strong></p>
-
-        <!-- Action Bar (Right of Countdown) -->
-        <div class="auction-footer">
-          <p *ngIf="auction.countdown" class="auction-timer">
-            {{ auction.countdown }}
-          </p>
-
-          <!-- Save (Bookmark) Icon in Action Bar -->
-          <button (click)="toggleSave(auction)" class="save-icon">
-            <i class="pi pi-bookmark saved"></i>
-          </button>
-        </div>
-      </div>
-    </a>
+    </div>
   </div>
 </div>
 

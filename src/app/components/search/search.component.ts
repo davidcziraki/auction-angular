@@ -1,26 +1,47 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Auction } from '../../models/auction';
-import { NgForOf, NgIf } from '@angular/common';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
 import { RouterLink } from '@angular/router';
 import { ProgressSpinner } from 'primeng/progressspinner';
+import { FirestoreService } from '../../services/firestore.service';
+import { Toast } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { AuthService } from '../../services/auth.service';
+import { getAuth, User } from '@angular/fire/auth';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-search',
-  imports: [NgForOf, NgIf, RouterLink, ProgressSpinner],
+  imports: [NgForOf, NgIf, RouterLink, ProgressSpinner, Toast, NgClass],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
+  providers: [MessageService],
 })
 export class SearchComponent implements OnInit, OnDestroy {
   auctions: Auction[] = [];
+  user: User | null = null;
+  authState$!: Observable<User | null>;
+
   loadedImages: Set<string> = new Set();
   isLoading: boolean = false;
   private countdownInterval?: number;
 
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private firestoreService: FirestoreService,
+    private authService: AuthService,
+    private messageService: MessageService,
+  ) {}
 
   ngOnInit(): void {
-    this.loadAuctions();
+    this.authState$ = this.authService.authState$;
+
+    this.authState$.subscribe(async (user) => {
+      this.user = user;
+
+      await this.loadAuctions(user?.uid);
+    });
   }
 
   ngOnDestroy() {
@@ -29,29 +50,33 @@ export class SearchComponent implements OnInit, OnDestroy {
     }
   }
 
-  async loadAuctions() {
+  async loadAuctions(userId?: string) {
     try {
       this.isLoading = true;
-      const auctionData = await this.storageService.loadAuctions();
 
-      // Wait for all images to load
+      // Fetch auctions with or without user ID
+      const auctionData = await this.firestoreService.getAuctions(userId);
+
+      // Preload images
       await Promise.all(
         auctionData.map(
           (auction) =>
             new Promise<void>((resolve) => {
+              if (!auction.imageUrl) {
+                resolve();
+                return;
+              }
+
               const img = new Image();
               img.onload = () => {
-                if (auction.id != null) {
-                  this.loadedImages.add(auction.id);
-                }
+                this.loadedImages.add(auction.id!);
                 resolve();
               };
               img.onerror = () => {
-                // Handle error but still resolve
                 console.error(`Failed to load image for auction ${auction.id}`);
                 resolve();
               };
-              img.src = auction.imageUrl || '';
+              img.src = auction.imageUrl;
             }),
         ),
       );
@@ -69,7 +94,49 @@ export class SearchComponent implements OnInit, OnDestroy {
     return this.loadedImages.has(auctionId);
   }
 
-  toggleSave(auction: Auction) {}
+  /** Add or remove auction from favourites */
+  async toggleFavourite(auction: Auction | null) {
+    if (!auction) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'Auction is null.',
+      });
+      return;
+    }
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user?.uid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'User not logged in.',
+      });
+      return;
+    }
+
+    try {
+      await this.firestoreService.toggleFavourites(user.uid, auction.id!);
+      auction.isFavourite = !auction.isFavourite;
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: auction.isFavourite
+          ? 'Added to favourites'
+          : 'Removed from favourites',
+      });
+    } catch (error) {
+      console.error('Error toggling favourite:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to update favourites.',
+      });
+    }
+  }
 
   private startGlobalCountdown() {
     // Initial update

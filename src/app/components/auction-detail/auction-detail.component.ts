@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { getAuth } from '@angular/fire/auth';
+import { FirestoreService } from '../../services/firestore.service';
 
 @Component({
   selector: 'app-auction-detail',
@@ -61,12 +62,23 @@ export class AuctionDetailComponent {
     private storageService: StorageService,
     private auctionService: AuctionService,
     private messageService: MessageService,
+    private firestoreService: FirestoreService,
   ) {}
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
-      const id = params['id'];
-      this.auction$ = this.storageService.getAuction(id);
+      const id: string | undefined = params['id'];
+
+      if (!id) {
+        console.error('Auction ID is undefined.');
+        return;
+      }
+
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      const currentUserID = currentUser?.uid ?? '';
+
+      this.auction$ = this.firestoreService.getAuction(id, currentUserID);
 
       this.auction$.subscribe((auctionData) => {
         if (auctionData) {
@@ -85,7 +97,12 @@ export class AuctionDetailComponent {
   }
 
   loadAuction(id: string) {
-    this.auction$ = this.storageService.getAuction(id);
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    const currentUserID = currentUser?.uid as string;
+
+    this.auction$ = this.firestoreService.getAuction(id, currentUserID);
+
     console.log(this.auction$);
   }
 
@@ -160,6 +177,50 @@ export class AuctionDetailComponent {
         severity: 'error',
         summary: 'Error',
         detail: errorMessage,
+      });
+    }
+  }
+
+  /** Add or remove auction from favourites */
+  async toggleFavourite(auction: Auction | null) {
+    if (!auction) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'Auction is null.',
+      });
+      return;
+    }
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user?.uid) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'User not logged in.',
+      });
+      return;
+    }
+
+    try {
+      await this.firestoreService.toggleFavourites(user.uid, auction.id!);
+      auction.isFavourite = !auction.isFavourite;
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: auction.isFavourite
+          ? 'Added to favourites'
+          : 'Removed from favourites',
+      });
+    } catch (error) {
+      console.error('Error toggling favourite:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to update favourites.',
       });
     }
   }

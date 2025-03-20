@@ -1,61 +1,71 @@
-<p-tabView>
-  <p-tabPanel header="Account Settings">
-    <div class="account-management">
-      <h2>Account Management</h2>
+<div class="account-tabs">
+  <p-tabView>
+    <p-tabPanel header="Account Settings">
+      <div class="account-management">
+        <h2>Account Management</h2>
 
-      <div *ngFor="let field of ['email', 'forename', 'surname', 'password']" class="account-field">
-        <label>{{ field.charAt(0).toUpperCase() + field.slice(1) }}</label>
+        <div *ngFor="let field of ['email', 'forename', 'surname', 'password']" class="account-field">
+          <label>{{ field.charAt(0).toUpperCase() + field.slice(1) }}</label>
 
-        <div class="field-container">
+          <div class="field-container">
           <span *ngIf="editingField !== field">
             {{ field === 'password' ? '*****' : userData[field] }}
           </span>
 
-          <input
-            *ngIf="editingField === field && field !== 'password'"
-            [(ngModel)]="userData[field]"
-            [type]="field === 'email' ? 'email' : 'text'"
-          />
+            <input
+              *ngIf="editingField === field && field !== 'password'"
+              [(ngModel)]="userData[field]"
+              [type]="field === 'email' ? 'email' : 'text'"
+            />
 
-          <input
-            *ngIf="editingField === field && field === 'password'"
-            [(ngModel)]="newPassword"
-            placeholder="Enter new password"
-            type="password"
-          />
+            <input
+              *ngIf="editingField === field && field === 'password'"
+              [(ngModel)]="newPassword"
+              placeholder="Enter new password"
+              type="password"
+            />
 
-          <button (click)="editField(field)" class="edit-button" icon="pi pi-pencil" pButton>
-            Edit
-          </button>
+            <button (click)="editField(field)" class="edit-button" icon="pi pi-pencil" pButton>
+              Edit
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="editingField" class="button-group">
+          <button (click)="saveChanges()" class="save-button" pButton>Save</button>
+          <button (click)="cancelEdit()" class="cancel-button" pButton>Cancel</button>
         </div>
       </div>
+    </p-tabPanel>
 
-      <div *ngIf="editingField" class="button-group">
-        <button (click)="saveChanges()" class="save-button" pButton>Save</button>
-        <button (click)="cancelEdit()" class="cancel-button" pButton>Cancel</button>
+    <p-tabPanel header="Past Won Auctions">
+      <div class="auctions-container">
+        <h2>Past Won Auctions</h2>
+        <p-table [paginator]="true" [rows]="5" [value]="wonAuctions">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Auction Item</th>
+              <th>Winning Bid</th>
+              <th>End Date</th>
+              <th>Action</th> <!-- New column for the Pay button -->
+            </tr>
+          </ng-template>
+          <ng-template let-auction pTemplate="body">
+            <tr>
+              <td>{{ auction.name }}</td>
+              <td>{{ auction.price | currency: 'HUF' }}</td>
+              <td>{{ auction.endtime | date:'medium' }}</td>
+              <td>
+                <button
+                  (click)="goToCart(auction.id)"
+                  class="p-button p-button-success">
+                  Pay
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
-    </div>
-  </p-tabPanel>
-
-  <p-tabPanel header="Past Won Auctions">
-    <div class="auctions-container">
-      <h2>Past Won Auctions</h2>
-      <p-table [paginator]="true" [rows]="5" [value]="wonAuctions">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Auction Item</th>
-            <th>Winning Bid</th>
-            <th>End Date</th>
-          </tr>
-        </ng-template>
-        <ng-template let-auction pTemplate="body">
-          <tr>
-            <td>{{ auction.name }}</td>
-            <td> {{ auction.price | currency: 'HUF' }}</td>
-            <td>{{ auction.endtime | date:'medium' }}</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
-  </p-tabPanel>
-</p-tabView>
+    </p-tabPanel>
+  </p-tabView>
+</div>

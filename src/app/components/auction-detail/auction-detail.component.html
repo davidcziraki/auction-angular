@@ -25,10 +25,15 @@
 
   <!-- Action Buttons -->
   <div class="actions">
-    <button class="watch-button" icon="pi pi-heart" label="WATCH" pButton></button>
+    <button (click)="toggleFavourite(auction)" class="watch-button" pButton>
+      <i [ngClass]="auction?.isFavourite ? 'pi pi-heart-fill' : 'pi pi-heart'"></i>
+      WATCH
+    </button>
+
     <button class="share-button" icon="pi pi-share-alt" label="SHARE" pButton></button>
     <button class="calendar-button" icon="pi pi-calendar-plus" pButton></button>
   </div>
+
 
   <!-- Place Bid Button -->
   <button (click)="openBidding()" label="PLACE BID" pButton pRipple></button>

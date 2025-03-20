@@ -145,6 +145,11 @@ export class AppComponent implements OnInit {
             },
           ]
         : []),
+      {
+        label: 'Seller Hub',
+        icon: 'pi pi-fw pi-briefcase',
+        routerLink: '/seller-hub',
+      },
     ];
   }
 

@@ -1,0 +1,34 @@
+<div class="checkout-container">
+  <h2 class="checkout-title">Checkout</h2>
+
+  <div class="checkout-card">
+    <!-- Image Section -->
+    <div class="checkout-image-container">
+      <img *ngIf="auction?.imageUrl" [src]="auction?.imageUrl" alt="Auction Image" class="checkout-image"/>
+    </div>
+
+    <!-- Auction Details -->
+    <div class="checkout-details">
+      <h3 class="checkout-item-title">{{ auction?.name }}</h3>
+
+      <div class="checkout-info">
+        <p><span class="checkout-label">Winning Bid:</span> HUF {{ auction?.price | number }}</p>
+        <p><span class="checkout-label">Auction Ended:</span> {{ auction?.endTimeDate | date:'medium' }}</p>
+      </div>
+
+      <!-- Price Breakdown -->
+      <div class="price-summary">
+        <p><span class="checkout-label">Subtotal:</span> HUF {{ auction?.price | number }}</p>
+        <p><span class="checkout-label">VAT (27%):</span> HUF {{ vatAmount | number }}</p>
+        <p><span class="checkout-label">Shipping:</span> HUF {{ shippingCost | number }}</p>
+        <hr/>
+        <p class="total-cost"><span class="checkout-label">Total:</span> HUF {{ totalCost | number }}</p>
+      </div>
+
+      <!-- Proceed to Payment Button -->
+      <button (click)="proceedToPayment()" class="checkout-btn">
+        Proceed to Payment
+      </button>
+    </div>
+  </div>
+</div>
