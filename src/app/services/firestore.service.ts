@@ -96,6 +96,7 @@ export class FirestoreService {
     console.log(`Listening for real-time updates on auction ID: ${id}`);
 
     const auctionRef = doc(this.firestore, 'auctions', id);
+    const bidsRef = collection(this.firestore, `auctions/${id}/bids`);
 
     return docData(auctionRef, { idField: 'id' }).pipe(
       switchMap((auctionData: any) => {
@@ -115,7 +116,7 @@ export class FirestoreService {
 
         return forkJoin({
           imageUrl: from(getDownloadURL(imageRef)).pipe(
-            catchError(() => of('assets/error.jpg')),
+            catchError(() => of('error.jpg')),
           ),
           isFavourited: from(
             getDocs(
@@ -128,10 +129,15 @@ export class FirestoreService {
             map((favSnapshot) => !favSnapshot.empty),
             catchError(() => of(false)),
           ),
+          bidCount: from(getDocs(bidsRef)).pipe(
+            map((bidSnapshot) => bidSnapshot.size),
+            catchError(() => of(0)),
+          ),
         }).pipe(
-          map(({ imageUrl, isFavourited }) => {
+          map(({ imageUrl, isFavourited, bidCount }) => {
             auction.imageUrl = imageUrl;
             auction.isFavourite = isFavourited;
+            auction.bidCount = bidCount; // Store bid count in auction object
             return auction;
           }),
         );

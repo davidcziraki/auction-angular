@@ -30,8 +30,13 @@
       WATCH
     </button>
 
-    <button class="share-button" icon="pi pi-share-alt" label="SHARE" pButton></button>
-    <button class="calendar-button" icon="pi pi-calendar-plus" pButton></button>
+    <button (click)="openShareModal()" class="share-button" pButton>
+      <i class="pi pi-share-alt"></i>
+      SHARE
+    </button>
+    <button (click)="openCalendarModal()" class="calendar-button" pButton>
+      <i class="pi pi-calendar-plus"></i>
+    </button>
   </div>
 
 
@@ -78,5 +83,57 @@
     </div>
   </p-dialog>
 </div>
+
+
+<!-- SHARE MODAL -->
+<p-dialog [(visible)]="displayShareDialog" [closable]="true" [header]="'Share Auction'" [modal]="true"
+          class="share-modal">
+  <div class="share-modal-container">
+    <p>Copy and share this auction link:</p>
+
+    <div class="share-input-container">
+      <input [(ngModel)]="shareLink" pInputText readonly type="text">
+      <button (click)="copyToClipboard()" class="copy-button" pButton>
+        <i class="pi pi-copy"></i> Copy
+      </button>
+    </div>
+
+    <p class="share-text">Or share on:</p>
+    <div class="social-buttons">
+      <button (click)="shareOnFacebook()" class="facebook-button" pButton>
+        <i class="pi pi-facebook"></i> Facebook
+      </button>
+      <button (click)="shareOnTwitter()" class="twitter-button" pButton>
+        <i class="pi pi-twitter"></i> Twitter
+      </button>
+      <button (click)="shareOnWhatsApp()" class="whatsapp-button" pButton>
+        <i class="pi pi-whatsapp"></i> WhatsApp
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+
+<!-- CALENDAR MODAL -->
+<p-dialog [(visible)]="displayCalendarDialog" [closable]="true" [header]="'Add to Calendar'" [modal]="true">
+  <div class="calendar-modal-container">
+    <p>Choose where to add this auction to your calendar:</p>
+
+    <div class="calendar-buttons">
+      <button (click)="addToGoogleCalendar()" class="calendar-button google" pButton>
+        <i class="pi pi-google"></i> Google Calendar
+      </button>
+
+      <button (click)="addToOutlookCalendar()" class="calendar-button outlook" pButton>
+        <i class="pi pi-calendar"></i> Outlook / Apple Calendar
+      </button>
+
+      <button (click)="addToCalendar()" class="calendar-button ics" pButton>
+        <i class="pi pi-download"></i> Download .ICS File
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
 
 

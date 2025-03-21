@@ -125,4 +125,6 @@ export class AccountManageComponent implements OnInit {
   goToCart(auctionId: string) {
     this.router.navigate(['cart', auctionId]);
   }
+
+  addDelivery(auctionId: string) {}
 }

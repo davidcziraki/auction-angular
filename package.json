@@ -20,6 +20,7 @@
     "@angular/platform-browser-dynamic": "^19.1.7",
     "@angular/router": "^19.1.7",
     "@primeng/themes": "^19.0.5",
+    "@stripe/stripe-js": "^6.1.0",
     "ag-grid-angular": "^33.1.1",
     "ag-grid-community": "^33.1.1",
     "prettier": "^3.4.2",
@@ -27,6 +28,7 @@
     "primeicons": "^7.0.0",
     "primeng": "^19.0.5",
     "rxjs": "~7.8.0",
+    "stripe": "^17.7.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },

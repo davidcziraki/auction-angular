@@ -56,11 +56,20 @@
               <td>{{ auction.price | currency: 'HUF' }}</td>
               <td>{{ auction.endtime | date:'medium' }}</td>
               <td>
-                <button
-                  (click)="goToCart(auction.id)"
-                  class="p-button p-button-success">
-                  Pay
-                </button>
+                <ng-container *ngIf="auction.paid === 'yes'; else payButton">
+                  <button class="p-button p-button-secondary" disabled>Paid</button>
+                  <button (click)="addDelivery(auction.id)" class="p-button p-button-info">
+                    Add Delivery
+                  </button>
+                </ng-container>
+
+                <ng-template #payButton>
+                  <button
+                    (click)="goToCart(auction.id)"
+                    class="p-button p-button-success">
+                    Pay
+                  </button>
+                </ng-template>
               </td>
             </tr>
           </ng-template>

@@ -128,6 +128,80 @@
 }
 
 
+.share-modal-container {
+  text-align: center;
+}
+
+.share-input-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.facebook-button {
+  background-color: #3b5998;
+  color: white;
+}
+
+.twitter-button {
+  background-color: #1da1f2;
+  color: white;
+}
+
+.whatsapp-button {
+  background-color: #25d366;
+  color: white;
+}
+
+
+.calendar-modal-container {
+  text-align: center;
+  padding: 20px;
+
+  p {
+    margin-bottom: 15px;
+    font-size: 16px;
+  }
+
+  .calendar-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .calendar-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+
+    .google {
+      background-color: #4285f4;
+      color: white;
+    }
+
+    .outlook {
+      background-color: #0072c6;
+      color: white;
+    }
+
+    .ics {
+      background-color: #333;
+      color: white;
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .auction-bar {
     display: flex;

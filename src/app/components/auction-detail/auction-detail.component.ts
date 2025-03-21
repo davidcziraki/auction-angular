@@ -38,9 +38,14 @@ export class AuctionDetailComponent {
   auction: Auction | null = null;
   auction$!: Observable<Auction | null>;
 
-  bids: number = 21;
+  displayShareDialog: boolean = false;
+  shareLink: string = '';
+
+  bids: number = 0;
   displayBidDialog: boolean = false;
   bidAmount = 0;
+
+  displayCalendarDialog: boolean = false;
 
   mainImage: string = '';
 
@@ -83,6 +88,8 @@ export class AuctionDetailComponent {
       this.auction$.subscribe((auctionData) => {
         if (auctionData) {
           this.auction = auctionData;
+          this.bids = auctionData.bidCount || 0; // Update bid count
+
           this.preloadAuctionImage(auctionData.imageUrl);
           this.startCountdown();
         }
@@ -223,6 +230,129 @@ export class AuctionDetailComponent {
         detail: 'Failed to update favourites.',
       });
     }
+  }
+
+  openShareModal() {
+    this.shareLink = window.location.href; // Get the current auction URL
+    this.displayShareDialog = true;
+  }
+
+  shareOnFacebook() {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(this.shareLink)}`;
+    window.open(url, '_blank');
+  }
+
+  shareOnTwitter() {
+    const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(this.shareLink)}&text=Check%20out%20this%20auction!`;
+    window.open(url, '_blank');
+  }
+
+  shareOnWhatsApp() {
+    const url = `https://wa.me/?text=${encodeURIComponent('Check out this auction: ' + this.shareLink)}`;
+    window.open(url, '_blank');
+  }
+
+  copyToClipboard() {
+    navigator.clipboard
+      .writeText(this.shareLink)
+      .then(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Copied!',
+          detail: 'Auction link copied to clipboard.',
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to copy:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to copy link.',
+        });
+      });
+  }
+
+  openCalendarModal() {
+    this.displayCalendarDialog = true;
+  }
+
+  addToGoogleCalendar() {
+    if (!this.auction) return;
+
+    const title = encodeURIComponent(
+      `Reminder: Auction for ${this.auction.name}`,
+    );
+    const endTime = new Date(this.auction.endTimeDate).getTime();
+
+    // Calculate 2 hours before the auction ends
+    const startDate = new Date(endTime - 7200000)
+      .toISOString()
+      .replace(/-|:|\.\d+/g, '');
+
+    // The actual auction end time
+    const endDate = new Date(endTime).toISOString().replace(/-|:|\.\d+/g, '');
+
+    const details = encodeURIComponent(
+      `The auction for ${this.auction.name} is ending soon! Current bid: HUF ${this.auction.price}.`,
+    );
+
+    const location = encodeURIComponent('CarLicit');
+
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${details}&location=${location}`;
+
+    window.open(url, '_blank');
+    this.displayCalendarDialog = false; // Close modal after action
+  }
+
+  addToOutlookCalendar() {
+    this.addToCalendar(); // Uses ICS method
+    this.displayCalendarDialog = false;
+  }
+
+  addToCalendar() {
+    if (!this.auction) return;
+
+    const title = `Reminder: Auction for ${this.auction.name}`;
+    const endDate = new Date(this.auction.endTimeDate);
+    const startDate = new Date(endDate.getTime() - 7200000);
+
+    const location = 'CarLicit';
+    const description = `The auction for ${this.auction.name} is ending soon. Current bid: HUF ${this.auction.price}.`;
+
+    const formatDate = (date: Date) =>
+      date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+    const dtStamp = formatDate(new Date());
+    const startFormatted = formatDate(startDate);
+    const endFormatted = formatDate(endDate);
+
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Auction Calendar//EN
+BEGIN:VEVENT
+UID:${new Date().getTime()}@auction-site.com
+DTSTAMP:${dtStamp}
+DTSTART:${startFormatted}
+DTEND:${endFormatted}
+SUMMARY:${title}
+LOCATION:${location}
+DESCRIPTION:${description}
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], {
+      type: 'text/calendar;charset=utf-8',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'auction-event.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    this.displayCalendarDialog = false;
   }
 
   private preloadAuctionImage(imageUrl: string | undefined) {

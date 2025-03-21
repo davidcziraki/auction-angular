@@ -1,4 +1,4 @@
-<div class="checkout-container">
+<div *ngIf="!hideCheckoutCard" class="checkout-container">
   <h2 class="checkout-title">Checkout</h2>
 
   <div class="checkout-card">
@@ -27,8 +27,14 @@
 
       <!-- Proceed to Payment Button -->
       <button (click)="proceedToPayment()" class="checkout-btn">
-        Proceed to Payment
+        Pay with Stripe
       </button>
+
+
     </div>
   </div>
+</div>
+<!-- Stripe Payment Element -->
+<div id="checkout">
+  <!-- Checkout will insert the payment form here -->
 </div>
