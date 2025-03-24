@@ -68,7 +68,9 @@ export class CartComponent implements OnDestroy, AfterViewInit {
       const response = (await this.paymentService
         .createCheckoutSession({
           auctionId: this.auctionId,
-          auctionName: this.auction.name,
+          year: this.auction.year,
+          make: this.auction.make,
+          model: this.auction.model,
           auctionImage: this.auction.imageUrl,
           price: this.totalCost,
         })

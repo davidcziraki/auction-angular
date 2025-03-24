@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { collection, collectionData, Firestore } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
@@ -73,6 +73,7 @@ export class AppComponent implements OnInit {
     private authService: AuthService,
     private firestoreService: FirestoreService,
     private auctionService: AuctionService,
+    private router: Router,
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
@@ -95,22 +96,17 @@ export class AppComponent implements OnInit {
       this.user = user;
       this.isLoggedIn = !!user;
 
-      if (user) {
-        if (this.user?.email) {
-          const userDetails = await this.firestoreService.getUserDetailsByEmail(
-            this.user.email,
-          );
-
-          if (userDetails) {
-            this.userFirestore = { ...userDetails };
-          }
-        }
-
-        const tokenResult = await getIdTokenResult(user);
-        this.isAdmin$.next(!!tokenResult.claims['admin']);
+      if (user?.email) {
+        this.userFirestore = await this.firestoreService.getUserDetailsByEmail(
+          user.email,
+        );
       } else {
-        this.isAdmin$.next(false);
+        this.userFirestore = null;
       }
+
+      this.isAdmin$.next(
+        user ? !!(await getIdTokenResult(user)).claims['admin'] : false,
+      );
 
       this.setMenuItems();
       this.updateUserMenu();
@@ -122,15 +118,17 @@ export class AppComponent implements OnInit {
       { label: 'Home', icon: 'pi pi-fw pi-home', routerLink: '/home' },
       { label: 'Auctions', icon: 'pi pi-fw pi-search', routerLink: '/search' },
       { label: 'Guide', icon: 'pi pi-fw pi-info-circle', routerLink: '/guide' },
-      ...(this.isLoggedIn
-        ? [
-            {
-              label: 'Account',
-              icon: 'pi pi-fw pi-warehouse',
-              routerLink: 'user-management',
-            },
-          ]
-        : []),
+      {
+        label: 'Account',
+        icon: 'pi pi-fw pi-warehouse',
+        command: () => {
+          if (this.isLoggedIn) {
+            this.router.navigate(['/user-management']);
+          } else {
+            this.showDialog(); // Open login modal
+          }
+        },
+      },
       {
         label: 'Contact',
         icon: 'pi pi-fw pi-address-book',
@@ -187,24 +185,33 @@ export class AppComponent implements OnInit {
     this.authService
       .createUser(this.emailRegister, this.passwordRegister)
       .then((user) => {
+        if (!user) {
+          console.error('User creation failed');
+          return;
+        }
+
+        // Ensure user is signed in before adding to Firestore
+        return this.authService
+          .loginUser(this.emailRegister, this.passwordRegister, true)
+          .then(() => user);
+      })
+      .then((user) => {
+        if (!user) return;
+
         const newUser: UserModel = {
           forename: this.firstName,
           surname: this.lastName,
           DOB: new Date(this.dob),
           email: this.emailRegister,
-          userID: user.uid,
+          userID: user.uid, // Use Firebase UID
           admin: false,
         };
 
-        this.firestoreService
-          .addUser(newUser)
-          .then(() => {
-            console.log('User registered successfully.');
-            this.displayDialog = false;
-          })
-          .catch((error) => {
-            console.error('Error adding user:', error);
-          });
+        return this.firestoreService.addUser(newUser);
+      })
+      .then(() => {
+        console.log('User registered and added to Firestore successfully.');
+        this.displayDialog = false;
       })
       .catch((error) => {
         console.error('Registration error:', error);
@@ -216,6 +223,7 @@ export class AppComponent implements OnInit {
       .logout()
       .then(() => {
         this.user = null;
+        this.userFirestore = null;
       })
       .catch((error) => {
         console.error('Logout error:', error);

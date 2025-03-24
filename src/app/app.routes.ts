@@ -16,11 +16,8 @@ import { CheckoutSuccessComponent } from './components/checkout-success/checkout
 const adminOnly = () => hasCustomClaim('admin');
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'home',
-    pathMatch: 'full',
-  },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+
   { path: 'home', component: HomeComponent },
   { path: 'search', component: SearchComponent },
   { path: 'login', component: LoginComponent },

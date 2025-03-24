@@ -48,8 +48,20 @@
 
     <!-- Car Title -->
     <div class="p-field p-col-12 p-md-6">
-      <label for="name">Car Title</label>
-      <input [(ngModel)]="newAuction.name" id="name" pInputText required/>
+      <label for="year">Year</label>
+      <input [(ngModel)]="newAuction.year" id="year" pInputText required/>
+    </div>
+
+    <!-- Car Title -->
+    <div class="p-field p-col-12 p-md-6">
+      <label for="make">Make</label>
+      <input [(ngModel)]="newAuction.make" id="make" pInputText required/>
+    </div>
+
+    <!-- Car Title -->
+    <div class="p-field p-col-12 p-md-6">
+      <label for="model">Model</label>
+      <input [(ngModel)]="newAuction.model" id="model" pInputText required/>
     </div>
 
     <!-- Seller -->
@@ -152,8 +164,14 @@
   <div *ngIf="selectedAuction">
 
     <!-- Car Title -->
-    <label>Car Title:</label>
-    <input [(ngModel)]="selectedAuction.name" class="form-control" type="text"/>
+    <label>Year:</label>
+    <input [(ngModel)]="selectedAuction.year" class="form-control" type="text"/>
+
+    <label>Make:</label>
+    <input [(ngModel)]="selectedAuction.make" class="form-control" type="text"/>
+
+    <label>Model:</label>
+    <input [(ngModel)]="selectedAuction.model" class="form-control" type="text"/>
 
     <!-- Seller -->
     <label>Seller:</label>

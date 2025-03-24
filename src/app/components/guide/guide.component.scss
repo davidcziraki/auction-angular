@@ -11,8 +11,12 @@
   flex-wrap: wrap;
 }
 
-/* Individual Step Card */
-
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
 
 /* Step Icon */
 .step-icon {

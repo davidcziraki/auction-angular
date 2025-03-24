@@ -81,50 +81,51 @@
 
 
 /* Bidding Modal Styles */
-.bidding-modal {
-  width: 30rem;
-}
-
 .bidding-modal-container {
-  background: var(--surface-card);
-  padding: 1rem;
-  box-shadow: var(--shadow-2);
-  border-radius: var(--border-round);
-  width: 100%;
+  padding: 20px;
 }
 
 .bidding-modal-header {
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 10px;
 }
 
-.bidding-modal-header .title {
-  color: var(--text-900);
-  font-size: 1.875rem;
-  font-weight: 500;
-  margin-bottom: 0.75rem;
-}
-
-.bidding-modal-header .current-bid {
-  color: var(--text-600);
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.bidding-modal-form label {
-  display: block;
-  color: var(--text-900);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
+.bidding-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .bidding-modal-form input {
-  width: 100%;
-  margin-bottom: 0.75rem;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.bidding-modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
 }
 
 .bidding-modal-button {
-  width: 100%;
+  background: #007bff;
+  color: white;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.bidding-modal-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.error-text {
+  color: red;
+  font-size: 14px;
 }
 
 

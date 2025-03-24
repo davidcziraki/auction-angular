@@ -60,26 +60,62 @@
 <p-toast class="custom-toast"></p-toast>
 
 
+<!--&lt;!&ndash; BIDDING MODAL &ndash;&gt;-->
+<!--<div *ngIf="displayBidDialog">-->
+<!--  <p-dialog [(visible)]="displayBidDialog" [closable]="true" [modal]="true" [ngClass]="'bidding-modal'">-->
+<!--    <div class="bidding-modal-container">-->
+<!--      <div class="bidding-modal-header">-->
+<!--        <div class="title">Place Your Bid</div>-->
+<!--        <span class="current-bid">-->
+<!--          Current Highest Bid: HUF <strong>{{ (auction$ | async)?.price | number }}</strong>-->
+<!--        </span>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Bidding Form &ndash;&gt;-->
+<!--      <div class="bidding-modal-form">-->
+<!--        <label for="bidAmount">Your Bid Amount</label>-->
+<!--        <input [(ngModel)]="bidAmount" id="bidAmount" min="{{ auction?.price }}" pInputText-->
+<!--               placeholder="Enter your bid" type="number">-->
+<!--      </div>-->
+
+<!--      <button (click)="placeBid()" class="bidding-modal-button" icon="pi pi-check" label="Place Bid" pButton pRipple>-->
+<!--      </button>-->
+<!--    </div>-->
+<!--  </p-dialog>-->
+<!--</div>-->
+
 <!-- BIDDING MODAL -->
 <div *ngIf="displayBidDialog">
   <p-dialog [(visible)]="displayBidDialog" [closable]="true" [modal]="true" [ngClass]="'bidding-modal'">
     <div class="bidding-modal-container">
+
+      <!-- Header Section -->
       <div class="bidding-modal-header">
-        <div class="title">Place Your Bid</div>
+        <h2 class="title">Place Your Bid</h2>
         <span class="current-bid">
-          Current Highest Bid: HUF <strong>{{ (auction$ | async)?.price | number }}</strong>
+          Current Highest Bid: <strong>HUF {{ (auction$ | async)?.price | number }}</strong>
         </span>
       </div>
 
       <!-- Bidding Form -->
       <div class="bidding-modal-form">
         <label for="bidAmount">Your Bid Amount</label>
-        <input [(ngModel)]="bidAmount" id="bidAmount" min="{{ auction?.price }}" pInputText
-               placeholder="Enter your bid" type="number">
+        <input (input)="validateBid()" [(ngModel)]="bidAmount"
+               [min]="minBid" id="bidAmount" pInputText
+               placeholder="Enter your bid" step="1"
+               type="number">
+
+        <small *ngIf="bidError" class="error-text">{{ bidError }}</small>
       </div>
 
-      <button (click)="placeBid()" class="bidding-modal-button" icon="pi pi-check" label="Place Bid" pButton pRipple>
-      </button>
+      <!-- Buttons -->
+      <div class="bidding-modal-actions">
+        <button (click)="placeBid()" [disabled]="!canPlaceBid"
+                class="bidding-modal-button" pButton pRipple>
+          <i class="pi pi-check"></i> Place Bid
+        </button>
+      </div>
+
     </div>
   </p-dialog>
 </div>

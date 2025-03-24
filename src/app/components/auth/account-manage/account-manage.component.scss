@@ -92,6 +92,12 @@ p-button {
 }
 
 
+.delete-account {
+  display: flex;
+  justify-content: center;
+  margin-top: 10%;
+}
+
 @media (max-width: 1023px) {
 
   .account-tabs {

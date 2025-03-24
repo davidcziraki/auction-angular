@@ -1,3 +1,91 @@
+<div class="search-container p-shadow-3">
+  <div class="search-bar-wrapper">
+    <div class="search-input-container">
+
+      <input
+        (keydown.enter)="applySearch()"
+        [(ngModel)]="searchInput"
+        class="search-input"
+        pInputText
+        placeholder="Search by make, model, or year"
+        type="text"
+      />
+
+    </div>
+    <p-button (click)="applySearch()" class="search-btn" icon="pi pi-search" label="Search"/>
+
+    <div class="filter-controls">
+      <p-dropdown
+        (onChange)="sortAuctions()"
+        [(ngModel)]="selectedSort"
+        [options]="sortOptions"
+        [showClear]="false"
+        placeholder="Sort by"
+        styleClass="sort-dropdown"
+      ></p-dropdown>
+
+      <p-multiSelect
+        (onChange)="filterAuctions()"
+        [(ngModel)]="selectedMakes"
+        [maxSelectedLabels]="1"
+        [options]="uniqueMakes"
+        [selectedItemsLabel]="'{0} makes selected'"
+        [showToggleAll]="true"
+        placeholder="Filter by Make"
+        styleClass="make-filter"
+      ></p-multiSelect>
+    </div>
+  </div>
+
+  <div class="price-filter-container">
+    <div class="price-filter-header">
+      <label>Price Range</label>
+      <span class="price-range-label">HUF {{ priceRange[0] | number }} - HUF {{ priceRange[1] | number }}</span>
+    </div>
+    <p-slider
+      (onSlideEnd)="filterAuctions()"
+      [(ngModel)]="priceRange"
+      [max]="maxPrice"
+      [min]="minPrice"
+      [range]="true"
+      class="price-slider"
+    ></p-slider>
+  </div>
+
+  <div *ngIf="hasActiveFilters()" class="active-filters">
+    <span class="active-filters-label">Active Filters:</span>
+    <div class="filter-chips">
+      <p-chip
+        (onRemove)="clearSearch()"
+        *ngIf="searchApplied && searchQuery"
+        [label]="'Search: ' + searchQuery"
+        [removable]="true"
+      ></p-chip>
+      <p-chip
+        (onRemove)="removeMake(make)"
+        *ngFor="let make of selectedMakes"
+        [label]="make"
+        [removable]="true"
+      ></p-chip>
+      <p-chip
+        (onRemove)="resetPriceRange()"
+        *ngIf="isPriceRangeFiltered()"
+        [label]="'Price: HUF ' + (priceRange[0] | number) + ' - HUF ' + (priceRange[1] | number)"
+        [removable]="true"
+      ></p-chip>
+    </div>
+    <button
+      (click)="clearAllFilters()"
+      class="p-button-outlined p-button-sm clear-filters-btn"
+      icon="pi pi-filter-slash"
+      label="Clear All"
+      pButton
+      type="button"
+    ></button>
+  </div>
+</div>
+
+
 <div *ngIf="isLoading" class="spinner">
   <p-progressSpinner ariaLabel="Loading auctions..."></p-progressSpinner>
 
@@ -7,7 +95,7 @@
 
 
 <div class="auction-list">
-  <div *ngFor="let auction of auctions" class="auction-card">
+  <div *ngFor="let auction of filteredAuctions" class="auction-card">
     <div class="auction-image-container">
       <a [routerLink]="['/auction', auction.id]" class="auction-link">
 
@@ -19,7 +107,7 @@
     </div>
 
     <div class="auction-details">
-      <h3 class="auction-title">{{ auction.name }}</h3>
+      <h3 class="auction-title">{{ auction.year }} {{ auction.make }} {{ auction.model }}</h3>
       <!--        <p class="auction-subtitle">Filler temporary text to be used for Auction subtitles.</p>-->
 
       <p class="auction-price">Current Bid: <span class="price-number">

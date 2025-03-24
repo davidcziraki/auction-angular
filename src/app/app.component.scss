@@ -9,11 +9,37 @@ html, body {
 
 }
 
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+
+::ng-deep .p-menubar {
+  background-color: #1f2c51 !important;
+  color: white !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+
+}
+
+::ng-deep .p-focus {
+  //color: #1f2c51 !important;
+  //background-color: #1f2c51 !important;
+
+}
+
+::ng-deep .p-menubar-item-content a:hover {
+  color: #1f2c51 !important;
+
+}
+
 
 .footer {
   text-align: center;
   padding: 20px 0;
-  background-color: #1e2f60;
+  background-color: #1f2c51;
   color: white;
   font-size: 14px;
   border-top: 1px solid #ddd;
@@ -100,7 +126,8 @@ html, body {
 //BANNER
 /* Base styles for all screen sizes */
 .homepage-banner {
-  background-color: #1e3a8a;
+  //background-color: #1e3a8a;
+  background-color: #191c24;
   color: white;
   display: flex;
   justify-content: space-between;
@@ -311,6 +338,10 @@ input {
 
   .menu-logo-mobile {
     display: none;
+  }
+
+  ::ng-deep .p-menubar-item-content {
+    color: white !important;
   }
 }
 

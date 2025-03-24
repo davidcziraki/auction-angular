@@ -1,12 +1,3 @@
-<div class="search-bar flex justify-content-center flex-wrap">
-  <div class="iconfield-container">
-    <p-iconfield>
-      <p-inputicon class="p-inputicon-custom" styleClass="pi pi-search"/>
-      <input class="search-input center-container" pInputText placeholder="Search for make, model, category, etc."
-             type="text"/>
-    </p-iconfield>
-  </div>
-</div>
 <div class="banner">
 
   <div class="grid grid-nogutter surface-section text-white"
@@ -25,7 +16,17 @@
       </section>
     </div>
   </div>
+</div>
 
+
+<div class="search-bar">
+  <input
+    (keydown.enter)="submitSearch()"
+    [(ngModel)]="searchInput"
+    placeholder="Search for make, model, category, etc."
+    type="text"
+  >
+  <button (click)="submitSearch()" class="search-btn"><i class="pi pi-search"></i></button>
 </div>
 
 
@@ -38,61 +39,71 @@
     Discover what makes our car auction marketplace the best choice for buyers and sellers.
   </div>
 
-  <div class="features-container">
-    <!-- Feature 1 -->
-    <div class="feature-card">
-      <div class="icon-container">
-        <i class="pi pi-car"></i>
+  <div class="features-wrapper">
+    <div class="features-container">
+      <!-- Feature 1 -->
+      <div class="feature-card">
+        <div class="icon-container">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <h3>Verified Sellers</h3>
+        <p>All sellers are verified to ensure a secure and trustworthy experience.</p>
       </div>
-      <h3>Wide Selection</h3>
-      <p>Choose from a diverse range of vehicles, from budget-friendly to luxury cars.</p>
-    </div>
 
-    <!-- Feature 2 -->
-    <div class="feature-card">
-      <div class="icon-container">
-        <i class="pi pi-money-bill"></i>
-      </div>
-      <h3>Best Prices</h3>
-      <p>Competitive auction pricing ensures you get the best deal possible.</p>
-    </div>
 
-    <!-- Feature 3 -->
-    <div class="feature-card">
-      <div class="icon-container">
-        <i class="pi pi-check-circle"></i>
+      <!-- Feature 2 -->
+      <div class="feature-card">
+        <div class="icon-container">
+          <i class="pi pi-money-bill"></i>
+        </div>
+        <h3>Best Prices</h3>
+        <p>Competitive auction pricing ensures you get the best deal possible.</p>
       </div>
-      <h3>Verified Sellers</h3>
-      <p>All sellers are verified to ensure a secure and trustworthy experience.</p>
-    </div>
 
-    <!-- Feature 4 -->
-    <div class="feature-card">
-      <div class="icon-container">
-        <i class="pi pi-lock"></i>
+      <!-- Feature 3 -->
+      <div class="feature-card">
+        <div class="icon-container">
+          <i class="pi pi-car"></i>
+        </div>
+        <h3>Wide Selection</h3>
+        <p>Choose from a diverse range of vehicles, from budget-friendly to luxury cars.</p>
       </div>
-      <h3>Secure Transactions</h3>
-      <p>We offer safe and secure payment options, including escrow protection.</p>
-    </div>
 
-    <!-- Feature 5 -->
-    <div class="feature-card">
-      <div class="icon-container">
-        <i class="pi pi-clock"></i>
+      <!-- Feature 4 -->
+      <div class="feature-card">
+        <div class="icon-container">
+          <i class="pi pi-lock"></i>
+        </div>
+        <h3>Secure Transactions</h3>
+        <p>We offer safe and secure payment options, including escrow protection.</p>
       </div>
-      <h3>Real-Time Bidding</h3>
-      <p>Engage in live auctions and place your bids with real-time updates.</p>
-    </div>
 
-    <!-- Feature 6 -->
-    <div class="feature-card">
-      <div class="icon-container">
-        <i class="pi pi-globe"></i>
+      <!-- Feature 5 -->
+      <div class="feature-card">
+        <div class="icon-container">
+          <i class="pi pi-clock"></i>
+        </div>
+        <h3>Real-Time Bidding</h3>
+        <p>Engage in live auctions and place your bids with real-time updates.</p>
       </div>
-      <h3>Nationwide Accessibility</h3>
-      <p>Buy and sell cars from anywhere within Hungary using our auction platform.</p>
+
+      <!-- Feature 6 -->
+      <div class="feature-card">
+        <div class="icon-container">
+          <i class="pi pi-globe"></i>
+        </div>
+        <h3>Nationwide Accessibility</h3>
+        <p>Buy and sell cars from anywhere within Hungary using our auction platform.</p>
+      </div>
     </div>
   </div>
 </div>
 
-
+<section [class.visible]="isCtaVisible" class="cta-section">
+  <div class="cta-content">
+    <h2>Ready to Sell Your Car?</h2>
+    <p>Join thousands of successful sellers who found the right buyers at the right price on our platform. Get started
+      in minutes.</p>
+    <button class="p-button-lg p-button-primary" label="Become a Seller" pButton routerLink="/seller-hub"></button>
+  </div>
+</section>

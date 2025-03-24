@@ -43,7 +43,11 @@ export class AuctionDetailComponent {
 
   bids: number = 0;
   displayBidDialog: boolean = false;
-  bidAmount = 0;
+  bidAmount: number = 0;
+  minBid: number = 0;
+  bidError: string = '';
+  canPlaceBid: boolean = false;
+  minBidIncreasePercentage: number = 5;
 
   displayCalendarDialog: boolean = false;
 
@@ -70,6 +74,10 @@ export class AuctionDetailComponent {
     private firestoreService: FirestoreService,
   ) {}
 
+  get isBidValid(): boolean {
+    return this.bidAmount >= this.minBid;
+  }
+
   ngOnInit() {
     this.route.params.subscribe((params) => {
       const id: string | undefined = params['id'];
@@ -88,6 +96,9 @@ export class AuctionDetailComponent {
       this.auction$.subscribe((auctionData) => {
         if (auctionData) {
           this.auction = auctionData;
+          this.minBid =
+            this.auction.price * (1 + this.minBidIncreasePercentage / 100);
+
           this.bids = auctionData.bidCount || 0; // Update bid count
 
           this.preloadAuctionImage(auctionData.imageUrl);
@@ -100,6 +111,22 @@ export class AuctionDetailComponent {
   ngOnDestroy() {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
+    }
+  }
+
+  validateBid() {
+    if (!Number.isInteger(this.bidAmount)) {
+      this.bidError = 'Bids must be whole numbers (no decimals allowed).';
+      this.canPlaceBid = false;
+      return;
+    }
+
+    if (this.bidAmount < this.minBid) {
+      this.bidError = `Your bid must be at least HUF ${this.minBid.toFixed(0)} (${this.minBidIncreasePercentage}% higher).`;
+      this.canPlaceBid = false;
+    } else {
+      this.bidError = '';
+      this.canPlaceBid = true;
     }
   }
 
@@ -280,7 +307,7 @@ export class AuctionDetailComponent {
     if (!this.auction) return;
 
     const title = encodeURIComponent(
-      `Reminder: Auction for ${this.auction.name}`,
+      `Reminder: Auction for ${this.auction.year} ${this.auction.make} ${this.auction.model}`,
     );
     const endTime = new Date(this.auction.endTimeDate).getTime();
 
@@ -293,7 +320,7 @@ export class AuctionDetailComponent {
     const endDate = new Date(endTime).toISOString().replace(/-|:|\.\d+/g, '');
 
     const details = encodeURIComponent(
-      `The auction for ${this.auction.name} is ending soon! Current bid: HUF ${this.auction.price}.`,
+      `The auction for ${this.auction.year} ${this.auction.make} ${this.auction.model} is ending soon! Current bid: HUF ${this.auction.price}.`,
     );
 
     const location = encodeURIComponent('CarLicit');
@@ -312,12 +339,12 @@ export class AuctionDetailComponent {
   addToCalendar() {
     if (!this.auction) return;
 
-    const title = `Reminder: Auction for ${this.auction.name}`;
+    const title = `Reminder: Auction for ${this.auction.year} ${this.auction.make} ${this.auction.model}`;
     const endDate = new Date(this.auction.endTimeDate);
     const startDate = new Date(endDate.getTime() - 7200000);
 
     const location = 'CarLicit';
-    const description = `The auction for ${this.auction.name} is ending soon. Current bid: HUF ${this.auction.price}.`;
+    const description = `The auction for ${this.auction.year} ${this.auction.make} ${this.auction.model} is ending soon. Current bid: HUF ${this.auction.price}.`;
 
     const formatDate = (date: Date) =>
       date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';

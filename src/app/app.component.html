@@ -2,27 +2,24 @@
   <div class="card">
 
     <div class="menubar-container">
-      <p-menubar [model]="menuItems">
+      <p-menubar [model]="menuItems" class="menubar">
         <ng-template pTemplate="start">
-          <img alt="Logo" class="menu-logo" src="logo.png"/>
+          <div [routerLink]="['/home']" class="logo" style="cursor: pointer;">CarLicit.</div>
         </ng-template>
 
         <ng-template pTemplate="end">
           <div class="flex items-center gap-4">
             <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
 
-            <!-- Avatar and Logged In As Text -->
 
             <!-- Conditionally display "Logged in as" or "Log in" -->
             <p *ngIf="user; else loginText" class="logged-in-text">
               {{ userFirestore?.forename }} {{ userFirestore?.surname }}
             </p>
             <ng-template #loginText>
-              <p class="ml-2 cursor-pointer">
-                <a (click)="showDialog() "
-                >Log in / Register</a>
-              </p>
+              <p (click)="showDialog()" class="logged-in-text" style="cursor: pointer;">Login</p>
             </ng-template>
+
             <!--            [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"-->
 
             <!-- Avatar -->

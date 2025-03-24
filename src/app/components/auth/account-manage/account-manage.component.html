@@ -35,7 +35,13 @@
           <button (click)="saveChanges()" class="save-button" pButton>Save</button>
           <button (click)="cancelEdit()" class="cancel-button" pButton>Cancel</button>
         </div>
+        <div class="delete-account">
+          <button (click)="confirmDeleteAccount()" class="p-button p-button-danger">Delete Account</button>
+
+        </div>
       </div>
+
+
     </p-tabPanel>
 
     <p-tabPanel header="Past Won Auctions">
@@ -52,7 +58,7 @@
           </ng-template>
           <ng-template let-auction pTemplate="body">
             <tr>
-              <td>{{ auction.name }}</td>
+              <td>{{ auction.year }} {{ auction.make }} {{ auction.model }}</td>
               <td>{{ auction.price | currency: 'HUF' }}</td>
               <td>{{ auction.endtime | date:'medium' }}</td>
               <td>
@@ -78,3 +84,16 @@
     </p-tabPanel>
   </p-tabView>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<p-dialog [(visible)]="displayDeleteModal" [closable]="false" [modal]="true" [style]="{width: '30vw'}"
+          header="Confirm Deletion">
+  <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+
+  <div class="flex justify-end gap-2 mt-4">
+    <p-button (click)="cancelDelete()" class="p-button-secondary" label="Cancel"></p-button>
+    <p-button (click)="deleteAccount()" class="p-button-primary" label="Delete"></p-button>
+  </div>
+</p-dialog>
+
+<p-toast></p-toast>

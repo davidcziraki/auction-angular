@@ -7,9 +7,13 @@ import { Observable } from 'rxjs';
 import { User } from '@angular/fire/auth';
 import { FirestoreService } from '../../../services/firestore.service';
 import { FormsModule } from '@angular/forms';
-import { ButtonDirective } from 'primeng/button';
+import { Button, ButtonDirective } from 'primeng/button';
 import { AuctionService } from '../../../services/auction.service';
 import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
+import { MessagesModule } from 'primeng/messages';
+import { Toast } from 'primeng/toast';
+import { Dialog } from 'primeng/dialog';
 
 @Component({
   selector: 'app-account-manage',
@@ -23,9 +27,14 @@ import { Router } from '@angular/router';
     NgIf,
     ButtonDirective,
     NgForOf,
+    MessagesModule,
+    Toast,
+    Button,
+    Dialog,
   ],
   templateUrl: './account-manage.component.html',
   styleUrl: './account-manage.component.scss',
+  providers: [MessageService],
 })
 export class AccountManageComponent implements OnInit {
   wonAuctions: any[] = [];
@@ -33,6 +42,8 @@ export class AccountManageComponent implements OnInit {
   user: User | null = null;
   editingField: string | null = null;
   newPassword: string = '';
+
+  displayDeleteModal: boolean = false;
 
   userData: { [key: string]: string } = {
     email: '',
@@ -45,6 +56,7 @@ export class AccountManageComponent implements OnInit {
     private firestoreService: FirestoreService,
     private auctionService: AuctionService,
     private router: Router,
+    private messageService: MessageService,
   ) {}
 
   ngOnInit() {
@@ -127,4 +139,39 @@ export class AccountManageComponent implements OnInit {
   }
 
   addDelivery(auctionId: string) {}
+
+  confirmDeleteAccount() {
+    this.displayDeleteModal = true;
+  }
+
+  async deleteAccount() {
+    try {
+      await this.authService.deleteUser();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Account Deleted',
+        detail: 'Your account has been successfully deleted.',
+      });
+
+      this.displayDeleteModal = false;
+
+      // Wait a short time for the user to see the message
+      setTimeout(() => {
+        this.router.navigate(['/home']).then(() => {
+          window.location.reload();
+        });
+      }, 1500);
+    } catch (error: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail:
+          'There has been an error. Please contact administration or try again later.',
+      });
+    }
+  }
+
+  cancelDelete() {
+    this.displayDeleteModal = false;
+  }
 }

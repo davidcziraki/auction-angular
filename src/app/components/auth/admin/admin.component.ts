@@ -41,7 +41,9 @@ export class AdminComponent implements OnInit {
   selectedImage: File | null = null;
 
   newAuction: Auction = {
-    name: '',
+    make: '',
+    model: '',
+    year: new Date().getFullYear(), // Default to current year
     seller: '',
     endTimeDate: new Date(),
     price: 0,
@@ -49,7 +51,9 @@ export class AdminComponent implements OnInit {
   };
 
   selectedAuction: Auction = {
-    name: '',
+    make: '',
+    model: '',
+    year: new Date().getFullYear(),
     seller: '',
     endtime: Timestamp.now(),
     endTimeDate: new Date(),
@@ -74,8 +78,7 @@ export class AdminComponent implements OnInit {
       field: 'imageUrl',
       headerName: 'Image',
       cellRenderer: (params: { value: any }) => {
-        const imageUrl = params.value ? params.value : 'placeholder.png';
-        return `<img src="${params.value}" width="250" height="160" style="border-radius: 10px; " alt="">`;
+        return `<img src="${params.value}" width="250" height="160" style="border-radius: 10px;" alt="">`;
       },
       autoHeight: true,
       width: 300,
@@ -83,57 +86,37 @@ export class AdminComponent implements OnInit {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-      }, // Center image
+      },
     },
-    {
-      field: 'name',
-      filter: true,
-      cellStyle: { display: 'flex', alignItems: 'center' },
-    },
-    {
-      field: 'seller',
-      filter: true,
-      cellStyle: { display: 'flex', alignItems: 'center' },
-    },
-    {
-      field: 'endTimeDate',
-      filter: true,
-      cellStyle: { display: 'flex', alignItems: 'center' },
-    },
+    { field: 'make', headerName: 'Make', filter: true },
+    { field: 'model', headerName: 'Model', filter: true },
+    { field: 'year', headerName: 'Year', filter: true },
     {
       field: 'price',
-      filter: true,
       headerName: 'Price (HUF)',
-      valueFormatter: (params) => {
-        return new Intl.NumberFormat('hu-HU', {
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('hu-HU', {
           style: 'currency',
           currency: 'HUF',
-        }).format(params.value);
-      },
-      cellStyle: { display: 'flex', alignItems: 'center', textAlign: 'right' }, // Aligns numbers & centers vertically
+        }).format(params.value),
+      cellStyle: { textAlign: 'right' },
     },
+    { field: 'seller', headerName: 'Seller', filter: true },
+
     {
       field: 'status',
       headerName: 'Status',
       cellRenderer: (params: { value: string }) => {
-        if (!params.value) return '';
-
-        const capitalizedStatus =
-          params.value.charAt(0).toUpperCase() +
-          params.value.slice(1).toLowerCase();
-
         let color =
-          capitalizedStatus === 'Completed'
+          params.value.toLowerCase() === 'completed'
             ? 'green'
-            : capitalizedStatus === 'Expired'
+            : params.value.toLowerCase() === 'expired'
               ? 'orange'
-              : capitalizedStatus === 'Active'
-                ? 'gray'
-                : 'gray';
+              : 'gray';
 
-        return `<span style="background:${color}; color: white; padding: 5px 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">${capitalizedStatus}</span>`;
+        return `<span style="background:${color}; color: white; padding: 5px 10px; border-radius: 10px;">${params.value}</span>`;
       },
-      cellStyle: { display: 'flex', alignItems: 'center' }, // Ensures text inside the cell is centered
+      cellStyle: { display: 'flex', alignItems: 'center' },
     },
     {
       field: 'actions',
@@ -145,23 +128,12 @@ export class AdminComponent implements OnInit {
         <button class="btn btn-danger delete-auction" data-id="${auctionId}">Delete</button>
       `;
       },
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
       onCellClicked: (params: any) => {
         if (params.event.target.classList.contains('delete-auction')) {
-          const auction = params.data;
-          if (auction) {
-            this.onDeleteAuction(auction);
-          }
+          this.onDeleteAuction(params.data);
         }
         if (params.event.target.classList.contains('edit-auction')) {
-          const auction = params.data;
-          if (auction) {
-            this.openEditModal(auction);
-          }
+          this.openEditModal(params.data);
         }
       },
     },
@@ -196,22 +168,22 @@ export class AdminComponent implements OnInit {
       const matchesStatus =
         this.selectedFilter === 'all' ||
         auction.status.toLowerCase() === this.selectedFilter;
-      const matchesSearch = auction.name
-        .toLowerCase()
-        .includes(this.searchQuery.toLowerCase());
+      const matchesSearch =
+        auction.make.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        auction.model.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        auction.year.toString().includes(this.searchQuery);
 
       return matchesStatus && matchesSearch;
     });
   }
 
   openNewAuctionDialog() {
-    const now = Timestamp.now();
-
     this.newAuction = {
-      name: '',
+      make: '',
+      model: '',
+      year: new Date().getFullYear(), // Default to current year
       seller: '',
-      endtime: now,
-      endTimeDate: now.toDate(),
+      endTimeDate: new Date(),
       price: 0,
       status: 'active',
     };
@@ -231,7 +203,9 @@ export class AdminComponent implements OnInit {
 
   async createAuction() {
     if (
-      !this.newAuction.name ||
+      !this.newAuction.make ||
+      !this.newAuction.model ||
+      !this.newAuction.year ||
       !this.newAuction.seller ||
       !this.newAuction.endTimeDate ||
       !this.newAuction.price
@@ -305,10 +279,8 @@ export class AdminComponent implements OnInit {
     if (!this.selectedAuction || !this.selectedAuction.id) return;
 
     try {
-      // Create an update object with the changed fields
       const updates: Partial<Auction> = { ...this.selectedAuction };
 
-      // If an image is selected, upload it and add the URL to updates
       if (this.selectedImage) {
         updates.imageUrl = await this.storageService.uploadImage(
           this.selectedAuction.id,
@@ -316,7 +288,6 @@ export class AdminComponent implements OnInit {
         );
       }
 
-      // Call Firestore service to update the auction
       await this.firestoreService.updateAuction(
         this.selectedAuction.id,
         updates,

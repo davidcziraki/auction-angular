@@ -5,6 +5,7 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   createUserWithEmailAndPassword,
+  deleteUser,
   sendEmailVerification,
   sendPasswordResetEmail,
   setPersistence,
@@ -125,4 +126,18 @@ export class AuthService implements OnDestroy {
     console.error('Firebase Error:', errorMessage);
     return new Error(errorMessage);
   }
+
+
+  // Delete user account
+  async deleteUser(): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('No authenticated user found');
+
+    try {
+      await deleteUser(user);
+    } catch (error: any) {
+      throw this.handleFirebaseError(error);
+    }
+  }
+
 }
