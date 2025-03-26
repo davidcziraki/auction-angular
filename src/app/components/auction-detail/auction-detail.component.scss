@@ -161,6 +161,79 @@
 }
 
 
+////////// FEATURES CONTAINER
+
+.features-container {
+  display: flex;
+  justify-content: center;
+  gap: 1%;
+  padding: 5vw;
+
+
+  .feature-card {
+    background: #eee;
+    border-radius: 10px;
+    padding: 1% 5%;
+    display: flex;
+    flex-direction: column;
+    row-gap: 15px;
+  }
+
+  .feature-icon {
+    scale: 0.9;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+
+  .feature-text {
+    text-align: center;
+    font-weight: 600;
+    color: #4a4a4a;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .features-container {
+    flex-wrap: wrap;
+    row-gap: 15px;
+    column-gap: 6px;
+  }
+
+  .feature-card {
+    flex: 1 1 calc(33.333% - 1%);
+    padding: 5% !important;
+  }
+
+
+}
+
+/////////////
+
+
+.vehicle-info {
+  margin: 20px 0;
+}
+
+.vehicle-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+
+.vehicle-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.vehicle-item strong {
+  font-weight: bold;
+}
+
+
 .calendar-modal-container {
   text-align: center;
   padding: 20px;
@@ -243,7 +316,7 @@
     padding-left: 23%;
     padding-right: 23%;
     margin-top: 3vw;
-    margin-bottom: 30%;
+    //margin-bottom: 30%;
   }
 }
 

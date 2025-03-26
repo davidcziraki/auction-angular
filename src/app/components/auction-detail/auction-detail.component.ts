@@ -37,6 +37,7 @@ import { FirestoreService } from '../../services/firestore.service';
 export class AuctionDetailComponent {
   auction: Auction | null = null;
   auction$!: Observable<Auction | null>;
+  vehicleDetails: any;
 
   displayShareDialog: boolean = false;
   shareLink: string = '';
@@ -54,10 +55,6 @@ export class AuctionDetailComponent {
   mainImage: string = '';
 
   thumbnailImages: string[] = [
-    'placeholder.png',
-    'placeholder.png',
-    'placeholder.png',
-    'placeholder.png',
     'placeholder.png',
     'placeholder.png',
     'placeholder.png',
@@ -96,6 +93,7 @@ export class AuctionDetailComponent {
       this.auction$.subscribe((auctionData) => {
         if (auctionData) {
           this.auction = auctionData;
+
           this.minBid =
             this.auction.price * (1 + this.minBidIncreasePercentage / 100);
 

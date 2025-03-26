@@ -41,6 +41,7 @@ export class AdminComponent implements OnInit {
   selectedImage: File | null = null;
 
   newAuction: Auction = {
+    registration: '',
     make: '',
     model: '',
     year: new Date().getFullYear(), // Default to current year
@@ -51,6 +52,7 @@ export class AdminComponent implements OnInit {
   };
 
   selectedAuction: Auction = {
+    registration: '',
     make: '',
     model: '',
     year: new Date().getFullYear(),
@@ -179,6 +181,7 @@ export class AdminComponent implements OnInit {
 
   openNewAuctionDialog() {
     this.newAuction = {
+      registration: '',
       make: '',
       model: '',
       year: new Date().getFullYear(), // Default to current year
@@ -203,6 +206,7 @@ export class AdminComponent implements OnInit {
 
   async createAuction() {
     if (
+      !this.newAuction.registration ||
       !this.newAuction.make ||
       !this.newAuction.model ||
       !this.newAuction.year ||
@@ -214,14 +218,35 @@ export class AdminComponent implements OnInit {
       return;
     }
 
-    this.newAuction.endtime = Timestamp.fromDate(this.newAuction.endTimeDate);
-
     try {
+      // // Fetch vehicle data based on the registration number using the service
+      // const vehicleData = await this.vehicleInfoService
+      //   .getRegApiData(this.newAuction.registration)
+      //   .toPromise();
+      //
+      // if (vehicleData) {
+      //   // Enrich auction data with vehicle information
+      //   this.newAuction.description = vehicleData.Description;
+      //   this.newAuction.bodyStyle = vehicleData.BodyStyle;
+      //   this.newAuction.engineSize = vehicleData.EngineSize;
+      //   this.newAuction.numberOfDoors = vehicleData.NumberOfDoors;
+      //   this.newAuction.numberOfSeats = vehicleData.NumberOfSeats;
+      //   this.newAuction.colour = vehicleData.Colour;
+      //   this.newAuction.insuranceGroup = vehicleData.VehicleInsuranceGroup;
+      // } else {
+      //   console.error('Failed to fetch vehicle data.');
+      // }
+
+      // Convert the end time to a Firestore Timestamp
+      this.newAuction.endtime = Timestamp.fromDate(this.newAuction.endTimeDate);
+
+      // Proceed with creating the auction
       const auctionId = await this.firestoreService.addAuction(this.newAuction);
       if (!auctionId) {
         throw new Error('Failed to create auction.');
       }
 
+      // Handle image upload (if any)
       if (this.selectedImage) {
         const imageUrl = await this.storageService.uploadImage(
           auctionId,
@@ -233,7 +258,7 @@ export class AdminComponent implements OnInit {
       }
 
       this.newAuctionDialog = false;
-      this.fetchAuctions(); // Refresh list
+      this.fetchAuctions(); // Refresh list after creating auction
     } catch (error) {
       console.error('Error creating auction:', error);
     }

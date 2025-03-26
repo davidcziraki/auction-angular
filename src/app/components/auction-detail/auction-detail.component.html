@@ -1,3 +1,7 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+
+
 <div class="auction-bar">
   <!-- Back Button -->
   <button [routerLink]="['/search']" class="back-button" icon="pi pi-chevron-left" pButton></button>
@@ -57,32 +61,50 @@
 </div>
 
 
+<div class="features-container">
+  <div class="feature-card">
+    <img alt="Calendar Icon" class="feature-icon" src="icons/calendar.png"/>
+    <div class="feature-text">2018</div>
+  </div>
+  <div class="feature-card">
+    <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
+    <div class="feature-text">30,600 miles</div>
+  </div>
+  <div class="feature-card">
+    <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
+    <div class="feature-text">Automatic</div>
+  </div>
+  <div class="feature-card">
+    <img alt="Engine Icon" class="feature-icon" src="icons/engine.png"/>
+    <div class="feature-text">3 ltr</div>
+  </div>
+  <div class="feature-card">
+    <img alt="Colour Icon" class="feature-icon" src="icons/colour.png"/>
+    <div class="feature-text">Blue</div>
+  </div>
+  <div class="feature-card">
+    <img alt="Fuel Icon" class="feature-icon" src="icons/fuel.png"/>
+    <div class="feature-text">Petrol</div>
+  </div>
+</div>
+
+
+<!--<div>-->
+<!--  <h2>{{ vehicleDetails.CarMake }} {{ vehicleDetails.CarModel }}</h2>-->
+
+<!--  <p><strong>Description:</strong> {{ vehicleDetails.Description }}</p>-->
+<!--  <p><strong>Registration Year:</strong> {{ vehicleDetails.RegistrationYear }}</p>-->
+<!--  <p><strong>Fuel Type:</strong> {{ vehicleDetails.FuelType }}</p>-->
+<!--  <p><strong>Engine Size:</strong> {{ vehicleDetails.EngineSize }} cc</p>-->
+<!--  <p><strong>Transmission:</strong> {{ vehicleDetails.Transmission }}</p>-->
+<!--  <p><strong>Body Style:</strong> {{ vehicleDetails.BodyStyle }}</p>-->
+<!--  <p><strong>Number of Doors:</strong> {{ vehicleDetails.NumberOfDoors }}</p>-->
+<!--  <p><strong>Number of Seats:</strong> {{ vehicleDetails.NumberOfSeats }}</p>-->
+<!--</div>-->
+
+
 <p-toast class="custom-toast"></p-toast>
 
-
-<!--&lt;!&ndash; BIDDING MODAL &ndash;&gt;-->
-<!--<div *ngIf="displayBidDialog">-->
-<!--  <p-dialog [(visible)]="displayBidDialog" [closable]="true" [modal]="true" [ngClass]="'bidding-modal'">-->
-<!--    <div class="bidding-modal-container">-->
-<!--      <div class="bidding-modal-header">-->
-<!--        <div class="title">Place Your Bid</div>-->
-<!--        <span class="current-bid">-->
-<!--          Current Highest Bid: HUF <strong>{{ (auction$ | async)?.price | number }}</strong>-->
-<!--        </span>-->
-<!--      </div>-->
-
-<!--      &lt;!&ndash; Bidding Form &ndash;&gt;-->
-<!--      <div class="bidding-modal-form">-->
-<!--        <label for="bidAmount">Your Bid Amount</label>-->
-<!--        <input [(ngModel)]="bidAmount" id="bidAmount" min="{{ auction?.price }}" pInputText-->
-<!--               placeholder="Enter your bid" type="number">-->
-<!--      </div>-->
-
-<!--      <button (click)="placeBid()" class="bidding-modal-button" icon="pi pi-check" label="Place Bid" pButton pRipple>-->
-<!--      </button>-->
-<!--    </div>-->
-<!--  </p-dialog>-->
-<!--</div>-->
 
 <!-- BIDDING MODAL -->
 <div *ngIf="displayBidDialog">

@@ -15,4 +15,12 @@ export interface Auction {
   winnerID?: string;
   isFavourite?: boolean;
   bidCount?: number;
+  description?: string;
+  bodyStyle?: string;
+  engineSize?: string;
+  numberOfDoors?: number;
+  numberOfSeats?: number;
+  colour?: string;
+  insuranceGroup?: number;
+  registration: string;
 }
