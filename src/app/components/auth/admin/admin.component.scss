@@ -12,3 +12,160 @@
   display: flex;
   gap: 2%;
 }
+
+
+/* Main Dialog Styling */
+.auction-dialog .p-dialog-content {
+  padding: 2rem;
+  background-color: #f9fafb;
+}
+
+.auction-dialog .p-dialog-header {
+  background-color: #1e3a8a;
+  color: white;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.auction-dialog .p-dialog-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.auction-dialog .p-dialog-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 1.25rem 2rem;
+  background-color: #f9fafb;
+}
+
+/* Form Styling */
+.auction-form .p-field {
+  margin-bottom: 1.5rem;
+}
+
+.auction-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.auction-form input,
+.auction-form .p-datepicker,
+.auction-form .p-inputtext {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auction-form input:focus,
+.auction-form .p-inputtext:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+.auction-form input.ng-invalid.ng-touched,
+.auction-form .p-inputtext.ng-invalid.ng-touched {
+  border-color: #ef4444;
+}
+
+/* File Upload Styling */
+.auction-form .p-fileupload {
+  width: 100%;
+}
+
+.auction-form .p-fileupload-buttonbar {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+.auction-form .p-fileupload-content {
+  padding: 1rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.375rem;
+  background-color: #f9fafb;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.auction-form .p-fileupload .p-button {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.auction-form .p-fileupload .p-button:hover {
+  background-color: #1e40af;
+  border-color: #1e40af;
+}
+
+/* Button Styling */
+.auction-form .p-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.auction-form .p-button-secondary {
+  background-color: #6b7280;
+  border-color: #6b7280;
+}
+
+.auction-form .p-button-secondary:hover {
+  background-color: #4b5563;
+  border-color: #4b5563;
+}
+
+.auction-form .p-button-success {
+  background-color: #10b981;
+  border-color: #10b981;
+}
+
+.auction-form .p-button-success:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .auction-dialog .p-dialog-content {
+    padding: 1rem;
+  }
+
+  .auction-form .p-field {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Additional field styling */
+.auction-form .p-field.required label::after {
+  content: "*";
+  color: #ef4444;
+  margin-left: 0.25rem;
+}
+
+/* Error message styling */
+.auction-form .p-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Custom file upload message */
+.auction-form .p-fileupload-content::before {
+  content: "Drag and drop an image here or click to browse";
+  display: block;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+/* Preview image styling */
+.auction-form .image-preview {
+  
+}
+

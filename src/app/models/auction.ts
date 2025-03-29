@@ -9,6 +9,8 @@ export interface Auction {
   endtime?: Timestamp;
   endTimeDate: Date;
   imageUrl?: string;
+  mainImageUrl?: string;
+  imageUrls?: string[];
   seller: string;
   status: string;
   countdown?: string;
@@ -20,7 +22,10 @@ export interface Auction {
   engineSize?: string;
   numberOfDoors?: number;
   numberOfSeats?: number;
-  colour?: string;
   insuranceGroup?: number;
   registration: string;
+  mileage: number;
+  transmission: string;
+  colour: string;
+  fuel: string;
 }

@@ -53,12 +53,16 @@ export class AuctionDetailComponent {
   displayCalendarDialog: boolean = false;
 
   mainImage: string = '';
-
-  thumbnailImages: string[] = [
-    'placeholder.png',
-    'placeholder.png',
-    'placeholder.png',
-    'placeholder.png',
+  images: any[] = [];
+  responsiveOptions: any[] = [
+    {
+      breakpoint: '1300px',
+      numVisible: 4,
+    },
+    {
+      breakpoint: '575px',
+      numVisible: 1,
+    },
   ];
 
   private countdownInterval?: number;
@@ -99,7 +103,9 @@ export class AuctionDetailComponent {
 
           this.bids = auctionData.bidCount || 0; // Update bid count
 
-          this.preloadAuctionImage(auctionData.imageUrl);
+          this.preloadAuctionImage(auctionData.mainImageUrl);
+          this.setUpImages(auctionData);
+
           this.startCountdown();
         }
       });
@@ -110,6 +116,18 @@ export class AuctionDetailComponent {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
     }
+  }
+
+  // Set up images for Galleria
+  setUpImages(auctionData: Auction) {
+    // Ensure that imageUrls exists and is an array
+    const imageUrls = auctionData.imageUrls ?? [];
+
+    // Initialize the images array with only the imageUrls
+    this.images = imageUrls.map((imageUrl: string) => ({
+      itemImageSrc: imageUrl,
+      thumbnailImageSrc: imageUrl,
+    }));
   }
 
   validateBid() {

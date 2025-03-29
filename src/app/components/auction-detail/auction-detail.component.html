@@ -49,30 +49,49 @@
 </div>
 
 
+<!--<div class="gallery">-->
+<!--  <div class="main-image">-->
+<!--    <img [src]="mainImage" alt="">-->
+<!--  </div>-->
+<!--  <div class="thumbnail-images">-->
+<!--    <div *ngFor="let image of thumbnailImages; let i = index" class="thumbnail">-->
+<!--      <img [src]="image" alt="Thumbnail {{i + 1}}">-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
 <div class="gallery">
-  <div class="main-image">
-    <img [src]="mainImage" alt="">
-  </div>
-  <div class="thumbnail-images">
-    <div *ngFor="let image of thumbnailImages; let i = index" class="thumbnail">
-      <img [src]="image" alt="Thumbnail {{i + 1}}">
-    </div>
-  </div>
+  <p-galleria
+    [containerStyle]="{ 'max-width': '800px' }"
+    [numVisible]="5"
+    [responsiveOptions]="responsiveOptions"
+    [showItemNavigators]="true"
+    [value]="images"
+  >
+    <ng-template #item let-item>
+      <img [src]="item.itemImageSrc" style="width:100%"/>
+    </ng-template>
+    <ng-template #thumbnail let-item>
+      <img [src]="item.thumbnailImageSrc" style="width:100%"/>
+    </ng-template>
+  </p-galleria>
+
+
 </div>
 
 
 <div class="features-container">
   <div class="feature-card">
     <img alt="Calendar Icon" class="feature-icon" src="icons/calendar.png"/>
-    <div class="feature-text">2018</div>
+    <div class="feature-text">{{ auction?.year }}</div>
   </div>
   <div class="feature-card">
     <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
-    <div class="feature-text">30,600 miles</div>
+    <div class="feature-text">{{ auction?.mileage | number }} miles</div>
   </div>
   <div class="feature-card">
     <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
-    <div class="feature-text">Automatic</div>
+    <div class="feature-text">{{ auction?.transmission }}</div>
   </div>
   <div class="feature-card">
     <img alt="Engine Icon" class="feature-icon" src="icons/engine.png"/>
@@ -80,11 +99,11 @@
   </div>
   <div class="feature-card">
     <img alt="Colour Icon" class="feature-icon" src="icons/colour.png"/>
-    <div class="feature-text">Blue</div>
+    <div class="feature-text">{{ auction?.colour }}</div>
   </div>
   <div class="feature-card">
     <img alt="Fuel Icon" class="feature-icon" src="icons/fuel.png"/>
-    <div class="feature-text">Petrol</div>
+    <div class="feature-text">{{ auction?.fuel }}</div>
   </div>
 </div>
 

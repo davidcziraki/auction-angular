@@ -13,7 +13,7 @@ import { FirestoreService } from '../../../services/firestore.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
-import { NgIf } from '@angular/common';
+import { NgForOf, NgIf } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
@@ -30,6 +30,7 @@ import { DatePickerModule } from 'primeng/datepicker';
     FileUploadModule,
     NgIf,
     DatePickerModule,
+    NgForOf,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -38,7 +39,11 @@ import { DatePickerModule } from 'primeng/datepicker';
 export class AdminComponent implements OnInit {
   // NEW AUCTION
   newAuctionDialog = false;
-  selectedImage: File | null = null;
+  selectedImages: File[] = [];
+  imagePreviews: string[] = [];
+  mainImage: File | null = null;
+  mainImageIndex: number | null = null;
+  mainImagePreview: string | null = null;
 
   newAuction: Auction = {
     registration: '',
@@ -48,6 +53,10 @@ export class AdminComponent implements OnInit {
     seller: '',
     endTimeDate: new Date(),
     price: 0,
+    mileage: 0,
+    transmission: '',
+    colour: '',
+    fuel: '',
     status: 'active',
   };
 
@@ -60,6 +69,10 @@ export class AdminComponent implements OnInit {
     endtime: Timestamp.now(),
     endTimeDate: new Date(),
     price: 0,
+    mileage: 0,
+    transmission: '',
+    colour: '',
+    fuel: '',
     status: 'active',
   };
 
@@ -77,7 +90,7 @@ export class AdminComponent implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: 'imageUrl',
+      field: 'mainImageUrl',
       headerName: 'Image',
       cellRenderer: (params: { value: any }) => {
         return `<img src="${params.value}" width="250" height="160" style="border-radius: 10px;" alt="">`;
@@ -188,6 +201,10 @@ export class AdminComponent implements OnInit {
       seller: '',
       endTimeDate: new Date(),
       price: 0,
+      mileage: 0,
+      transmission: '',
+      colour: '',
+      fuel: '',
       status: 'active',
     };
 
@@ -205,6 +222,7 @@ export class AdminComponent implements OnInit {
   }
 
   async createAuction() {
+    // Validate required fields
     if (
       !this.newAuction.registration ||
       !this.newAuction.make ||
@@ -219,58 +237,78 @@ export class AdminComponent implements OnInit {
     }
 
     try {
-      // // Fetch vehicle data based on the registration number using the service
-      // const vehicleData = await this.vehicleInfoService
-      //   .getRegApiData(this.newAuction.registration)
-      //   .toPromise();
-      //
-      // if (vehicleData) {
-      //   // Enrich auction data with vehicle information
-      //   this.newAuction.description = vehicleData.Description;
-      //   this.newAuction.bodyStyle = vehicleData.BodyStyle;
-      //   this.newAuction.engineSize = vehicleData.EngineSize;
-      //   this.newAuction.numberOfDoors = vehicleData.NumberOfDoors;
-      //   this.newAuction.numberOfSeats = vehicleData.NumberOfSeats;
-      //   this.newAuction.colour = vehicleData.Colour;
-      //   this.newAuction.insuranceGroup = vehicleData.VehicleInsuranceGroup;
-      // } else {
-      //   console.error('Failed to fetch vehicle data.');
-      // }
-
-      // Convert the end time to a Firestore Timestamp
-      this.newAuction.endtime = Timestamp.fromDate(this.newAuction.endTimeDate);
-
-      // Proceed with creating the auction
+      // Add the auction to Firestore and get the auction ID
       const auctionId = await this.firestoreService.addAuction(this.newAuction);
       if (!auctionId) {
         throw new Error('Failed to create auction.');
       }
 
-      // Handle image upload (if any)
-      if (this.selectedImage) {
-        const imageUrl = await this.storageService.uploadImage(
-          auctionId,
-          this.selectedImage,
-        );
-        if (imageUrl) {
-          await this.firestoreService.updateAuction(auctionId, { imageUrl });
+      // Initialize variables for storing the URLs
+      let imageUrls: string[] = [];
+      let mainImageUrl: string = ''; // Initialize to an empty string to avoid null assignment
+
+      // Handle image uploads
+      if (this.selectedImages.length > 0) {
+        // If a main image has been selected, upload it first
+        if (this.mainImage) {
+          mainImageUrl = await this.storageService.uploadMainImage(
+            auctionId,
+            this.mainImage,
+          ); // Upload main image
         }
+
+        // Upload other images and get their URLs
+        const otherImageUrls = await this.storageService.uploadImages(
+          auctionId,
+          this.selectedImages.filter(
+            (_, index) => index !== this.mainImageIndex,
+          ), // Exclude the main image from other images
+        );
+
+        // Combine the main image URL with other image URLs
+        imageUrls = [mainImageUrl, ...otherImageUrls];
+
+        // Update the auction document with image URLs and the main image URL
+        await this.firestoreService.updateAuction(auctionId, {
+          imageUrls: imageUrls,
+          mainImageUrl: mainImageUrl, // Store the main image URL
+        });
       }
 
+      // Close the dialog and refresh the auction list
       this.newAuctionDialog = false;
-      this.fetchAuctions(); // Refresh list after creating auction
+      this.fetchAuctions(); // Refresh the auction list after creation
     } catch (error) {
       console.error('Error creating auction:', error);
     }
   }
 
-  onImageSelected(event: any) {
-    console.log('File selection event:', event);
+  // Handle image selection and generate previews
+  onImagesSelected(event: any) {
+    this.selectedImages = Array.from(event.files);
+    const imagePreviewPromises = this.selectedImages.map((file: File) => {
+      const reader = new FileReader();
+      return new Promise<string>((resolve) => {
+        reader.onload = (e: any) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    });
 
-    if (event.files && event.files.length > 0) {
-      this.selectedImage = event.files[0]; // ✅ Store the file
-      console.log('Selected file:', this.selectedImage);
-    }
+    Promise.all(imagePreviewPromises).then((previews: string[]) => {
+      this.imagePreviews = previews;
+    });
+  }
+
+  // Handle the main image selection
+  onMainImageSelected(event: any) {
+    const file = event.files[0];
+    this.mainImage = file;
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.mainImagePreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   async onDeleteAuction(auction: Auction) {
@@ -306,13 +344,25 @@ export class AdminComponent implements OnInit {
     try {
       const updates: Partial<Auction> = { ...this.selectedAuction };
 
-      if (this.selectedImage) {
-        updates.imageUrl = await this.storageService.uploadImage(
+      // Check if there are selected images to upload
+      if (this.selectedImages && this.selectedImages.length > 0) {
+        // Upload images and get their URLs
+        updates.imageUrls = await this.storageService.uploadImages(
           this.selectedAuction.id,
-          this.selectedImage,
+          this.selectedImages,
         );
       }
 
+      // Check if a new main image is selected
+      if (this.mainImage) {
+        // Upload the main image and get its URL
+        updates.mainImageUrl = await this.storageService.uploadMainImage(
+          this.selectedAuction.id,
+          this.mainImage, // Upload the selected main image
+        );
+      }
+
+      // Update the auction in Firestore with the new data
       await this.firestoreService.updateAuction(
         this.selectedAuction.id,
         updates,
@@ -325,7 +375,7 @@ export class AdminComponent implements OnInit {
       });
 
       this.displayEditModal = false;
-      await this.fetchAuctions();
+      await this.fetchAuctions(); // Refresh the auctions list after updating
     } catch (error) {
       console.error('Error updating auction:', error);
       this.messageService.add({
