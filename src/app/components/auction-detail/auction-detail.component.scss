@@ -1,4 +1,47 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* Main layout containers */
+.auction-container {
+  display: flex;
+  max-width: 1670px;
+  //max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  gap: 30px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+
+.gallery-container {
+  flex: 1;
+
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
+}
+
+.details-container {
+  flex: 1;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
+}
+
+/* Auction bar styles - enhanced but keeping your existing structure */
 .auction-bar {
+  display: flex;
+  align-items: center;
+  gap: 5vw;
+  justify-content: center;
+
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+
   .back-button {
     background: none;
     border: none;
@@ -41,17 +84,232 @@
       background: #f8f9fa;
       border: none;
       color: black;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background: #e9ecef;
+      }
     }
   }
 
   .bid-button {
+    background-color: #4CAF50;
     color: white;
     font-weight: bold;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #45a049;
+    }
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    gap: 4vw;
+    justify-content: end;
+    flex-wrap: wrap;
+    scale: 0.85;
   }
 }
 
+/* Vehicle header section */
+.vehicle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 
-/* Bidding Modal Styles */
+  .vehicle-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .auction-status {
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+/* Features container - maintaining your existing structure */
+.features-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+
+  .feature-card {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #f1f3f5;
+    }
+  }
+
+  .feature-icon {
+    scale: 0.9;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+  }
+
+  .feature-text {
+    text-align: center;
+    font-weight: 600;
+    color: #4a4a4a;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+
+    .feature-card {
+      padding: 10px;
+    }
+  }
+}
+
+/* New bid section */
+.bid-section {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Optional, for a little elevation */
+}
+
+.current-bid {
+  margin-bottom: 15px;
+
+  .bid-amount {
+    font-size: 24px;
+    color: #4CAF50;
+    font-weight: bold;
+  }
+
+  .bid-count {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+}
+
+.bidding-form {
+  margin-top: 10px;
+
+  label {
+    display: block;
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  .error-text {
+    color: red;
+    font-size: 14px;
+  }
+}
+
+.place-bid-button {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  padding: 12px;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  border-radius: 5px;
+  border: none;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #45a049;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.place-bid-button i {
+  margin-right: 8px; /* Adds space between icon and text */
+}
+
+/* For responsive layout */
+@media (max-width: 768px) {
+  .bid-section {
+    padding: 15px;
+  }
+
+  .place-bid-button {
+    font-size: 14px;
+  }
+}
+
+/* Vehicle description */
+.vehicle-description {
+  margin-top: 20px;
+
+  h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+
+  p {
+    line-height: 1.6;
+    color: #333;
+  }
+}
+
+/* Gallery enhacement */
+.main-gallery {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  ::ng-deep .p-galleria-item-wrapper {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  ::ng-deep .p-galleria-thumbnail-container {
+    background-color: #f8f9fa;
+  }
+
+  ::ng-deep .p-galleria-thumbnail-item-content {
+    opacity: 0.7;
+    transition: opacity 0.3s;
+
+    &:hover, &.p-galleria-thumbnail-item-current {
+      opacity: 1;
+    }
+  }
+}
+
+/* Modal styles - keeping your existing ones */
 .bidding-modal-container {
   padding: 20px;
 }
@@ -81,7 +339,7 @@
 }
 
 .bidding-modal-button {
-  background: #007bff;
+  background: #4CAF50;
   color: white;
   font-size: 16px;
   padding: 10px 20px;
@@ -98,7 +356,6 @@
   color: red;
   font-size: 14px;
 }
-
 
 .share-modal-container {
   text-align: center;
@@ -130,87 +387,6 @@
   background-color: #25d366;
   color: white;
 }
-
-
-////////// FEATURES CONTAINER
-
-.features-container {
-  display: flex;
-  justify-content: center;
-  gap: 1%;
-  padding: 5vw;
-
-
-  .feature-card {
-    background: #eee;
-    border-radius: 10px;
-    padding: 1% 5%;
-    display: flex;
-    flex-direction: column;
-    row-gap: 15px;
-  }
-
-  .feature-icon {
-    scale: 0.9;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-
-  .feature-text {
-    text-align: center;
-    font-weight: 600;
-    color: #4a4a4a;
-  }
-}
-
-
-.gallery {
-  display: flex;
-  justify-content: center;
-  margin-top: 3%;
-}
-
-
-@media (max-width: 768px) {
-  .features-container {
-    flex-wrap: wrap;
-    row-gap: 15px;
-    column-gap: 6px;
-  }
-
-  .feature-card {
-    flex: 1 1 calc(33.333% - 1%);
-    padding: 5% !important;
-  }
-
-
-}
-
-/////////////
-
-
-.vehicle-info {
-  margin: 20px 0;
-}
-
-.vehicle-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-
-.vehicle-item {
-  display: flex;
-  justify-content: space-between;
-}
-
-.vehicle-item strong {
-  font-weight: bold;
-}
-
 
 .calendar-modal-container {
   text-align: center;
@@ -253,30 +429,3 @@
     }
   }
 }
-
-@media (max-width: 768px) {
-  .auction-bar {
-    display: flex;
-    align-items: center;
-    gap: 4vw;
-    justify-content: end;
-    flex-wrap: wrap;
-    scale: 0.85;
-  }
-
-
-}
-
-
-@media (min-width: 768px) {
-  .auction-bar {
-    display: flex;
-    align-items: center;
-    gap: 5vw;
-    justify-content: center;
-    margin-top: 1%;
-  }
-
-
-}
-

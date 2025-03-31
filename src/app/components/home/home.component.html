@@ -30,6 +30,81 @@
 </div>
 
 
+<div class="auction-container">
+  <h2 *ngIf="displayMode === 'favorites'" class="title">Your Favorite Auctions</h2>
+  <h2 *ngIf="displayMode === 'trending'" class="title">Trending Auctions</h2>
+  <h2 *ngIf="displayMode === 'random'" class="title">Recommended Auctions</h2>
+
+  <!-- Show Skeletons when loading -->
+  <div *ngIf="isLoading" class="auction-list">
+    <div *ngFor="let _ of skeletonArray" class="auction-card">
+      <div class="auction-image-container">
+        <p-skeleton height="150px" styleClass="mb-2" width="100%"/>
+      </div>
+
+      <div class="auction-details">
+        <p-skeleton height="1.5rem" styleClass="mb-2" width="60%"/>
+        <p-skeleton height="1rem" styleClass="mb-2" width="40%"/>
+
+        <div class="auction-footer">
+          <p-skeleton height="1rem" width="5rem"/>
+          <p-skeleton shape="circle" size="2rem"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auction-grid">
+    <div *ngFor="let auction of auctions" class="auction-card">
+      <div [routerLink]="['/auction', auction.id]" class="auction-image-wrapper">
+        <img [src]="auction.mainImageUrl" alt="{{ auction.year }} {{ auction.make }} {{ auction.model }}"
+             class="auction-image"/>
+
+        <div class="auction-badges">
+          <span *ngIf="auction.isPopular" class="badge badge-popular">Popular</span>
+          <span *ngIf="auction.isEndingSoon" class="badge badge-ending">Ending Soon</span>
+        </div>
+      </div>
+
+      <div class="auction-content">
+        <h3 class="auction-title">{{ auction.year }} {{ auction.make }} {{ auction.model }}</h3>
+
+        <div class="auction-features">
+          <div class="feature-item">
+            <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
+            <span>{{ auction.transmission }}</span>
+          </div>
+
+          <div class="feature-item">
+            <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
+            <span>{{ auction.mileage | number }} miles</span>
+          </div>
+        </div>
+
+        <div class="auction-price">
+          <span class="price-label">Current Bid:</span>
+          <span class="price-value">HUF {{ auction.price | number }}</span>
+        </div>
+
+        <div class="auction-footer">
+          <div *ngIf="auction.countdown" class="auction-timer">
+            <i class="pi pi-clock"></i>
+            <span>{{ auction.countdown }}</span>
+          </div>
+
+          <button
+            (click)="toggleFavourite(auction); $event.preventDefault()"
+            [class.favorite-active]="auction.isFavourite"
+            class="favorite-button">
+            <i [ngClass]="auction.isFavourite ? 'pi-heart-fill' : 'pi-heart'" class="pi"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="why-choose-us">
   <div class="title">
     <span>Why </span>
@@ -104,6 +179,73 @@
     <h2>Ready to Sell Your Car?</h2>
     <p>Join thousands of successful sellers who found the right buyers at the right price on our platform. Get started
       in minutes.</p>
-    <button class="p-button-lg p-button-primary" label="Become a Seller" pButton routerLink="/seller-hub"></button>
+    <button (click)="sendToSellerHub()" class="p-button-lg p-button-primary" label="Become a Seller" pButton></button>
   </div>
 </section>
+
+
+<p-toast></p-toast>
+
+
+<!-- Login/Register Dialog -->
+<p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" class="auth-dialog">
+  <div class="auth-container">
+    <div class="auth-header">
+      <img alt="Logo" class="auth-logo" src="logo.ico">
+      <div class="auth-title">
+        <span *ngIf="!isRegistering">Welcome Back</span>
+        <span *ngIf="isRegistering">Register</span>
+      </div>
+      <span class="auth-subtitle">
+        <span *ngIf="!isRegistering">Don't have an account?</span>
+        <span *ngIf="isRegistering">Already have an account?</span>
+      </span>
+      <a (click)="toggleForm()" class="auth-toggle">
+        <span *ngIf="!isRegistering">Create today!</span>
+        <span *ngIf="isRegistering">Back to Sign In</span>
+      </a>
+    </div>
+
+    <!-- Login Form -->
+    <div *ngIf="!isRegistering">
+      <label for="emailLogin">Email</label>
+      <input [(ngModel)]="emailLogin" id="emailLogin" pInputText placeholder="Email address" type="text">
+
+      <label for="passwordLogin">Password</label>
+      <input [(ngModel)]="passwordLogin" id="passwordLogin" pInputText placeholder="Password" type="password">
+
+      <div class="auth-options">
+        <div class="auth-remember">
+          <p-checkbox [(ngModel)]="rememberMe" [binary]="true" id="rememberme1"></p-checkbox>
+          <label for="rememberme1">Remember me</label>
+        </div>
+        <a (click)="forgotPassword()" class="auth-forgot">Forgot password?</a>
+      </div>
+
+
+      <button (click)="login()" class="auth-button" icon="pi pi-user" label="Sign In" pButton pRipple></button>
+    </div>
+
+    <!-- Registration Form -->
+    <div *ngIf="isRegistering">
+      <label for="emailRegister">Email</label>
+      <input [(ngModel)]="emailRegister" id="emailRegister" pInputText placeholder="Email address" type="email">
+
+      <label for="firstName">First Name</label>
+      <input [(ngModel)]="firstName" id="firstName" pInputText placeholder="First Name" type="text">
+
+      <label for="lastName">Surname</label>
+      <input [(ngModel)]="lastName" id="lastName" pInputText placeholder="Surname" type="text">
+
+      <label for="dob">Date of Birth</label>
+      <input [(ngModel)]="dob" id="dob" pInputText placeholder="Date of Birth" type="date">
+
+      <label for="passwordRegister">Password</label>
+      <input [(ngModel)]="passwordRegister" id="passwordRegister" pInputText placeholder="Password" type="password">
+
+      <p *ngIf="passwordError" class="auth-error">{{ passwordError }}</p>
+
+      <button (click)="register()" class="auth-button" icon="pi pi-user" label="Register" pButton pRipple></button>
+    </div>
+  </div>
+</p-dialog>

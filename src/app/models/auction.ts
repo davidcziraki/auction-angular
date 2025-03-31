@@ -16,6 +16,8 @@ export interface Auction {
   countdown?: string;
   winnerID?: string;
   isFavourite?: boolean;
+  isPopular?: boolean;
+  isEndingSoon?: boolean;
   bidCount?: number;
   description?: string;
   bodyStyle?: string;
@@ -28,4 +30,7 @@ export interface Auction {
   transmission: string;
   colour: string;
   fuel: string;
+  isDealer?: boolean;
+  mobile?: number;
+  submissionDate?: Date;
 }

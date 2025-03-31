@@ -1,19 +1,13 @@
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
-
-
+<!-- Main auction header bar -->
 <div class="auction-bar">
   <!-- Back Button -->
   <button [routerLink]="['/search']" class="back-button" icon="pi pi-chevron-left" pButton></button>
 
-  <!-- Current Bid -->
-  <div class="auction-info">
-    <div class="price">
-      <span class="currency">HUF </span>
-      <span class="amount">{{ (auction$ | async)?.price | number }}</span>
-    </div>
-    <div class="label">CURRENT BID</div>
+  <!-- Main Auction Info -->
+  <div class="auction-info main">
+<!--    <h1 class="vehicle-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h1>-->
   </div>
+
 
   <!-- Countdown Timer -->
   <div class="auction-info">
@@ -43,123 +37,95 @@
     </button>
   </div>
 
-
-  <!-- Place Bid Button -->
-  <button (click)="openBidding()" label="PLACE BID" pButton pRipple></button>
 </div>
 
-
-<!--<div class="gallery">-->
-<!--  <div class="main-image">-->
-<!--    <img [src]="mainImage" alt="">-->
-<!--  </div>-->
-<!--  <div class="thumbnail-images">-->
-<!--    <div *ngFor="let image of thumbnailImages; let i = index" class="thumbnail">-->
-<!--      <img [src]="image" alt="Thumbnail {{i + 1}}">-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</div>-->
-
-<div class="gallery">
-  <p-galleria
-    [containerStyle]="{ 'max-width': '800px' }"
-    [numVisible]="5"
-    [responsiveOptions]="responsiveOptions"
-    [showItemNavigators]="true"
-    [value]="images"
-  >
-    <ng-template #item let-item>
-      <img [src]="item.itemImageSrc" style="width:100%"/>
-    </ng-template>
-    <ng-template #thumbnail let-item>
-      <img [src]="item.thumbnailImageSrc" style="width:100%"/>
-    </ng-template>
-  </p-galleria>
-
-
-</div>
-
-
-<div class="features-container">
-  <div class="feature-card">
-    <img alt="Calendar Icon" class="feature-icon" src="icons/calendar.png"/>
-    <div class="feature-text">{{ auction?.year }}</div>
+<!-- Main content container -->
+<div class="auction-container">
+  <!-- Left side - gallery -->
+  <div class="gallery-container">
+    <p-galleria
+      [containerStyle]="{ 'max-width': '100%', 'border-radius': '8px', 'overflow': 'hidden' }"
+      [numVisible]="5"
+      [responsiveOptions]="responsiveOptions"
+      [showItemNavigators]="true"
+      [value]="images"
+      class="main-gallery"
+    >
+      <ng-template #item let-item>
+        <img [src]="item.itemImageSrc" style="width:100%; height:100%; object-fit:cover;"/>
+      </ng-template>
+      <ng-template #thumbnail let-item>
+        <img [src]="item.thumbnailImageSrc" style="width:100%; height:100%; object-fit:cover;"/>
+      </ng-template>
+    </p-galleria>
   </div>
-  <div class="feature-card">
-    <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
-    <div class="feature-text">{{ auction?.mileage | number }} miles</div>
-  </div>
-  <div class="feature-card">
-    <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
-    <div class="feature-text">{{ auction?.transmission }}</div>
-  </div>
-  <div class="feature-card">
-    <img alt="Engine Icon" class="feature-icon" src="icons/engine.png"/>
-    <div class="feature-text">3 ltr</div>
-  </div>
-  <div class="feature-card">
-    <img alt="Colour Icon" class="feature-icon" src="icons/colour.png"/>
-    <div class="feature-text">{{ auction?.colour }}</div>
-  </div>
-  <div class="feature-card">
-    <img alt="Fuel Icon" class="feature-icon" src="icons/fuel.png"/>
-    <div class="feature-text">{{ auction?.fuel }}</div>
-  </div>
-</div>
 
+  <!-- Right side - details -->
+  <div class="details-container">
+    <div class="vehicle-header">
+      <h1 class="vehicle-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h1>
+      <div class="auction-status">Ends: {{ auction?.endTimeDate | date: 'MMM d h:mm a' }}</div>
+    </div>
 
-<!--<div>-->
-<!--  <h2>{{ vehicleDetails.CarMake }} {{ vehicleDetails.CarModel }}</h2>-->
+    <!-- Features/Specs grid -->
+    <div class="features-container">
+      <div class="feature-card">
+        <img alt="Calendar Icon" class="feature-icon" src="icons/calendar.png"/>
+        <div class="feature-text">{{ auction?.year }}</div>
+      </div>
+      <div class="feature-card">
+        <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
+        <div class="feature-text">{{ auction?.mileage | number }} miles</div>
+      </div>
+      <div class="feature-card">
+        <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
+        <div class="feature-text">{{ auction?.transmission }}</div>
+      </div>
+      <div class="feature-card">
+        <img alt="Engine Icon" class="feature-icon" src="icons/engine.png"/>
+        <div class="feature-text">3 ltr</div>
+      </div>
+      <div class="feature-card">
+        <img alt="Colour Icon" class="feature-icon" src="icons/colour.png"/>
+        <div class="feature-text">{{ auction?.colour }}</div>
+      </div>
+      <div class="feature-card">
+        <img alt="Fuel Icon" class="feature-icon" src="icons/fuel.png"/>
+        <div class="feature-text">{{ auction?.fuel }}</div>
+      </div>
+    </div>
 
-<!--  <p><strong>Description:</strong> {{ vehicleDetails.Description }}</p>-->
-<!--  <p><strong>Registration Year:</strong> {{ vehicleDetails.RegistrationYear }}</p>-->
-<!--  <p><strong>Fuel Type:</strong> {{ vehicleDetails.FuelType }}</p>-->
-<!--  <p><strong>Engine Size:</strong> {{ vehicleDetails.EngineSize }} cc</p>-->
-<!--  <p><strong>Transmission:</strong> {{ vehicleDetails.Transmission }}</p>-->
-<!--  <p><strong>Body Style:</strong> {{ vehicleDetails.BodyStyle }}</p>-->
-<!--  <p><strong>Number of Doors:</strong> {{ vehicleDetails.NumberOfDoors }}</p>-->
-<!--  <p><strong>Number of Seats:</strong> {{ vehicleDetails.NumberOfSeats }}</p>-->
-<!--</div>-->
-
-
-<p-toast class="custom-toast"></p-toast>
-
-
-<!-- BIDDING MODAL -->
-<div *ngIf="displayBidDialog">
-  <p-dialog [(visible)]="displayBidDialog" [closable]="true" [modal]="true" [ngClass]="'bidding-modal'">
-    <div class="bidding-modal-container">
-
-      <!-- Header Section -->
-      <div class="bidding-modal-header">
-        <h2 class="title">Place Your Bid</h2>
-        <span class="current-bid">
-          Current Highest Bid: <strong>HUF {{ (auction$ | async)?.price | number }}</strong>
-        </span>
+    <!-- Bid section -->
+    <div class="bid-section">
+      <div class="current-bid">
+        <div class="bid-amount">HUF {{ (auction$ | async)?.price | number }}</div>
+        <div class="bid-count">CURRENT BID</div>
       </div>
 
-      <!-- Bidding Form -->
-      <div class="bidding-modal-form">
+      <div class="bidding-form" *ngIf="biddingSectionVisible">
         <label for="bidAmount">Your Bid Amount</label>
-        <input (input)="validateBid()" [(ngModel)]="bidAmount"
+        <input [(ngModel)]="bidAmount"
                [min]="minBid" id="bidAmount" pInputText
                placeholder="Enter your bid" step="1"
-               type="number">
+               type="number" pattern="\d*">
 
         <small *ngIf="bidError" class="error-text">{{ bidError }}</small>
       </div>
 
-      <!-- Buttons -->
-      <div class="bidding-modal-actions">
-        <button (click)="placeBid()" [disabled]="!canPlaceBid"
-                class="bidding-modal-button" pButton pRipple>
-          <i class="pi pi-check"></i> Place Bid
-        </button>
-      </div>
-
+      <button (click)="toggleBiddingSection()"
+              [disabled]="!canPlaceBid && !biddingSectionVisible"
+              class="place-bid-button" pButton pRipple>
+        <i class="pi pi-check"></i> {{ biddingSectionVisible ? 'Place Bid' : 'Open Bidding' }}
+      </button>
     </div>
-  </p-dialog>
-</div>
+
+
+
+
+  </div>
+
+<!-- Toast notification -->
+<p-toast class="custom-toast"></p-toast>
 
 
 <!-- SHARE MODAL -->
@@ -190,7 +156,6 @@
   </div>
 </p-dialog>
 
-
 <!-- CALENDAR MODAL -->
 <p-dialog [(visible)]="displayCalendarDialog" [closable]="true" [header]="'Add to Calendar'" [modal]="true">
   <div class="calendar-modal-container">
@@ -211,6 +176,3 @@
     </div>
   </div>
 </p-dialog>
-
-
-

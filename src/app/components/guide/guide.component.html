@@ -1,16 +1,6 @@
 <div class="how-it-works">
   <h2>How it works</h2>
 
-  <!-- Toggle Button for Buyer/Seller Guide -->
-  <!--  <div class="toggle-container">-->
-  <!--    <div class="toggle-wrapper">-->
-  <!--      <p-toggleButton [(ngModel)]="isBuyerGuide" offIcon="pi pi-shopping-cart" offLabel="Buyer"-->
-  <!--                      onIcon="pi pi-user" onLabel="Seller"-->
-  <!--                      styleClass="custom-toggle"></p-toggleButton>-->
-  <!--    </div>-->
-  <!--    <span *ngIf="isBuyerGuide">Buyer</span>-->
-  <!--    <span *ngIf="!isBuyerGuide">Seller</span>-->
-  <!--  </div>-->
 
   <div class="toggle-container">
     <p-button (click)="toggleRole(true)" [severity]="!isBuyerGuide ? 'secondary' : 'primary'"

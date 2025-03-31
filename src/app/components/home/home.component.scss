@@ -100,7 +100,7 @@
     font-size: 1.2rem;
   }
   p {
-    color: #666;
+    //color: #666;
   }
 
 }
@@ -153,6 +153,11 @@
 }
 
 
+.auction-container {
+  margin-top: 2%;
+}
+
+
 // WHY CHOOSE US?
 .why-choose-us {
   text-align: center;
@@ -164,6 +169,7 @@
   font-weight: bold;
   margin-bottom: 1rem;
   color: #283342;
+  text-align: center;
 }
 
 .subtitle {
@@ -204,4 +210,314 @@
   font-size: 1.1rem;
   color: var(--light-text);
 }
+
+
+// Modern Auction Grid Layout
+.auction-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+// Card Styling
+.auction-card {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  height: 100%;
+
+
+}
+
+// Link Container
+.auction-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+// Image Styling
+.auction-image-wrapper {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  cursor: pointer;
+
+}
+
+.auction-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+
+
+}
+
+// Badge Styling
+.auction-badges {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+  color: white;
+}
+
+.badge-popular {
+  background-color: #22c55e;
+}
+
+.badge-ending {
+  background-color: #f59e0b;
+}
+
+// Content Area
+.auction-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1.25rem;
+}
+
+.auction-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+// Features Styling
+.auction-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+
+  &:not(:last-child) {
+    margin-right: 0.5rem;
+  }
+}
+
+.feature-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+}
+
+// Price Styling
+.auction-price {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.price-label {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.price-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+// Footer Area
+.auction-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+}
+
+.auction-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+
+  i {
+    color: #64748b;
+  }
+}
+
+// Favorite Button
+.favorite-button {
+  background: transparent;
+  border: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #64748b;
+
+  &:hover {
+    background-color: #f8fafc;
+    color: #f43f5e;
+  }
+
+  &.favorite-active {
+    color: #f43f5e;
+  }
+
+  i {
+    font-size: 1.25rem;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  .auction-grid {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .auction-content {
+    padding: 1rem;
+  }
+
+  .auction-features {
+    gap: 0.75rem;
+  }
+}
+
+
+//AUTH
+/* Dialog Styles */
+.auth-dialog {
+  max-width: 90vw;
+  width: 400px;
+}
+
+/* Container */
+.auth-container {
+  background-color: var(--surface-card);
+  padding: 1rem;
+}
+
+/* Header */
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-logo {
+  height: 50px;
+  margin-bottom: 1rem;
+}
+
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-900);
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-600);
+}
+
+.auth-toggle {
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  display: block;
+  margin-top: 0.5rem;
+  color: #2967a8;
+}
+
+/* Form Elements */
+label {
+  display: block;
+  font-weight: 500;
+  color: var(--text-900);
+  margin-bottom: 0.3rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.5rem;
+
+  border: 1px solid var(--gray-300);
+  border-radius: 4px;
+}
+
+/* Options */
+.auth-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 70px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.auth-remember {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.auth-forgot {
+  color: #2967a8;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: right;
+  margin-left: auto;
+}
+
+
+/* Buttons */
+.auth-button {
+  width: 100%;
+  font-weight: 600;
+}
+
+/* Error Message */
+.auth-error {
+  color: red;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  width: 15vw;
+}
+
 

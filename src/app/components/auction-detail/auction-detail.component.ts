@@ -6,7 +6,6 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { GalleriaModule } from 'primeng/galleria';
-import { Dialog } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { InputText } from 'primeng/inputtext';
 import { AuctionService } from '../../services/auction.service';
@@ -15,6 +14,7 @@ import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { getAuth } from '@angular/fire/auth';
 import { FirestoreService } from '../../services/firestore.service';
+import { Dialog } from 'primeng/dialog';
 
 @Component({
   selector: 'app-auction-detail',
@@ -25,10 +25,10 @@ import { FirestoreService } from '../../services/firestore.service';
     RouterLink,
     Ripple,
     GalleriaModule,
-    Dialog,
     FormsModule,
     InputText,
     Toast,
+    Dialog,
   ],
   templateUrl: './auction-detail.component.html',
   styleUrl: './auction-detail.component.scss',
@@ -47,10 +47,11 @@ export class AuctionDetailComponent {
   bidAmount: number = 0;
   minBid: number = 0;
   bidError: string = '';
-  canPlaceBid: boolean = false;
+  canPlaceBid: boolean = true;
   minBidIncreasePercentage: number = 5;
 
   displayCalendarDialog: boolean = false;
+  biddingSectionVisible = false;
 
   mainImage: string = '';
   images: any[] = [];
@@ -77,6 +78,18 @@ export class AuctionDetailComponent {
 
   get isBidValid(): boolean {
     return this.bidAmount >= this.minBid;
+  }
+
+  // This method toggles the visibility of the bidding section
+  toggleBiddingSection() {
+    if (!this.biddingSectionVisible) {
+      // When showing the form, we allow the user to start bidding
+      this.biddingSectionVisible = true;
+      this.canPlaceBid = true; // Enable the bid button when the form is shown
+    } else {
+      // If the bidding section is visible, place the bid
+      this.validateBid();
+    }
   }
 
   ngOnInit() {
@@ -140,10 +153,15 @@ export class AuctionDetailComponent {
     if (this.bidAmount < this.minBid) {
       this.bidError = `Your bid must be at least HUF ${this.minBid.toFixed(0)} (${this.minBidIncreasePercentage}% higher).`;
       this.canPlaceBid = false;
-    } else {
-      this.bidError = '';
-      this.canPlaceBid = true;
+      return;
     }
+
+    this.bidAmount = Math.floor(this.bidAmount); // Ensure the bid is an integer
+    this.bidError = '';
+    this.canPlaceBid = true;
+
+    // If everything is valid, call placeBid()
+    this.placeBid();
   }
 
   loadAuction(id: string) {

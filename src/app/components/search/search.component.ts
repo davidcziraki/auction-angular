@@ -52,6 +52,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   searchInput: string = '';
   searchQuery: string = '';
   searchApplied: boolean = false;
+  showEndedAuctions: boolean = false;
 
   // Sort options
   sortOptions: SelectItem[] = [
@@ -63,14 +64,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   selectedSort: string = 'newest';
   // Make filter
-  uniqueMakes: SelectItem[] = [
-    { label: 'Ford', value: 'Ford' },
-    { label: 'Toyota', value: 'Toyota' },
-    { label: 'BMW', value: 'BMW' },
-    { label: 'Mercedes-Benz', value: 'Mercedes-Benz' },
-    { label: 'Audi', value: 'Audi' },
-    { label: 'Volkswagen', value: 'Volkswagen' },
-  ];
+  uniqueMakes: SelectItem[] = [];
   selectedMakes: string[] = [];
   // Price range
   minPrice: number = 0;
@@ -89,17 +83,25 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.authState$ = this.authService.authState$;
+
+    // Wait for the user to load first
     this.authState$.subscribe(async (user) => {
       this.user = user;
+
+      // Load auctions first
       await this.loadAuctions(user?.uid);
-    });
-    this.initializeFilters();
-    this.route.queryParams.subscribe((params) => {
-      if (params['q']) {
-        this.searchQuery = params['q'];
-        this.searchInput = params['q']; // Ensure input field is populated
-        this.applySearch(); // Run the search when navigating with a query
-      }
+
+      // Once auctions are loaded, check for query params and filter
+      this.route.queryParams.subscribe((params) => {
+        if (params['q']) {
+          this.searchQuery = params['q'];
+          this.searchInput = params['q']; // Ensure input field is populated with the query param
+          this.searchApplied = true;
+
+          // After search input is updated, apply the filters
+          this.filterAuctions();
+        }
+      });
     });
   }
 
@@ -183,6 +185,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.uniqueMakes = [...new Set(this.auctions.map((a) => a.make))].map(
         (make) => ({ label: make, value: make }),
       );
+      console.log('Unique Makes:', this.uniqueMakes); // Verify the unique makes
 
       // Preload images asynchronously
       await Promise.all(
@@ -211,8 +214,8 @@ export class SearchComponent implements OnInit, OnDestroy {
       // Start countdown timers for auctions
       this.startGlobalCountdown();
 
-      // Sort auctions after loading
-      this.sortAuctions();
+      // Apply filter after loading auctions
+      this.filterAuctions();
     } catch (error) {
       console.error('Error loading auctions:', error);
     } finally {
@@ -235,7 +238,14 @@ export class SearchComponent implements OnInit, OnDestroy {
         auction.price >= this.priceRange[0] &&
         auction.price <= this.priceRange[1];
 
-      return matchesSearch && matchesMake && matchesPrice;
+      const isAuctionEnded = auction.status?.toLowerCase() !== 'active';
+
+      return (
+        matchesSearch &&
+        matchesMake &&
+        matchesPrice &&
+        (this.showEndedAuctions || !isAuctionEnded)
+      );
     });
 
     this.sortAuctions();

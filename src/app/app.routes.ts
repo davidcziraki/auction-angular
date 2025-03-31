@@ -21,14 +21,22 @@ export const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'search', component: SearchComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'seller-hub', component: SellerHubComponent },
+  {
+    path: 'seller-hub',
+    component: SellerHubComponent,
+    canActivate: [AngularFireAuthGuard],
+  },
 
   { path: 'auction/:id', component: AuctionDetailComponent },
-  { path: 'cart/:id', component: CartComponent },
+  {
+    path: 'cart/:id',
+    component: CartComponent,
+    canActivate: [AngularFireAuthGuard],
+  },
   { path: 'checkout-success', component: CheckoutSuccessComponent },
 
   {
-    path: 'user-management',
+    path: 'account',
     component: AccountManageComponent,
     canActivate: [AngularFireAuthGuard],
   },

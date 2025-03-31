@@ -1,1 +1,247 @@
-<p>Incomplete</p>
+<div class="toggle-container">
+  <p-button (click)="toggleButton(true)" [severity]="!isNewApplication ? 'secondary' : 'primary'"
+            class="switch-button" label="New Application"></p-button>
+  <p-button (click)="toggleButton(false)" [severity]="isNewApplication ? 'secondary' : 'primary'"
+            class="switch-button" label="Your Cars"></p-button>
+</div>
+
+
+<div *ngIf="isNewApplication">
+
+  <div class="seller-hub-container">
+    <div class="form-container">
+
+      <!--Car Details Form -->
+      <form (ngSubmit)="submitApplication()" [formGroup]="carDetailsForm">
+
+        <h2>Personal Details</h2>
+        <div class="p-field">
+          <label>Mobile Number</label>
+          <p-inputmask formControlName="mobile" mask="(07) 9999-99999" placeholder="(07) 9999-99999"></p-inputmask>
+        </div>
+        <div class="p-field-checkbox">
+          <p-checkbox [binary]="true" formControlName="isDealer"></p-checkbox>
+          <label> Please tick if you are a dealer</label>
+        </div>
+
+        <h2>Enter Car Details</h2>
+
+
+        <div class="p-fluid">
+          <div class="p-field">
+            <label for="make">Car Make</label>
+            <input formControlName="make" id="make" pInputText type="text"/>
+          </div>
+
+          <div class="p-field">
+            <label for="model">Car Model</label>
+            <input formControlName="model" id="model" pInputText type="text"/>
+          </div>
+
+          <div class="p-field">
+            <label for="year">Car Year</label>
+            <input formControlName="year" id="year" pInputText type="text"/>
+          </div>
+
+          <div class="p-field">
+            <label>Transmission</label>
+            <p-select [options]="transmissionOptions" formControlName="transmission"
+                      placeholder="Select Transmission"></p-select>
+          </div>
+
+          <div class="p-field">
+            <label>Fuel Type</label>
+            <p-select [options]="fuelTypeOptions" formControlName="fuel"
+                      placeholder="Select Fuel Type"></p-select>
+          </div>
+
+          <div class="p-field">
+            <label for="mileage">Mileage</label>
+            <input formControlName="mileage" id="mileage" pInputText type="number"/>
+          </div>
+
+          <div class="p-field">
+            <label for="price">Starting Price</label>
+            <input formControlName="price" id="price" pInputText type="number"/>
+          </div>
+
+          <div class="p-field">
+            <label for="registration">Car Registration</label>
+            <input formControlName="registration" id="registration" pInputText type="text"/>
+          </div>
+
+          <div class="p-field">
+            <label>Auction End Date</label>
+            <p-datePicker
+              [showIcon]="true"
+              [showTime]="true"
+              class="form-control"
+              dateFormat="dd MM yy"
+              formControlName="endDate"
+              hourFormat="24"
+              id="endDate"
+              required>
+            </p-datePicker>
+          </div>
+
+          <div class="p-field">
+            <label for="colour">Car Color</label>
+            <input formControlName="colour" id="colour" pInputText type="text"/>
+          </div>
+
+          <div class="p-field">
+            <label for="description">Car Description</label>
+            <textarea formControlName="description" id="description" pTextarea rows="5"></textarea>
+          </div>
+
+          <!-- Main Image Upload -->
+          <div class="p-field p-col-12">
+            <label>Upload Main Image</label>
+            <p-fileupload
+              (onSelect)="onMainImageSelected($event)"
+              accept="image/*"
+              chooseIcon="pi pi-upload"
+              chooseLabel="Choose Main Image"
+              maxFileSize="1000000"
+              mode="basic"
+              name="mainImage">
+            </p-fileupload>
+
+            <!-- Display the main image preview -->
+            <div *ngIf="mainImagePreview" class="main-image-preview">
+              <img [src]="mainImagePreview" alt="Main Image Preview" class="image-preview-img"/>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="p-field p-col-12">
+              <label>Upload Car Images</label>
+              <p-fileupload
+                (onSelect)="onImagesSelected($event)"
+                [multiple]="true"
+                accept="image/*"
+                chooseIcon="pi pi-upload"
+                chooseLabel="Choose Images"
+                maxFileSize="1000000"
+                mode="basic"
+                name="images">
+              </p-fileupload>
+              <!-- Preview Images -->
+              <div *ngIf="imagePreviews.length > 0" class="image-previews">
+                <div *ngFor="let image of imagePreviews" class="image-preview">
+                  <img [src]="image" alt="Image Preview" class="image-preview-img"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="p-d-flex p-jc-end">
+            <button [disabled]="carDetailsForm.invalid" label="Submit" pButton type="submit"></button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Image Container -->
+    <div class="image-container">
+      <img alt="Professional Image" src="seller-hub.jpg"/>
+      <img alt="Professional Image" src="sellerhub2.jpg"/>
+      <img alt="Professional Image" src="sellerhub3.jpg"/>
+
+    </div>
+  </div>
+</div>
+
+<div *ngIf="auctions && auctions.length && !isNewApplication; else noAuctionsMessage" class="table-container">
+  <p-table [value]="auctions" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Main Image</th>
+        <th>Images</th>
+        <th>Year</th>
+        <th>Make</th>
+        <th>Model</th>
+        <th>Seller</th>
+        <th>Mileage</th>
+        <th>Transmission</th>
+        <th>Colour</th>
+        <th>Fuel</th>
+        <th>Price (HUF)</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template let-application pTemplate="body">
+      <tr>
+        <!-- Main Image Column -->
+        <td>
+          <img [src]="application.mainImageUrl" alt="Main Image"
+               style="object-fit: cover; width: 100px; height: 75px;">
+        </td>
+
+        <!-- Images Column with View Images Button -->
+        <td>
+          <p-button
+            (click)="openImagesModal(application.imageUrls)"
+            icon="pi pi-images"
+            label="View Images"
+            severity="info">
+          </p-button>
+        </td>
+
+        <td>{{ application.year }}</td>
+        <td>{{ application.make }}</td>
+        <td>{{ application.model }}</td>
+        <td>{{ application.seller }}</td>
+        <td>{{ application.mileage }}</td>
+        <td>{{ application.transmission }}</td>
+        <td>{{ application.colour }}</td>
+        <td>{{ application.fuel }}</td>
+        <td>{{ application.price }}</td>
+        <td>
+          <p-button
+            [label]="application.status.toUpperCase()"
+            [severity]="getSeverity(application.status)">
+          </p-button>
+
+
+        </td>
+        <td>
+          <!-- Approve / Reject Buttons for each row -->
+          <p-button
+            [disabled]="true"
+            icon="pi pi-chevron-circle-up"
+            label="Re-list"
+            severity="info"
+            styleClass="mr-2">
+          </p-button>
+
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Fallback Message when No Auctions are Available -->
+<ng-template #noAuctionsMessage>
+  <div class="no-auctions-message">
+    <p>No auctions available at the moment.</p>
+  </div>
+</ng-template>
+
+
+<!-- Image Viewer Modal -->
+<p-dialog [(visible)]="displayImagesModal" [modal]="true" [style]="{width: '80%'}" header="Auction Images">
+  <div class="application-images-container">
+    <div *ngFor="let imageUrl of applicationImages">
+      <img [src]="imageUrl" alt="Auction Image"
+           style="object-fit: cover; border-radius: 10px; margin-right: 10px;">
+    </div>
+
+  </div>
+
+</p-dialog>
+
+
+<p-toast></p-toast>

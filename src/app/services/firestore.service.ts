@@ -42,6 +42,10 @@ export class FirestoreService {
     this.firestore,
     'auctions',
   );
+  private applicationsCollection: CollectionReference = collection(
+    this.firestore,
+    'applications',
+  );
 
   private storage = getStorage();
 
@@ -82,9 +86,30 @@ export class FirestoreService {
           where('userId', '==', userId),
         ),
       );
+
+      // Fetch bids in the last 24 hours
+      const bidsRef = collection(this.firestore, `auctions/${auction.id}/bids`);
+      const bidSnapshot = await getDocs(bidsRef);
+      const bidsInLast24Hrs = bidSnapshot.docs.filter((bidDoc) => {
+        const bidTime = bidDoc.data()['timestamp']?.toDate() ?? new Date();
+        const now = new Date();
+        return now.getTime() - bidTime.getTime() <= 24 * 60 * 60 * 1000;
+      }).length;
+
+      // Add "POPULAR" if there are at least 5 bids in the last 24 hours
+      const isPopular = bidsInLast24Hrs >= 5;
+
+      // Check if auction is ending soon (less than 6 hours)
+      const now = new Date();
+      const timeRemaining = auction.endTimeDate.getTime() - now.getTime();
+      const isEndingSoon =
+        timeRemaining <= 6 * 60 * 60 * 1000 && timeRemaining > 0; // 6 hours in ms
+
       return {
         ...auction,
         isFavourite: !favSnapshot.empty,
+        isPopular: isPopular,
+        isEndingSoon: isEndingSoon,
       };
     });
 
@@ -186,6 +211,21 @@ export class FirestoreService {
     }
   }
 
+  /**  Add new auction application (image handled separately in StorageService) */
+  async submitAuction(auction: Auction): Promise<string | null> {
+    try {
+      const { endTimeDate, ...auctionData } = auction;
+      const docRef = await addDoc(this.applicationsCollection, {
+        ...auctionData,
+      });
+
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding auction:', error);
+      return null;
+    }
+  }
+
   /**  Delete auction */
   async deleteAuction(auctionId: string): Promise<void> {
     if (!auctionId) return console.error('Error: Auction ID is undefined.');
@@ -208,6 +248,23 @@ export class FirestoreService {
 
     try {
       await updateDoc(doc(this.firestore, 'auctions', auctionId), updates);
+    } catch (error) {
+      console.error('Error updating auction:', error);
+    }
+  }
+
+  /**  Update auction application details (supports partial updates) */
+  async updateApplication(
+    auctionId: string,
+    updates: Partial<Auction>,
+  ): Promise<void> {
+    if (!auctionId) {
+      console.error('Auction ID is missing.');
+      return;
+    }
+
+    try {
+      await updateDoc(doc(this.firestore, 'applications', auctionId), updates);
     } catch (error) {
       console.error('Error updating auction:', error);
     }
@@ -238,6 +295,112 @@ export class FirestoreService {
       }
     } catch (error) {
       console.error('Error toggling favourites:', error);
+    }
+  }
+
+  async submitCarApplication(applicationData: any): Promise<void> {
+    try {
+      await addDoc(collection(this.firestore, 'applications'), applicationData);
+      console.log('Application submitted successfully');
+    } catch (error) {
+      console.error('Error submitting application:', error);
+    }
+  }
+
+  async getApplicationsAdmin(): Promise<any[]> {
+    try {
+      const snapshot = await getDocs(this.applicationsCollection);
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      return [];
+    }
+  }
+
+  async getApplicationsSeller(userEmail: string): Promise<any[]> {
+    try {
+      if (!userEmail) {
+        console.error('User email is required');
+        return [];
+      }
+
+      console.log(this.applicationsCollection);
+      console.log(userEmail);
+      // Fetch applications where seller matches userEmail
+      const applicationsQuery = query(
+        this.applicationsCollection,
+        where('seller', '==', userEmail),
+      );
+      const applicationsSnapshot = await getDocs(applicationsQuery);
+      const applications = applicationsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Fetch auctions where seller matches userEmail
+      const auctionsQuery = query(
+        this.auctionsCollection,
+        where('seller', '==', userEmail),
+      );
+      const auctionsSnapshot = await getDocs(auctionsQuery);
+      const auctions = auctionsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Combine results
+      return [...applications, ...auctions];
+    } catch (error) {
+      console.error('Error fetching seller applications and auctions:', error);
+      return [];
+    }
+  }
+
+  /** Approve an application: move it to the auctions collection */
+  async approveApplication(applicationId: string): Promise<void> {
+    try {
+      // Get application data
+      const appRef = doc(this.firestore, 'applications', applicationId);
+      const appSnap = await getDoc(appRef);
+
+      if (!appSnap.exists()) {
+        console.error('Application not found');
+        return;
+      }
+
+      const appData = appSnap.data();
+
+      // Move to the auctions collection
+      const auctionRef = doc(this.firestore, 'auctions', applicationId);
+      await setDoc(auctionRef, {
+        ...appData,
+        status: 'Active',
+        winnerID: 'empty',
+      });
+
+      // Delete from applications collection
+      await deleteDoc(appRef);
+
+      console.log(
+        `Application ${applicationId} approved and moved to auctions.`,
+      );
+    } catch (error) {
+      console.error('Error approving application:', error);
+    }
+  }
+
+  /** Deny an application: update status to "Denied" */
+  async denyApplication(applicationId: string): Promise<void> {
+    try {
+      const appRef = doc(this.firestore, 'applications', applicationId);
+      await deleteDoc(appRef);
+
+      console.log(`Application ${applicationId} has been denied.`);
+    } catch (error) {
+      console.error('Error denying application:', error);
     }
   }
 }

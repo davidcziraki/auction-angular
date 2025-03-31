@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TableModule } from 'primeng/table';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { Auction } from '../../../models/auction';
 import { StorageService } from '../../../services/storage.service';
@@ -15,6 +15,8 @@ import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
 import { NgForOf, NgIf } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
+import { Select } from 'primeng/select';
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-admin',
@@ -31,6 +33,9 @@ import { DatePickerModule } from 'primeng/datepicker';
     NgIf,
     DatePickerModule,
     NgForOf,
+    ReactiveFormsModule,
+    Select,
+    Toast,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -44,6 +49,18 @@ export class AdminComponent implements OnInit {
   mainImage: File | null = null;
   mainImageIndex: number | null = null;
   mainImagePreview: string | null = null;
+
+  transmissionOptions = [
+    { label: 'Manual', value: 'Manual' },
+    { label: 'Automatic', value: 'Automatic' },
+  ];
+
+  fuelTypeOptions = [
+    { label: 'Petrol', value: 'Petrol' },
+    { label: 'Diesel', value: 'Diesel' },
+    { label: 'Electric', value: 'Electric' },
+    { label: 'Hybrid', value: 'Hybrid' },
+  ];
 
   newAuction: Auction = {
     registration: '',
@@ -82,6 +99,9 @@ export class AdminComponent implements OnInit {
   selectedFilter: string = 'all';
   searchQuery: string = '';
   displayEditModal: boolean = false;
+  displayApplicationsModal = false;
+  displayImagesModal: boolean = false;
+  applicationImages: string[] = [];
 
   public newTheme = themeAlpine.withPart(colorSchemeDarkBlue);
 
@@ -384,5 +404,50 @@ export class AdminComponent implements OnInit {
         detail: 'Failed to update auction!',
       });
     }
+  }
+
+  async viewApplications() {
+    try {
+      this.auctions = await this.firestoreService.getApplicationsAdmin(); // Fetch applications
+      this.displayApplicationsModal = true; // Open the modal
+    } catch (error) {
+      console.error('Error loading applications:', error);
+    }
+  }
+
+  async approveApplication(application: any) {
+    try {
+      await this.firestoreService.approveApplication(application.id); // Using application.id
+      console.log('Application approved:', application.id);
+      await this.viewApplications();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Application approved successfully',
+      });
+    } catch (error) {
+      console.error('Error approving application:', error);
+    }
+  }
+
+  async rejectApplication(application: any) {
+    try {
+      await this.firestoreService.denyApplication(application.id); // Using application.id
+      console.log('Application rejected:', application.id);
+      await this.viewApplications();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Application rejected successfully',
+      });
+    } catch (error) {
+      console.error('Error rejecting application:', error);
+    }
+  }
+
+  // Handle opening the image modal with selected images
+  openImagesModal(images: string[]): void {
+    this.applicationImages = images; // Store the images to display
+    this.displayImagesModal = true; // Show the modal
   }
 }

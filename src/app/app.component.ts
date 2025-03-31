@@ -119,17 +119,6 @@ export class AppComponent implements OnInit {
       { label: 'Auctions', icon: 'pi pi-fw pi-search', routerLink: '/search' },
       { label: 'Guide', icon: 'pi pi-fw pi-info-circle', routerLink: '/guide' },
       {
-        label: 'Account',
-        icon: 'pi pi-fw pi-warehouse',
-        command: () => {
-          if (this.isLoggedIn) {
-            this.router.navigate(['/user-management']);
-          } else {
-            this.showDialog(); // Open login modal
-          }
-        },
-      },
-      {
         label: 'Contact',
         icon: 'pi pi-fw pi-address-book',
         routerLink: 'contact',
@@ -147,12 +136,32 @@ export class AppComponent implements OnInit {
         label: 'Seller Hub',
         icon: 'pi pi-fw pi-briefcase',
         routerLink: '/seller-hub',
+        command: () => {
+          if (this.isLoggedIn) {
+            this.router.navigate(['/seller-hub']);
+          } else {
+            this.showDialog(); // Open login modal
+          }
+        },
       },
     ];
   }
 
   updateUserMenu() {
     this.userMenu = [
+      ...(this.user
+        ? [
+            {
+              label: 'Account',
+              icon: 'pi pi-fw pi-user',
+              command: () => {
+                if (this.isLoggedIn) {
+                  this.router.navigate(['/account']);
+                }
+              },
+            },
+          ]
+        : []),
       {
         label: this.user ? 'Logout' : 'Login',
         icon: this.user ? 'pi pi-sign-out' : 'pi pi-sign-in',
