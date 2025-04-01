@@ -7,6 +7,15 @@
           <div [routerLink]="['/home']" class="logo" style="cursor: pointer;">CarLicit.</div>
         </ng-template>
 
+
+        <ng-template pTemplate="center">
+          <!-- Menu centered in the middle -->
+          <div class="menu-container">
+            <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
+          </div>
+        </ng-template>
+
+
         <ng-template pTemplate="end">
           <div class="flex items-center gap-4">
             <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>

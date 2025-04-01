@@ -36,6 +36,17 @@ html, body {
 }
 
 
+/* Text color for focused item (when clicked or focused) */
+::ng-deep .p-menubar-item.p-focus .p-menubar-item-content {
+  color: #1f2c51 !important;
+}
+
+/* Text color for active (selected) item */
+::ng-deep .p-menubar-item.p-menubar-item-active .p-menubar-item-content {
+  color: #1f2c51 !important;
+}
+
+
 .footer {
   text-align: center;
   padding: 20px 0;
