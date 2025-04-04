@@ -22,9 +22,9 @@ import { Toast } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
 import { DatePipe, formatCurrency, NgForOf, NgIf } from '@angular/common';
 import { Auction } from '../../models/auction';
-import { FileUpload } from 'primeng/fileupload';
 import { StorageService } from '../../services/storage.service';
 import { Dialog } from 'primeng/dialog';
+import { FileUpload } from 'primeng/fileupload';
 
 @Component({
   selector: 'app-seller-hub',
@@ -44,9 +44,9 @@ import { Dialog } from 'primeng/dialog';
     TableModule,
     NgIf,
     Button,
-    FileUpload,
     NgForOf,
     Dialog,
+    FileUpload,
   ],
   templateUrl: './seller-hub.component.html',
   styleUrl: './seller-hub.component.scss',
@@ -291,21 +291,3 @@ export class SellerHubComponent implements OnInit {
     }
   }
 }
-
-
-// toggleRow(car: Auction) {
-//   const key = car.id; // Use car id as key
-//   this.expandedRows[key] = !this.expandedRows[key]; // Toggle expanded state
-// }
-//
-// expandAll() {
-//   this.userCars.forEach((car) => {
-//     this.expandedRows[car.id] = true;
-//   });
-// }
-//
-// collapseAll() {
-//   this.userCars.forEach((car) => {
-//     this.expandedRows[car.id] = false;
-//   });
-// }

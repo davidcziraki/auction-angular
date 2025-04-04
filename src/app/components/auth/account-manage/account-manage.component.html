@@ -1,47 +1,61 @@
 <div class="account-tabs">
   <p-tabView>
     <p-tabPanel header="Account Settings">
-      <div class="account-management">
+      <div [formGroup]="accountSettingsForm" class="account-management">
         <h2>Account Management</h2>
 
         <div *ngFor="let field of ['email', 'forename', 'surname', 'password']" class="account-field">
           <label>{{ field.charAt(0).toUpperCase() + field.slice(1) }}</label>
 
           <div class="field-container">
-          <span *ngIf="editingField !== field">
-            {{ field === 'password' ? '*****' : userData[field] }}
-          </span>
+            <span *ngIf="!editingFields.has(field)">
+              {{ field === 'password' ? '*************' : accountSettingsForm.get(field)?.value }}
+            </span>
 
             <input
-              *ngIf="editingField === field && field !== 'password'"
-              [(ngModel)]="userData[field]"
+              *ngIf="editingFields.has(field) && field !== 'password'"
+              [formControlName]="field"
               [type]="field === 'email' ? 'email' : 'text'"
             />
 
             <input
-              *ngIf="editingField === field && field === 'password'"
-              [(ngModel)]="newPassword"
+              *ngIf="editingFields.has(field) && field === 'password'"
+              [formControlName]="field"
               placeholder="Enter new password"
               type="password"
             />
 
-            <button (click)="editField(field)" class="edit-button" icon="pi pi-pencil" pButton>
-              Edit
-            </button>
+            <!-- Validation Message -->
+            <div *ngIf="accountSettingsForm.get(field)?.invalid && accountSettingsForm.get(field)?.touched"
+                 class="error-message">
+              <small *ngIf="accountSettingsForm.get(field)?.errors?.['required']">{{ field }} is required</small>
+              <small *ngIf="field === 'email' && accountSettingsForm.get(field)?.errors?.['email']">Invalid email
+                address</small>
+              <small *ngIf="field === 'password' && accountSettingsForm.get(field)?.errors?.['minlength']">Password must
+                be at least 6 characters long, contain an uppercase letter, a lowercase letter, a number, and a special
+                character.</small>
+            </div>
+
+            <button (click)="editField(field)" class="edit-button" icon="pi pi-pencil" pButton>Edit</button>
           </div>
         </div>
-
-        <div *ngIf="editingField" class="button-group">
-          <button (click)="saveChanges()" class="save-button" pButton>Save</button>
+        <div *ngIf="editingFields.size > 0" class="button-group">
+          <button
+            (click)="saveChanges()"
+            [disabled]="!areEditedFieldsValid()"
+            class="save-button"
+            pButton
+          >
+            Save
+          </button>
           <button (click)="cancelEdit()" class="cancel-button" pButton>Cancel</button>
         </div>
+
+
         <div class="delete-account">
           <button (click)="confirmDeleteAccount()" class="p-button p-button-danger">Delete Account</button>
-
         </div>
       </div>
-
-
     </p-tabPanel>
 
     <p-tabPanel header="Past Won Auctions">
@@ -53,7 +67,7 @@
               <th>Auction Item</th>
               <th>Winning Bid</th>
               <th>End Date</th>
-              <th>Action</th> <!-- New column for the Pay button -->
+              <th>Action</th>
             </tr>
           </ng-template>
           <ng-template let-auction pTemplate="body">
@@ -64,7 +78,7 @@
               <td>
                 <ng-container *ngIf="auction.paid === 'yes'; else payButton">
                   <button class="p-button p-button-secondary" disabled>Paid</button>
-                  <button (click)="addDelivery(auction.id)" class="p-button p-button-info">
+                  <button class="p-button p-button-info">
                     Add Delivery
                   </button>
                 </ng-container>

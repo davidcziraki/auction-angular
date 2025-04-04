@@ -5,7 +5,7 @@
 
   <!-- Main Auction Info -->
   <div class="auction-info main">
-<!--    <h1 class="vehicle-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h1>-->
+    <!--    <h1 class="vehicle-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h1>-->
   </div>
 
 
@@ -102,77 +102,88 @@
         <div class="bid-count">CURRENT BID</div>
       </div>
 
-      <div class="bidding-form" *ngIf="biddingSectionVisible">
+      <div *ngIf="biddingSectionVisible" class="bidding-form">
         <label for="bidAmount">Your Bid Amount</label>
         <input [(ngModel)]="bidAmount"
                [min]="minBid" id="bidAmount" pInputText
-               placeholder="Enter your bid" step="1"
-               type="number" pattern="\d*">
+               pattern="\d*" placeholder="Enter your bid"
+               step="1" type="number">
 
         <small *ngIf="bidError" class="error-text">{{ bidError }}</small>
       </div>
 
       <button (click)="toggleBiddingSection()"
               [disabled]="!canPlaceBid && !biddingSectionVisible"
-              class="place-bid-button" pButton pRipple>
+              [ngClass]="{
+          'p-button-primary': biddingSectionVisible,
+          'p-button-success': !biddingSectionVisible
+        }"
+              class="place-bid-button"
+              pButton
+              pRipple>
         <i class="pi pi-check"></i> {{ biddingSectionVisible ? 'Place Bid' : 'Open Bidding' }}
       </button>
+
+
     </div>
 
-
+    <div *ngIf="auction?.description" class="auction-description bid-section">
+      {{ auction?.description }}
+    </div>
 
 
   </div>
 
-<!-- Toast notification -->
-<p-toast class="custom-toast"></p-toast>
+  <!-- Toast notification -->
+  <p-toast class="custom-toast"></p-toast>
 
 
-<!-- SHARE MODAL -->
-<p-dialog [(visible)]="displayShareDialog" [closable]="true" [header]="'Share Auction'" [modal]="true"
-          class="share-modal">
-  <div class="share-modal-container">
-    <p>Copy and share this auction link:</p>
+  <!-- SHARE MODAL -->
+  <p-dialog [(visible)]="displayShareDialog" [closable]="true" [header]="'Share Auction'" [modal]="true"
+            class="share-modal">
+    <div class="share-modal-container">
+      <p>Copy and share this auction link:</p>
 
-    <div class="share-input-container">
-      <input [(ngModel)]="shareLink" pInputText readonly type="text">
-      <button (click)="copyToClipboard()" class="copy-button" pButton>
-        <i class="pi pi-copy"></i> Copy
-      </button>
+      <div class="share-input-container">
+        <input [(ngModel)]="shareLink" pInputText readonly type="text">
+        <button (click)="copyToClipboard()" class="copy-button" pButton>
+          <i class="pi pi-copy"></i> Copy
+        </button>
+      </div>
+
+      <p class="share-text">Or share on:</p>
+      <div class="social-buttons">
+        <button (click)="shareOnFacebook()" class="facebook-button" pButton>
+          <i class="pi pi-facebook"></i> Facebook
+        </button>
+        <button (click)="shareOnTwitter()" class="twitter-button" pButton>
+          <i class="pi pi-twitter"></i> Twitter
+        </button>
+        <button (click)="shareOnWhatsApp()" class="whatsapp-button" pButton>
+          <i class="pi pi-whatsapp"></i> WhatsApp
+        </button>
+      </div>
     </div>
+  </p-dialog>
 
-    <p class="share-text">Or share on:</p>
-    <div class="social-buttons">
-      <button (click)="shareOnFacebook()" class="facebook-button" pButton>
-        <i class="pi pi-facebook"></i> Facebook
-      </button>
-      <button (click)="shareOnTwitter()" class="twitter-button" pButton>
-        <i class="pi pi-twitter"></i> Twitter
-      </button>
-      <button (click)="shareOnWhatsApp()" class="whatsapp-button" pButton>
-        <i class="pi pi-whatsapp"></i> WhatsApp
-      </button>
+  <!-- CALENDAR MODAL -->
+  <p-dialog [(visible)]="displayCalendarDialog" [closable]="true" [header]="'Add to Calendar'" [modal]="true">
+    <div class="calendar-modal-container">
+      <p>Choose where to add this auction to your calendar:</p>
+
+      <div class="calendar-buttons">
+        <button (click)="addToGoogleCalendar()" class="calendar-button google" pButton>
+          <i class="pi pi-google"></i> Google Calendar
+        </button>
+
+        <button (click)="addToOutlookCalendar()" class="calendar-button outlook" pButton>
+          <i class="pi pi-calendar"></i> Outlook / Apple Calendar
+        </button>
+
+        <button (click)="addToCalendar()" class="calendar-button ics" pButton>
+          <i class="pi pi-download"></i> Download .ICS File
+        </button>
+      </div>
     </div>
-  </div>
-</p-dialog>
-
-<!-- CALENDAR MODAL -->
-<p-dialog [(visible)]="displayCalendarDialog" [closable]="true" [header]="'Add to Calendar'" [modal]="true">
-  <div class="calendar-modal-container">
-    <p>Choose where to add this auction to your calendar:</p>
-
-    <div class="calendar-buttons">
-      <button (click)="addToGoogleCalendar()" class="calendar-button google" pButton>
-        <i class="pi pi-google"></i> Google Calendar
-      </button>
-
-      <button (click)="addToOutlookCalendar()" class="calendar-button outlook" pButton>
-        <i class="pi pi-calendar"></i> Outlook / Apple Calendar
-      </button>
-
-      <button (click)="addToCalendar()" class="calendar-button ics" pButton>
-        <i class="pi pi-download"></i> Download .ICS File
-      </button>
-    </div>
-  </div>
-</p-dialog>
+  </p-dialog>
+</div>

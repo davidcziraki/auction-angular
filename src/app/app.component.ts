@@ -12,7 +12,16 @@ import { Avatar } from 'primeng/avatar';
 import { Menu } from 'primeng/menu';
 import { Dialog } from 'primeng/dialog';
 import { Checkbox } from 'primeng/checkbox';
-import { FormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { InputText } from 'primeng/inputtext';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
@@ -36,11 +45,15 @@ import { AuctionService } from './services/auction.service';
     ButtonDirective,
     Ripple,
     RouterLink,
+    ReactiveFormsModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
+  loginForm!: FormGroup;
+  registerForm!: FormGroup;
+
   title = 'finalyear';
   menuItems: MenuItem[] | undefined;
   authState$!: Observable<User | null>;
@@ -54,7 +67,7 @@ export class AppComponent implements OnInit {
   // Dialog state
   displayDialog: boolean = false;
   isRegistering: boolean = false;
-  passwordError = '';
+  authError = '';
 
   // Form fields
   emailLogin: string = '';
@@ -74,6 +87,7 @@ export class AppComponent implements OnInit {
     private firestoreService: FirestoreService,
     private auctionService: AuctionService,
     private router: Router,
+    private fb: FormBuilder,
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
@@ -110,6 +124,29 @@ export class AppComponent implements OnInit {
 
       this.setMenuItems();
       this.updateUserMenu();
+    });
+
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]],
+    });
+
+    this.registerForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      firstName: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Za-zÀ-ÿ\s'-]+$/)],
+      ],
+      lastName: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Za-zÀ-ÿ\s'-]+$/)],
+      ],
+
+      dob: ['', Validators.required],
+      password: [
+        '',
+        [Validators.required, Validators.minLength(6), passwordValidator()],
+      ],
     });
   }
 
@@ -171,59 +208,73 @@ export class AppComponent implements OnInit {
   }
 
   login() {
+    if (this.loginForm.invalid) return;
+
+    const { email, password } = this.loginForm.value;
+
     this.authService
-      .loginUser(this.emailLogin, this.passwordLogin, this.rememberMe)
-      .then((user) => {
+      .loginUser(email, password, this.rememberMe)
+      .then(() => {
         this.displayDialog = false;
       })
       .catch((error) => {
         console.error('Login error:', error);
+
+        const errorMessage = error?.message || '';
+
+        if (errorMessage.includes('auth/user-not-found')) {
+          this.authError = 'No user found with this email.';
+        } else if (errorMessage.includes('auth/invalid-credential')) {
+          this.authError = 'Incorrect password.';
+        } else if (errorMessage.includes('auth/invalid-email')) {
+          this.authError = 'Invalid email format.';
+        } else {
+          this.authError = 'Login failed. Please try again.';
+        }
       });
   }
 
   register() {
-    this.passwordError = '';
+    this.authError = '';
+    let newUser: UserModel;
 
-    // Validate password strength
-    if (!this.validatePassword(this.passwordRegister)) {
-      this.passwordError =
-        'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and be at least 6 characters long.';
-      return;
-    }
+    if (this.registerForm.invalid) return;
+
+    const { email, firstName, lastName, dob, password } =
+      this.registerForm.value;
 
     this.authService
-      .createUser(this.emailRegister, this.passwordRegister)
+      .createUser(email, password)
       .then((user) => {
         if (!user) {
           console.error('User creation failed');
-          return;
+          return null;
         }
 
-        // Ensure user is signed in before adding to Firestore
-        return this.authService
-          .loginUser(this.emailRegister, this.passwordRegister, true)
-          .then(() => user);
-      })
-      .then((user) => {
-        if (!user) return;
-
-        const newUser: UserModel = {
-          forename: this.firstName,
-          surname: this.lastName,
-          DOB: new Date(this.dob),
-          email: this.emailRegister,
-          userID: user.uid, // Use Firebase UID
+        newUser = {
+          forename: firstName,
+          surname: lastName,
+          DOB: new Date(dob),
+          email,
+          userID: user.uid,
           admin: false,
         };
 
-        return this.firestoreService.addUser(newUser);
+        return this.authService.loginUser(email, password, true);
       })
+      .then(() => this.firestoreService.addUser(newUser))
       .then(() => {
-        console.log('User registered and added to Firestore successfully.');
+        this.userFirestore = newUser;
         this.displayDialog = false;
       })
+
       .catch((error) => {
-        console.error('Registration error:', error);
+        if (error.code === 'auth/email-already-in-use') {
+          this.authError = 'This email address is already in use.';
+        } else {
+          this.authError = 'Registration failed. Please try again.';
+          console.error(error);
+        }
       });
   }
 
@@ -257,9 +308,17 @@ export class AppComponent implements OnInit {
       alert('Failed to send reset email. Please try again.');
     }
   }
+}
 
-  validatePassword(password: string): boolean {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
-    return regex.test(password);
-  }
+export function passwordValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const password = control.value;
+    const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{6,}$/;
+    return pattern.test(password)
+      ? null
+      : {
+          invalidPassword:
+            'Password must be at least 6 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.',
+        };
+  };
 }

@@ -2,7 +2,13 @@ import { Component, HostListener } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { DecimalPipe, NgClass, NgForOf, NgIf } from '@angular/common';
 import { Auction } from '../../models/auction';
 import { getAuth, User } from '@angular/fire/auth';
@@ -16,6 +22,7 @@ import { Checkbox } from 'primeng/checkbox';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { UserModel } from '../../models/user';
+import { passwordValidator } from '../../app.component';
 
 @Component({
   selector: 'app-home',
@@ -33,6 +40,7 @@ import { UserModel } from '../../models/user';
     Checkbox,
     Dialog,
     InputText,
+    ReactiveFormsModule,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -61,6 +69,10 @@ export class HomeComponent {
   firstName: string = '';
   lastName: string = '';
   dob: string = '';
+  loginForm!: FormGroup;
+  registerForm!: FormGroup;
+  authError = '';
+  userFirestore: UserModel | null = null;
   private countdownInterval?: number;
 
   constructor(
@@ -68,6 +80,7 @@ export class HomeComponent {
     private messageService: MessageService,
     private firestoreService: FirestoreService,
     private authService: AuthService,
+    private fb: FormBuilder,
   ) {}
 
   @HostListener('window:scroll', [])
@@ -88,6 +101,28 @@ export class HomeComponent {
     this.authState$.subscribe(async (user) => {
       this.user = user;
       await this.loadAuctions(user?.uid); // Ensure auctions are loaded first
+    });
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]],
+    });
+
+    this.registerForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      firstName: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Za-zÀ-ÿ\s'-]+$/)],
+      ],
+      lastName: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Za-zÀ-ÿ\s'-]+$/)],
+      ],
+
+      dob: ['', Validators.required],
+      password: [
+        '',
+        [Validators.required, Validators.minLength(6), passwordValidator()],
+      ],
     });
   }
 
@@ -116,59 +151,73 @@ export class HomeComponent {
   }
 
   login() {
+    if (this.loginForm.invalid) return;
+
+    const { email, password } = this.loginForm.value;
+
     this.authService
-      .loginUser(this.emailLogin, this.passwordLogin, this.rememberMe)
-      .then((user) => {
+      .loginUser(email, password, this.rememberMe)
+      .then(() => {
         this.displayDialog = false;
       })
       .catch((error) => {
         console.error('Login error:', error);
+
+        const errorMessage = error?.message || '';
+
+        if (errorMessage.includes('auth/user-not-found')) {
+          this.authError = 'No user found with this email.';
+        } else if (errorMessage.includes('auth/invalid-credential')) {
+          this.authError = 'Incorrect password.';
+        } else if (errorMessage.includes('auth/invalid-email')) {
+          this.authError = 'Invalid email format.';
+        } else {
+          this.authError = 'Login failed. Please try again.';
+        }
       });
   }
 
   register() {
-    this.passwordError = '';
+    this.authError = '';
+    let newUser: UserModel;
 
-    // Validate password strength
-    if (!this.validatePassword(this.passwordRegister)) {
-      this.passwordError =
-        'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and be at least 6 characters long.';
-      return;
-    }
+    if (this.registerForm.invalid) return;
+
+    const { email, firstName, lastName, dob, password } =
+      this.registerForm.value;
 
     this.authService
-      .createUser(this.emailRegister, this.passwordRegister)
+      .createUser(email, password)
       .then((user) => {
         if (!user) {
           console.error('User creation failed');
-          return;
+          return null;
         }
 
-        // Ensure user is signed in before adding to Firestore
-        return this.authService
-          .loginUser(this.emailRegister, this.passwordRegister, true)
-          .then(() => user);
-      })
-      .then((user) => {
-        if (!user) return;
-
-        const newUser: UserModel = {
-          forename: this.firstName,
-          surname: this.lastName,
-          DOB: new Date(this.dob),
-          email: this.emailRegister,
-          userID: user.uid, // Use Firebase UID
+        newUser = {
+          forename: firstName,
+          surname: lastName,
+          DOB: new Date(dob),
+          email,
+          userID: user.uid,
           admin: false,
         };
 
-        return this.firestoreService.addUser(newUser);
+        return this.authService.loginUser(email, password, true);
       })
+      .then(() => this.firestoreService.addUser(newUser))
       .then(() => {
-        console.log('User registered and added to Firestore successfully.');
+        this.userFirestore = newUser;
         this.displayDialog = false;
       })
+
       .catch((error) => {
-        console.error('Registration error:', error);
+        if (error.code === 'auth/email-already-in-use') {
+          this.authError = 'This email address is already in use.';
+        } else {
+          this.authError = 'Registration failed. Please try again.';
+          console.error(error);
+        }
       });
   }
 
