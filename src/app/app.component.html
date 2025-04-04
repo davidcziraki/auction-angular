@@ -95,7 +95,7 @@
 
         <!-- Validation message for email -->
         <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-          <small *ngIf="loginForm.get('email')?.hasError('required')">Email is required.</small>
+          <small *ngIf="loginForm.get('email')?.hasError('required')" class="validator-text">Email is required.</small>
           <small *ngIf="loginForm.get('email')?.hasError('email')">Please enter a valid email.</small>
         </div>
 

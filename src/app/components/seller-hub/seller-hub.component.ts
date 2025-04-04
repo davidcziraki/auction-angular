@@ -179,48 +179,44 @@ export class SellerHubComponent implements OnInit {
     };
 
     try {
-      // Add the auction to Firestore and get the auction ID
       const auctionId = await this.firestoreService.submitAuction(auction);
       if (!auctionId) {
         throw new Error('Failed to create auction.');
       }
 
-      // Initialize variables for storing the URLs
       let imageUrls: string[] = [];
-      let mainImageUrl: string = ''; // Initialize to an empty string to avoid null assignment
+      let mainImageUrl: string = '';
 
-      // Handle image uploads
-      if (this.selectedImages.length > 0) {
-        // If a main image has been selected, upload it first
-        if (this.mainImage) {
-          mainImageUrl = await this.storageService.uploadMainImage(
-            auctionId,
-            this.mainImage,
-          ); // Upload main image
-        }
+      if (this.mainImage) {
+        mainImageUrl = await this.storageService.uploadMainImage(
+          auctionId,
+          this.mainImage,
+        );
+        imageUrls.push(mainImageUrl);
+      }
 
-        // Upload other images and get their URLs
+      const otherImages = this.selectedImages.filter(
+        (_, index) => index !== this.mainImageIndex,
+      );
+      if (otherImages.length > 0) {
         const otherImageUrls = await this.storageService.uploadImages(
           auctionId,
-          this.selectedImages.filter(
-            (_, index) => index !== this.mainImageIndex,
-          ), // Exclude the main image from other images
+          otherImages,
         );
-
-        // Combine the main image URL with other image URLs
-        imageUrls = [mainImageUrl, ...otherImageUrls];
-
-        // Update the auction document with image URLs and the main image URL
-        await this.firestoreService.updateApplication(auctionId, {
-          imageUrls: imageUrls,
-          mainImageUrl: mainImageUrl, // Store the main image URL
-        });
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Application submitted successfully.',
-        });
+        imageUrls.push(...otherImageUrls);
       }
+
+      await this.firestoreService.updateApplication(auctionId, {
+        imageUrls: imageUrls,
+        mainImageUrl: mainImageUrl || undefined,
+      });
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Application submitted successfully.',
+      });
+
       await this.loadAllAuctions();
       this.clearForm();
     } catch (error) {
