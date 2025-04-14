@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class EmailService {
   private apiUrl =
-    'https://us-central1-final-year-bc4ca.cloudfunctions.net/sendContactEmail'; // Replace with your Firebase function URL
+    'https://us-central1-final-year-bc4ca.cloudfunctions.net/sendContactEmail';
 
   constructor(private http: HttpClient) {}
 
