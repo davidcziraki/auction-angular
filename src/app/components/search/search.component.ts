@@ -52,7 +52,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   searchInput: string = '';
   searchQuery: string = '';
   searchApplied: boolean = false;
-  showEndedAuctions: boolean = false;
+  showEndedAuctions: boolean = true;
 
   // Sort options
   sortOptions: SelectItem[] = [

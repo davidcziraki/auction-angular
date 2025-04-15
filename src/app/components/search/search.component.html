@@ -1,99 +1,159 @@
-<div class="search-container p-shadow-3">
-  <div class="search-bar-wrapper">
-    <div class="search-input-container">
+<div class="search-container-wrapper">
 
-      <input
-        (keydown.enter)="applySearch()"
-        [(ngModel)]="searchInput"
-        class="search-input"
-        pInputText
-        placeholder="Search by make, model, or year"
-        type="text"
-      />
+
+  <div class="search-container p-shadow-3">
+    <div class="search-bar-wrapper">
+      <div class="search-input-container">
+
+        <input
+          (keydown.enter)="applySearch()"
+          [(ngModel)]="searchInput"
+          class="search-input"
+          pInputText
+          placeholder="Search by make, model, or year"
+          type="text"
+        />
+
+      </div>
+      <p-button (click)="applySearch()" class="search-btn" icon="pi pi-search" label="Search"/>
+
+      <div class="filter-controls">
+        <p-dropdown
+          (onChange)="sortAuctions()"
+          [(ngModel)]="selectedSort"
+          [options]="sortOptions"
+          [showClear]="false"
+          placeholder="Sort by"
+          styleClass="sort-dropdown"
+        ></p-dropdown>
+
+        <p-multiSelect
+          (onChange)="filterAuctions()"
+          [(ngModel)]="selectedMakes"
+          [maxSelectedLabels]="1"
+          [options]="uniqueMakes"
+          [selectedItemsLabel]="'{0} makes selected'"
+          [showToggleAll]="true"
+          placeholder="Filter by Make"
+          styleClass="make-filter"
+        ></p-multiSelect>
+
+      </div>
+    </div>
+
+    <div class="price-filter-container">
+      <div class="price-filter-header">
+        <label>Price Range</label>
+        <span class="price-range-label">HUF {{ priceRange[0] | number }} - HUF {{ priceRange[1] | number }}</span>
+      </div>
+      <p-slider
+        (onSlideEnd)="filterAuctions()"
+        [(ngModel)]="priceRange"
+        [max]="maxPrice"
+        [min]="minPrice"
+        [range]="true"
+        class="price-slider"
+      ></p-slider>
+    </div>
+
+    <div *ngIf="hasActiveFilters()" class="active-filters">
+      <span class="active-filters-label">Active Filters:</span>
+      <div class="filter-chips">
+        <p-chip
+          (onRemove)="clearSearch()"
+          *ngIf="searchApplied && searchQuery"
+          [label]="'Search: ' + searchQuery"
+          [removable]="true"
+        ></p-chip>
+        <p-chip
+          (onRemove)="removeMake(make)"
+          *ngFor="let make of selectedMakes"
+          [label]="make"
+          [removable]="true"
+        ></p-chip>
+        <p-chip
+          (onRemove)="resetPriceRange()"
+          *ngIf="isPriceRangeFiltered()"
+          [label]="'Price: HUF ' + (priceRange[0] | number) + ' - HUF ' + (priceRange[1] | number)"
+          [removable]="true"
+        ></p-chip>
+      </div>
+
 
     </div>
-    <p-button (click)="applySearch()" class="search-btn" icon="pi pi-search" label="Search"/>
+    <div class="filter-actions">
+      <button
+        (click)="showEndedAuctions = !showEndedAuctions; filterAuctions()"
+        class="p-button-outlined p-button-sm toggle-ended-auctions-btn"
+        label="{{ showEndedAuctions ? 'Hide Ended Auctions' : 'Show Ended Auctions' }}"
+        pButton
+        type="button"
+      ></button>
 
-    <div class="filter-controls">
-      <p-dropdown
-        (onChange)="sortAuctions()"
-        [(ngModel)]="selectedSort"
-        [options]="sortOptions"
-        [showClear]="false"
-        placeholder="Sort by"
-        styleClass="sort-dropdown"
-      ></p-dropdown>
 
-      <p-multiSelect
-        (onChange)="filterAuctions()"
-        [(ngModel)]="selectedMakes"
-        [maxSelectedLabels]="1"
-        [options]="uniqueMakes"
-        [selectedItemsLabel]="'{0} makes selected'"
-        [showToggleAll]="true"
-        placeholder="Filter by Make"
-        styleClass="make-filter"
-      ></p-multiSelect>
+      <button
+        (click)="clearAllFilters()"
+        class="p-button-outlined p-button-sm clear-filters-btn"
+        icon="pi pi-filter-slash"
+        label="Clear All"
+        pButton
+        type="button"
+      ></button>
 
     </div>
   </div>
 
-  <div class="price-filter-container">
-    <div class="price-filter-header">
-      <label>Price Range</label>
-      <span class="price-range-label">HUF {{ priceRange[0] | number }} - HUF {{ priceRange[1] | number }}</span>
+
+  <div class="auction-grid">
+    <div *ngFor="let auction of filteredAuctions" class="auction-card">
+      <div [routerLink]="['/auction', auction.id]" class="auction-image-wrapper">
+        <img [src]="auction.mainImageUrl" alt="{{ auction.year }} {{ auction.make }} {{ auction.model }}"
+             class="auction-image"/>
+
+        <div class="auction-badges">
+          <span *ngIf="auction.isPopular" class="badge badge-popular">Popular</span>
+          <span *ngIf="auction.isEndingSoon" class="badge badge-ending">Ending Soon</span>
+        </div>
+      </div>
+
+      <div class="auction-content">
+        <h3 class="auction-title">{{ auction.year }} {{ auction.make }} {{ auction.model }}</h3>
+
+        <div class="auction-features">
+          <div class="feature-item">
+            <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
+            <span>{{ auction.transmission }}</span>
+          </div>
+
+          <div class="feature-item">
+            <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
+            <span>{{ auction.mileage | number }} miles</span>
+          </div>
+        </div>
+
+        <div class="auction-price">
+          <span class="price-label">Current Bid:</span>
+          <span class="price-value">HUF {{ auction.price | number }}</span>
+        </div>
+
+        <div class="auction-footer">
+          <div *ngIf="auction.countdown" class="auction-timer">
+            <i class="pi pi-clock"></i>
+            <span>{{ auction.countdown }}</span>
+          </div>
+
+          <button
+            (click)="toggleFavourite(auction); $event.preventDefault()"
+            [class.favorite-active]="auction.isFavourite"
+            class="favorite-button">
+            <i [ngClass]="auction.isFavourite ? 'pi-heart-fill' : 'pi-heart'" class="pi"></i>
+          </button>
+        </div>
+      </div>
     </div>
-    <p-slider
-      (onSlideEnd)="filterAuctions()"
-      [(ngModel)]="priceRange"
-      [max]="maxPrice"
-      [min]="minPrice"
-      [range]="true"
-      class="price-slider"
-    ></p-slider>
   </div>
 
-  <div *ngIf="hasActiveFilters()" class="active-filters">
-    <span class="active-filters-label">Active Filters:</span>
-    <div class="filter-chips">
-      <p-chip
-        (onRemove)="clearSearch()"
-        *ngIf="searchApplied && searchQuery"
-        [label]="'Search: ' + searchQuery"
-        [removable]="true"
-      ></p-chip>
-      <p-chip
-        (onRemove)="removeMake(make)"
-        *ngFor="let make of selectedMakes"
-        [label]="make"
-        [removable]="true"
-      ></p-chip>
-      <p-chip
-        (onRemove)="resetPriceRange()"
-        *ngIf="isPriceRangeFiltered()"
-        [label]="'Price: HUF ' + (priceRange[0] | number) + ' - HUF ' + (priceRange[1] | number)"
-        [removable]="true"
-      ></p-chip>
-    </div>
 
-    <button
-      (click)="showEndedAuctions = !showEndedAuctions; filterAuctions()"
-      class="p-button-outlined p-button-sm toggle-ended-auctions-btn"
-      label="{{ showEndedAuctions ? 'Hide Ended Auctions' : 'Show Ended Auctions' }}"
-      pButton
-      type="button"
-    ></button>
-
-
-    <button
-      (click)="clearAllFilters()"
-      class="p-button-outlined p-button-sm clear-filters-btn"
-      icon="pi pi-filter-slash"
-      label="Clear All"
-      pButton
-      type="button"
-    ></button>
-  </div>
 </div>
 
 
@@ -103,53 +163,3 @@
 </div>
 
 <p-toast></p-toast>
-
-
-<div class="auction-grid">
-  <div *ngFor="let auction of filteredAuctions" class="auction-card">
-    <div [routerLink]="['/auction', auction.id]" class="auction-image-wrapper">
-      <img [src]="auction.mainImageUrl" alt="{{ auction.year }} {{ auction.make }} {{ auction.model }}"
-           class="auction-image"/>
-
-      <div class="auction-badges">
-        <span *ngIf="auction.isPopular" class="badge badge-popular">Popular</span>
-        <span *ngIf="auction.isEndingSoon" class="badge badge-ending">Ending Soon</span>
-      </div>
-    </div>
-
-    <div class="auction-content">
-      <h3 class="auction-title">{{ auction.year }} {{ auction.make }} {{ auction.model }}</h3>
-
-      <div class="auction-features">
-        <div class="feature-item">
-          <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
-          <span>{{ auction.transmission }}</span>
-        </div>
-
-        <div class="feature-item">
-          <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
-          <span>{{ auction.mileage | number }} miles</span>
-        </div>
-      </div>
-
-      <div class="auction-price">
-        <span class="price-label">Current Bid:</span>
-        <span class="price-value">HUF {{ auction.price | number }}</span>
-      </div>
-
-      <div class="auction-footer">
-        <div *ngIf="auction.countdown" class="auction-timer">
-          <i class="pi pi-clock"></i>
-          <span>{{ auction.countdown }}</span>
-        </div>
-
-        <button
-          (click)="toggleFavourite(auction); $event.preventDefault()"
-          [class.favorite-active]="auction.isFavourite"
-          class="favorite-button">
-          <i [ngClass]="auction.isFavourite ? 'pi-heart-fill' : 'pi-heart'" class="pi"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>

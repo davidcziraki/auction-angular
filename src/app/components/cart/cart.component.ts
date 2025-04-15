@@ -71,7 +71,7 @@ export class CartComponent implements OnDestroy, AfterViewInit {
           year: this.auction.year,
           make: this.auction.make,
           model: this.auction.model,
-          auctionImage: this.auction.imageUrl,
+          auctionImage: this.auction.mainImageUrl,
           price: this.totalCost,
         })
         .toPromise()) as { clientSecret: string };

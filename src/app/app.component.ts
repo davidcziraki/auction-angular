@@ -157,7 +157,7 @@ export class AppComponent implements OnInit {
       { label: 'Guide', icon: 'pi pi-fw pi-info-circle', routerLink: '/guide' },
       {
         label: 'Contact',
-        icon: 'pi pi-fw pi-address-book',
+        icon: 'pi pi-fw pi-envelope',
         routerLink: 'contact',
       },
       ...(this.isAdmin$.value
