@@ -56,6 +56,7 @@
     </ng-container>
 
     <!-- Actual Auctions -->
+
     <div *ngFor="let auction of auctions" class="auction-card">
       <div [routerLink]="['/auction', auction.id]" class="auction-image-wrapper">
         <img [src]="auction.mainImageUrl" alt="{{ auction.year }} {{ auction.make }} {{ auction.model }}"

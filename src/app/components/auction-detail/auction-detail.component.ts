@@ -114,9 +114,14 @@ export class AuctionDetailComponent {
 
       const auth = getAuth();
       this.currentUser = auth.currentUser;
-      const currentUserID = this.currentUser?.uid ?? '';
 
-      this.auction$ = this.firestoreService.getAuction(id, currentUserID);
+      const currentUserID = this.currentUser?.uid; // Safe regardless of login
+
+      // Always load auction suggestions (filtered if user is logged in)
+      this.loadAuctions(currentUserID, id);
+
+      // Load auction details only if user is signed in
+      this.auction$ = this.firestoreService.getAuction(id, currentUserID || '');
 
       this.auction$.subscribe((auctionData) => {
         if (auctionData) {
@@ -124,16 +129,11 @@ export class AuctionDetailComponent {
 
           this.minBid =
             this.auction.price * (1 + this.minBidIncreasePercentage / 100);
-
-          this.bids = auctionData.bidCount || 0; // Update bid count
+          this.bids = auctionData.bidCount || 0;
 
           this.preloadAuctionImage(auctionData.mainImageUrl);
           this.setUpImages(auctionData);
-
           this.startCountdown();
-
-          let currentAuctionID = this.auction?.id;
-          this.loadAuctions(currentUserID, currentAuctionID);
         }
       });
     });

@@ -131,13 +131,13 @@
         </div>
 
         <div *ngIf="auction?.status === 'completed'" class="auction-ended-msg">
-          <ng-container *ngIf="auction?.winnerID === currentUser.uid">
+          <ng-container *ngIf="currentUser && auction?.winnerID === currentUser.uid">
             <div class="winner-msg">Congratulations! You won this auction.</div>
-            <button class="checkout-btn" pButton severity="primary"
+            <button [routerLink]="['/cart', auction?.id]" class="checkout-btn" pButton severity="primary"
             >Visit your account settings to complete the purchase.
             </button>
           </ng-container>
-          <ng-container *ngIf="auction?.winnerID !== currentUser.id">
+          <ng-container *ngIf="currentUser && auction?.winnerID !== currentUser.uid">
             <div class="auction-result">Auction ended. Final price: HUF {{ auction?.price | number:'1.0-0' }}</div>
           </ng-container>
         </div>
