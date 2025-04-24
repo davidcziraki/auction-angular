@@ -33,4 +33,10 @@ export interface Auction {
   isDealer?: boolean;
   mobile?: number;
   submissionDate?: Date;
+  bids?: Bid[];
+}
+
+export interface Bid {
+  bidAmount: number;
+  bidDate: Date;
 }

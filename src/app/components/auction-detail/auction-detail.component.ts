@@ -3,32 +3,30 @@ import { Auction } from '../../models/auction';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ButtonDirective } from 'primeng/button';
-import { Ripple } from 'primeng/ripple';
 import { GalleriaModule } from 'primeng/galleria';
 import { FormsModule } from '@angular/forms';
-import { InputText } from 'primeng/inputtext';
 import { AuctionService } from '../../services/auction.service';
 import { Observable } from 'rxjs';
 import { MessageService } from 'primeng/api';
-import { Toast } from 'primeng/toast';
 import { getAuth } from '@angular/fire/auth';
 import { FirestoreService } from '../../services/firestore.service';
+import { Toast } from 'primeng/toast';
 import { Dialog } from 'primeng/dialog';
+import { InputText } from 'primeng/inputtext';
+import { ButtonDirective } from 'primeng/button';
 
 @Component({
   selector: 'app-auction-detail',
   imports: [
     DatePipe,
-    ButtonDirective,
     DecimalPipe,
-    RouterLink,
-    Ripple,
     GalleriaModule,
     FormsModule,
-    InputText,
     Toast,
     Dialog,
+    InputText,
+    ButtonDirective,
+    RouterLink,
   ],
   templateUrl: './auction-detail.component.html',
   styleUrl: './auction-detail.component.scss',
@@ -36,8 +34,13 @@ import { Dialog } from 'primeng/dialog';
 })
 export class AuctionDetailComponent {
   auction: Auction | null = null;
+  auctions: Auction[] = [];
+
   auction$!: Observable<Auction | null>;
   vehicleDetails: any;
+  currentUser: any;
+
+  activeTab = 'details';
 
   displayShareDialog: boolean = false;
   shareLink: string = '';
@@ -62,7 +65,7 @@ export class AuctionDetailComponent {
     },
     {
       breakpoint: '575px',
-      numVisible: 1,
+      numVisible: 6,
     },
   ];
 
@@ -80,6 +83,10 @@ export class AuctionDetailComponent {
     return this.bidAmount >= this.minBid;
   }
 
+  trackTab(index: number, tab: any): any {
+    return tab.value;
+  }
+
   // This method toggles the visibility of the bidding section
   toggleBiddingSection() {
     if (!this.biddingSectionVisible) {
@@ -93,6 +100,10 @@ export class AuctionDetailComponent {
   }
 
   ngOnInit() {
+    this.route.paramMap.subscribe(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
     this.route.params.subscribe((params) => {
       const id: string | undefined = params['id'];
 
@@ -102,8 +113,8 @@ export class AuctionDetailComponent {
       }
 
       const auth = getAuth();
-      const currentUser = auth.currentUser;
-      const currentUserID = currentUser?.uid ?? '';
+      this.currentUser = auth.currentUser;
+      const currentUserID = this.currentUser?.uid ?? '';
 
       this.auction$ = this.firestoreService.getAuction(id, currentUserID);
 
@@ -120,6 +131,9 @@ export class AuctionDetailComponent {
           this.setUpImages(auctionData);
 
           this.startCountdown();
+
+          let currentAuctionID = this.auction?.id;
+          this.loadAuctions(currentUserID, currentAuctionID);
         }
       });
     });
@@ -170,8 +184,30 @@ export class AuctionDetailComponent {
     const currentUserID = currentUser?.uid as string;
 
     this.auction$ = this.firestoreService.getAuction(id, currentUserID);
+  }
 
-    console.log(this.auction$);
+  async loadAuctions(userId?: string, currentAuctionId?: string) {
+    try {
+      // Fetch all auctions with additional data
+      const allAuctions = await this.firestoreService.getAuctions(userId);
+
+      // Filter out auctions that are not active and not the current one
+      const activeAuctions = allAuctions.filter(
+        (a) =>
+          a.status?.toLowerCase() === 'active' && a.id !== currentAuctionId,
+      );
+
+      // Shuffle the array randomly
+      const shuffled = activeAuctions.sort(() => Math.random() - 0.5);
+
+      // Pick 3 random auctions
+      this.auctions = shuffled.slice(0, 3);
+
+      // Start countdown timers
+      this.startGlobalCountdown();
+    } catch (error) {
+      console.error('Error loading auctions:', error);
+    }
   }
 
   openBidding() {
@@ -416,6 +452,19 @@ END:VCALENDAR`;
     this.displayCalendarDialog = false;
   }
 
+  setAutoBid(percentage: number) {
+    if (this.auction?.price) {
+      const increase = Math.ceil(this.auction.price * (percentage / 100));
+      this.bidAmount = this.auction.price + increase;
+    }
+  }
+
+  calcAutoBid(percentage: number): number {
+    return this.auction?.price
+      ? Math.ceil(this.auction.price * (percentage / 100))
+      : 0;
+  }
+
   private preloadAuctionImage(imageUrl: string | undefined) {
     if (!imageUrl) {
       console.error('No image URL provided.');
@@ -467,5 +516,42 @@ END:VCALENDAR`;
     } else {
       this.auction['countdown'] = `${minutes}m ${seconds}s`;
     }
+  }
+
+  private startGlobalCountdown() {
+    // Initial update
+    this.updateAllCountdowns();
+
+    // Single interval for all auctions
+    this.countdownInterval = window.setInterval(() => {
+      this.updateAllCountdowns();
+    }, 1000);
+  }
+
+  private updateAllCountdowns() {
+    const now = Date.now(); // Get current timestamp once
+
+    this.auctions.forEach((auction) => {
+      const timeLeft = auction.endTimeDate.getTime() - now;
+
+      if (timeLeft <= 0) {
+        auction['countdown'] = 'Auction Ended';
+        return;
+      }
+
+      // More efficient time calculations using division and modulo
+      const days = Math.floor(timeLeft / 86400000); // 1000 * 60 * 60 * 24
+      const hours = Math.floor((timeLeft % 86400000) / 3600000); // 1000 * 60 * 60
+      const minutes = Math.floor((timeLeft % 3600000) / 60000); // 1000 * 60
+      const seconds = Math.floor((timeLeft % 60000) / 1000);
+
+      if (days >= 1) {
+        auction['countdown'] = `${days}d ${hours}h`;
+      } else if (hours >= 1) {
+        auction['countdown'] = `${hours}h ${minutes}m`;
+      } else {
+        auction['countdown'] = `${minutes}m ${seconds}s`;
+      }
+    });
   }
 }

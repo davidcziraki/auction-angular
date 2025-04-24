@@ -185,7 +185,6 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.uniqueMakes = [...new Set(this.auctions.map((a) => a.make))].map(
         (make) => ({ label: make, value: make }),
       );
-      console.log('Unique Makes:', this.uniqueMakes); // Verify the unique makes
 
       // Preload images asynchronously
       await Promise.all(

@@ -18,7 +18,7 @@ import {
 import { UserModel } from '../models/user';
 import {
   catchError,
-  forkJoin,
+  combineLatest,
   from,
   map,
   Observable,
@@ -122,6 +122,7 @@ export class FirestoreService {
 
     const auctionRef = doc(this.firestore, 'auctions', id);
     const bidsRef = collection(this.firestore, `auctions/${id}/bids`);
+    const imageRef = ref(this.storage, `auction-images/${id}/main.jpg`);
 
     return docData(auctionRef, { idField: 'id' }).pipe(
       switchMap((auctionData: any) => {
@@ -131,19 +132,15 @@ export class FirestoreService {
           id: id,
           ...auctionData,
           endTimeDate: auctionData.endtime?.toDate() ?? new Date(),
+          bids: [],
         };
 
-        // Fetch image URL dynamically from Firebase Storage
-        const imageRef = ref(
-          this.storage,
-          `auction-images/${auctionData.id}.jpg`,
-        );
-
-        return forkJoin({
-          imageUrl: from(getDownloadURL(imageRef)).pipe(
+        // Fetch image URL and other auction data
+        return combineLatest([
+          from(getDownloadURL(imageRef)).pipe(
             catchError(() => of('error.jpg')),
-          ),
-          isFavourited: from(
+          ), // Image URL
+          from(
             getDocs(
               query(
                 collection(this.firestore, `auctions/${id}/favourites`),
@@ -153,16 +150,28 @@ export class FirestoreService {
           ).pipe(
             map((favSnapshot) => !favSnapshot.empty),
             catchError(() => of(false)),
-          ),
-          bidCount: from(getDocs(bidsRef)).pipe(
-            map((bidSnapshot) => bidSnapshot.size),
-            catchError(() => of(0)),
-          ),
-        }).pipe(
-          map(({ imageUrl, isFavourited, bidCount }) => {
+          ), // Check if favourited
+          from(getDocs(bidsRef)).pipe(
+            map((bidSnapshot) => {
+              return bidSnapshot.docs
+                .map((doc) => {
+                  const bidData = doc.data();
+                  return {
+                    bidAmount: bidData['bid'],
+                    bidDate: bidData['timestamp']?.toDate() ?? new Date(),
+                  };
+                })
+                .sort((a, b) => b.bidAmount - a.bidAmount);
+            }),
+            catchError(() => of([])), // Return empty array in case of error
+          ), // Bids data
+        ]).pipe(
+          map(([imageUrl, isFavourited, bids]) => {
             auction.imageUrl = imageUrl;
             auction.isFavourite = isFavourited;
-            auction.bidCount = bidCount; // Store bid count in auction object
+            auction.bids = bids;
+            auction.bidCount = bids.length; // Count bids
+
             return auction;
           }),
         );

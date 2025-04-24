@@ -1,190 +1,365 @@
-<!-- Main auction header bar -->
-<div class="auction-bar">
-  <!-- Back Button -->
-  <button [routerLink]="['/search']" class="back-button" icon="pi pi-chevron-left" pButton></button>
+<div class="page-container">
 
-  <!-- Main Auction Info -->
-  <div class="auction-info main">
-    <!--    <h1 class="vehicle-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h1>-->
-  </div>
-
-
-  <!-- Countdown Timer -->
-  <div class="auction-info">
-    <span class="countdown">{{ auction?.countdown }}</span>
-    <div class="label">{{ auction?.endTimeDate | date: 'MMM d h:mm a' }}</div>
-  </div>
-
-  <!-- Bids Count -->
-  <div class="auction-info">
-    <span class="bids">{{ bids }}</span>
-    <div class="label">BIDS</div>
-  </div>
-
-  <!-- Action Buttons -->
-  <div class="actions">
-    <button (click)="toggleFavourite(auction)" class="watch-button" pButton>
-      <i [ngClass]="auction?.isFavourite ? 'pi pi-heart-fill' : 'pi pi-heart'"></i>
-      WATCH
-    </button>
-
-    <button (click)="openShareModal()" class="share-button" pButton>
-      <i class="pi pi-share-alt"></i>
-      SHARE
-    </button>
-    <button (click)="openCalendarModal()" class="calendar-button" pButton>
-      <i class="pi pi-calendar-plus"></i>
-    </button>
-  </div>
-
-</div>
-
-<!-- Main content container -->
-<div class="auction-container">
-  <!-- Left side - gallery -->
-  <div class="gallery-container">
-    <p-galleria
-      [containerStyle]="{ 'max-width': '100%', 'border-radius': '8px', 'overflow': 'hidden' }"
-      [numVisible]="5"
-      [responsiveOptions]="responsiveOptions"
-      [showItemNavigators]="true"
-      [value]="images"
-      class="main-gallery"
-    >
-      <ng-template #item let-item>
-        <img [src]="item.itemImageSrc" style="width:100%; height:100%; object-fit:cover;"/>
-      </ng-template>
-      <ng-template #thumbnail let-item>
-        <img [src]="item.thumbnailImageSrc" style="width:100%; height:100%; object-fit:cover;"/>
-      </ng-template>
-    </p-galleria>
-  </div>
-
-  <!-- Right side - details -->
-  <div class="details-container">
-    <div class="vehicle-header">
-      <h1 class="vehicle-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h1>
-      <!--      <div class="auction-status">Seller: davidcz1</div>-->
-      <div class="auction-status">Ends: {{ auction?.endTimeDate | date: 'MMM d h:mm a' }}</div>
+  <div class="auction-bar">
+    <!-- Back Button -->
+    <div class="breadcrumb">
+      <a [routerLink]="['/home']">Home</a> &gt; <a [routerLink]="['/search']">Auctions</a> &gt;
+      <span>{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</span>
     </div>
 
-    <!-- Features/Specs grid -->
-    <div class="features-container">
-      <div class="feature-card">
-        <img alt="Calendar Icon" class="feature-icon" src="icons/calendar.png"/>
-        <div class="feature-text">{{ auction?.year }}</div>
-      </div>
-      <div class="feature-card">
-        <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
-        <div class="feature-text">{{ auction?.mileage | number }} miles</div>
-      </div>
-      <div class="feature-card">
-        <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
-        <div class="feature-text">{{ auction?.transmission }}</div>
-      </div>
-      <div class="feature-card">
-        <img alt="Engine Icon" class="feature-icon" src="icons/engine.png"/>
-        <div class="feature-text">3 ltr</div>
-      </div>
-      <div class="feature-card">
-        <img alt="Colour Icon" class="feature-icon" src="icons/colour.png"/>
-        <div class="feature-text">{{ auction?.colour }}</div>
-      </div>
-      <div class="feature-card">
-        <img alt="Fuel Icon" class="feature-icon" src="icons/fuel.png"/>
-        <div class="feature-text">{{ auction?.fuel }}</div>
-      </div>
+
+    <!-- Main Auction Info -->
+    <div class="auction-info main">
+      <!--    <h1 class="vehicle-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h1>-->
     </div>
 
-    <!-- Bid section -->
-    <div class="bid-section">
-      <div class="current-bid">
-        <div class="bid-amount">HUF {{ (auction$ | async)?.price | number }}</div>
-        <div class="bid-count">CURRENT BID</div>
+
+    <!-- Countdown Timer -->
+    <div class="auction-info">
+      <span class="countdown">{{ auction?.countdown }}</span>
+      <div class="label">{{ auction?.endTimeDate | date: 'MMM d h:mm a' }}</div>
+    </div>
+
+    <!-- Bids Count -->
+    <div class="auction-info">
+      <span class="bids">{{ bids }}</span>
+      <div class="label">BIDS</div>
+    </div>
+
+
+  </div>
+
+
+  <!-- Main content container -->
+  <div class="auction-container">
+    <!-- Left side - gallery -->
+    <div class="gallery-container">
+      <p-galleria
+        [circular]="true"
+
+        [numVisible]="5"
+        [responsiveOptions]="responsiveOptions" [showItemNavigators]="true"
+        [value]="images"
+        class="main-gallery"
+      >
+        <ng-template #item let-item>
+          <img [src]="item.itemImageSrc" alt="Extra images of vehicle"
+               style="width:100%; height:100%; object-fit:cover;"/>
+        </ng-template>
+        <ng-template #thumbnail let-item>
+          <img [src]="item.thumbnailImageSrc" alt="Main image" style="width:100%; height:100%; object-fit:cover;"/>
+        </ng-template>
+      </p-galleria>
+    </div>
+
+    <!-- Right side - details -->
+    <div class="details-container">
+      <div class="vehicle-header">
+        <h1 class="vehicle-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h1>
+        <!--      <div class="auction-status">Seller: davidcz1</div>-->
+        <div class="auction-status">Ends: {{ auction?.endTimeDate | date: 'MMM d h:mm a' }}</div>
       </div>
 
-      <div *ngIf="biddingSectionVisible" class="bidding-form">
-        <label for="bidAmount">Your Bid Amount</label>
-        <input [(ngModel)]="bidAmount"
-               [min]="minBid" id="bidAmount" pInputText
-               pattern="\d*" placeholder="Enter your bid"
-               step="1" type="number">
-
-        <small *ngIf="bidError" class="error-text">{{ bidError }}</small>
+      <!-- Features/Specs grid -->
+      <div class="features-container">
+        <div class="feature-card">
+          <img alt="Calendar Icon" class="feature-icon" src="icons/calendar.png"/>
+          <div class="feature-text">{{ auction?.year }}</div>
+        </div>
+        <div class="feature-card">
+          <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
+          <div class="feature-text">{{ auction?.mileage | number }} miles</div>
+        </div>
+        <div class="feature-card">
+          <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
+          <div class="feature-text">{{ auction?.transmission }}</div>
+        </div>
+        <div class="feature-card">
+          <img alt="Engine Icon" class="feature-icon" src="icons/engine.png"/>
+          <div class="feature-text">3 ltr</div>
+        </div>
+        <div class="feature-card">
+          <img alt="Colour Icon" class="feature-icon" src="icons/colour.png"/>
+          <div class="feature-text">{{ auction?.colour }}</div>
+        </div>
+        <div class="feature-card">
+          <img alt="Fuel Icon" class="feature-icon" src="icons/fuel.png"/>
+          <div class="feature-text">{{ auction?.fuel }}</div>
+        </div>
       </div>
 
-      <button (click)="toggleBiddingSection()"
-              [disabled]="!canPlaceBid && !biddingSectionVisible"
-              [ngClass]="{
-          'p-button-primary': biddingSectionVisible,
-          'p-button-success': !biddingSectionVisible
-        }"
-              class="place-bid-button"
-              pButton
-              pRipple>
-        <i class="pi pi-check"></i> {{ biddingSectionVisible ? 'Place Bid' : 'Open Bidding' }}
+      <!-- Bid section -->
+
+      <div class="auction-bidding">
+        <div class="bid-info">
+          <div class="current-bid">
+            <span class="label">Current Bid:</span>
+            <span class="value">HUF {{ auction?.price | number:'1.0-0' }}</span>
+          </div>
+          <div class="bid-data">
+            <div class="bid-count">
+              <span class="label">Bids:</span>
+              <span class="value">{{ auction?.bidCount }}</span>
+            </div>
+            <div class="time-left">
+
+              <span class="label">Time Left:</span>
+              <span class="value">{{ auction?.countdown }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="auction?.status?.toLowerCase() === 'active'" class="bid-actions">
+          <div class="bid-input">
+            <div class="auto-bid-buttons">
+              <button (click)="setAutoBid(10)" type="button">10% (HUF {{ calcAutoBid(10) | number:'1.0-0' }})</button>
+              <button (click)="setAutoBid(20)" type="button">20% (HUF {{ calcAutoBid(20) | number:'1.0-0' }})</button>
+            </div>
+
+            <input [(ngModel)]="bidAmount" [min]="minBid" step="100" type="number">
+          </div>
+
+
+          <button (click)="placeBid()" class="place-bid-btn ">
+            <i class="pi pi-check"></i> Place Bid
+          </button>
+
+          <div class="min-bid-note">Minimum bid: HUF {{ minBid | number:'1.0-0' }}</div>
+          <small *ngIf="bidError" class="error-text">{{ bidError }}</small>
+
+        </div>
+
+        <div *ngIf="auction?.status === 'completed'" class="auction-ended-msg">
+          <ng-container *ngIf="auction?.winnerID === currentUser.uid">
+            <div class="winner-msg">Congratulations! You won this auction.</div>
+            <button class="checkout-btn" pButton severity="primary"
+            >Visit your account settings to complete the purchase.
+            </button>
+          </ng-container>
+          <ng-container *ngIf="auction?.winnerID !== currentUser.id">
+            <div class="auction-result">Auction ended. Final price: HUF {{ auction?.price | number:'1.0-0' }}</div>
+          </ng-container>
+        </div>
+
+        <div class="actions-section">
+          <button (click)="toggleFavourite(auction)" [class.favorite-active]="auction?.isFavourite"
+                  class="favorite-button watch-btn">
+            <i [ngClass]="auction?.isFavourite ? 'pi-heart-fill' : 'pi-heart'" class="pi"></i>
+          </button>
+          <button (click)="openShareModal()" class="watch-btn">
+            <i class="pi pi-share-alt"></i>
+            SHARE
+          </button>
+
+          <button (click)="openCalendarModal()" class="share-btn">
+            <i class="pi pi-calendar-plus"></i>
+
+          </button>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- SHARE MODAL -->
+      <p-dialog [(visible)]="displayShareDialog" [closable]="true" [header]="'Share Auction'" [modal]="true"
+                class="share-modal">
+        <div class="share-modal-container">
+          <p>Copy and share this auction link:</p>
+
+          <div class="share-input-container">
+            <input [(ngModel)]="shareLink" pInputText readonly type="text">
+            <button (click)="copyToClipboard()" class="copy-button" pButton>
+              <i class="pi pi-copy"></i> Copy
+            </button>
+          </div>
+
+          <p class="share-text">Or share on:</p>
+          <div class="social-buttons">
+            <button (click)="shareOnFacebook()" class="facebook-button" pButton>
+              <i class="pi pi-facebook"></i> Facebook
+            </button>
+            <button (click)="shareOnTwitter()" class="twitter-button" pButton>
+              <i class="pi pi-twitter"></i> Twitter
+            </button>
+            <button (click)="shareOnWhatsApp()" class="whatsapp-button" pButton>
+              <i class="pi pi-whatsapp"></i> WhatsApp
+            </button>
+          </div>
+        </div>
+      </p-dialog>
+
+      <!-- CALENDAR MODAL -->
+      <p-dialog [(visible)]="displayCalendarDialog" [closable]="true" [header]="'Add to Calendar'" [modal]="true">
+        <div class="calendar-modal-container">
+          <p>Choose where to add this auction to your calendar:</p>
+
+          <div class="calendar-buttons">
+            <button (click)="addToGoogleCalendar()" class="calendar-button google" pButton>
+              <i class="pi pi-google"></i> Google Calendar
+            </button>
+
+            <button (click)="addToOutlookCalendar()" class="calendar-button outlook" pButton>
+              <i class="pi pi-calendar"></i> Outlook / Apple Calendar
+            </button>
+
+            <button (click)="addToCalendar()" class="calendar-button ics" pButton>
+              <i class="pi pi-download"></i> Download .ICS File
+            </button>
+          </div>
+        </div>
+      </p-dialog>
+
+
+    </div>
+  </div>
+
+  <div class="tabs">
+    <!-- Tab Headers -->
+    <div class="tab-header">
+      <button (click)="activeTab = 'details'" [class.active]="activeTab === 'details'" class="tab-button">
+        Vehicle Details
       </button>
-
-
+      <button (click)="activeTab = 'history'" [class.active]="activeTab === 'history'" class="tab-button">
+        History & Documents
+      </button>
+      <button (click)="activeTab = 'bidding'" [class.active]="activeTab === 'bidding'" class="tab-button">
+        Bidding History
+      </button>
+      <!-- Uncomment for additional tabs -->
+      <!-- <button class="tab-button" [class.active]="activeTab === 'comments'" (click)="activeTab = 'comments'">
+        Q&A ({{ auction?.comments?.length || 0 }})
+      </button> -->
     </div>
 
-    <div *ngIf="auction?.description" class="auction-description bid-section">
-      {{ auction?.description }}
-    </div>
+    <!-- Tab Panels -->
+    <div class="tab-content">
+      <div *ngIf="activeTab === 'details'">
+        <h3>Vehicle Specifications</h3>
+        <div class="specs">
+          <div class="spec-item">
+            <div class="spec-title"><strong>VIN:</strong></div>
+            <div class="spec-value"></div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-title"><strong>Exterior Color:</strong></div>
+            <div class="spec-value">{{ auction?.colour }}</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-title"><strong>Interior Color:</strong></div>
+            <div class="spec-value">{{ auction?.colour }}</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-title"><strong>Body Style:</strong></div>
+            <div class="spec-value">Saloon</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-title"><strong>Fuel Type:</strong></div>
+            <div class="spec-value">{{ auction?.fuel }}</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-title"><strong>Drivetrain:</strong></div>
+            <div class="spec-value">{{ auction?.transmission }}</div>
+          </div>
+        </div>
 
+
+        <h3 class="mt-6">Seller's Description</h3>
+        <div [innerHTML]="auction?.description"></div>
+      </div>
+
+      <div *ngIf="activeTab === 'history'">
+        <h3>Vehicle History</h3>
+        <div class="links">
+          <a class="text-blue-500 hover:underline"><i class="pi pi-file"></i> Vehicle History Report</a>
+          <a class="text-blue-500 hover:underline"><i class="pi pi-file"></i> Service Records</a>
+          <a class="text-blue-500 hover:underline"><i class="pi pi-file"></i> Title Information</a>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'bidding'">
+        <h3>Bidding History</h3>
+        <div class="bidding-history-grid">
+          <div><strong>Bidder</strong></div>
+          <div><strong>Amount</strong></div>
+          <div><strong>Time</strong></div>
+
+          <!-- Loop through each bid -->
+          <div *ngFor="let bid of auction?.bids" class="bidding-row">
+            <div>*****</div> <!-- Replace with actual bidder info -->
+            <div>HUF {{ bid.bidAmount | number: '1.0-0' }}</div>
+            <div>{{ bid.bidDate | date: 'MMM dd, yyyy hh:mm a' }}</div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Add Comments tab content here if necessary -->
+      <!-- <div *ngIf="activeTab === 'comments'">Questions & Answers</div> -->
+    </div>
+  </div>
+
+
+  <div class="suggestions-container">
+    <h2 class="suggestions-title">You may also like</h2>
+    <p>Explore similar vehicles that might interest you.</p>
+
+
+    <div class="suggestion-grid">
+
+      <div *ngFor="let auction of auctions" class="suggestion-card">
+        <div [routerLink]="['/auction', auction.id]" class="suggestion-image-wrapper">
+          <img [src]="auction.mainImageUrl" alt="{{ auction.year }} {{ auction.make }} {{ auction.model }}"
+               class="suggestion-image"/>
+
+          <div class="suggestion-badges">
+            <span *ngIf="auction.isPopular" class="badge badge-popular">Popular</span>
+            <span *ngIf="auction.isEndingSoon" class="badge badge-ending">Ending Soon</span>
+          </div>
+        </div>
+
+        <div class="suggestion-content">
+          <h3 class="suggestion-title">{{ auction.year }} {{ auction.make }} {{ auction.model }}</h3>
+
+          <div class="suggestion-features">
+            <div class="feature-item">
+              <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
+              <span>{{ auction.transmission }}</span>
+            </div>
+
+            <div class="feature-item">
+              <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
+              <span>{{ auction.mileage | number }} miles</span>
+            </div>
+          </div>
+
+          <div class="suggestion-price">
+            <span class="price-label">Current Bid:</span>
+            <span class="price-value">HUF {{ auction.price | number }}</span>
+          </div>
+
+          <div class="suggestion-footer">
+            <div *ngIf="auction.countdown" class="suggestion-timer">
+              <i class="pi pi-clock"></i>
+              <span>{{ auction.countdown }}</span>
+            </div>
+
+            <button
+              (click)="toggleFavourite(auction); $event.preventDefault()"
+              [class.favorite-active]="auction.isFavourite"
+              class="favourite-suggestion-button">
+              <i [ngClass]="auction.isFavourite ? 'pi-heart-fill' : 'pi-heart'" class="pi"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 
-  <!-- Toast notification -->
-  <p-toast class="custom-toast"></p-toast>
 
-
-  <!-- SHARE MODAL -->
-  <p-dialog [(visible)]="displayShareDialog" [closable]="true" [header]="'Share Auction'" [modal]="true"
-            class="share-modal">
-    <div class="share-modal-container">
-      <p>Copy and share this auction link:</p>
-
-      <div class="share-input-container">
-        <input [(ngModel)]="shareLink" pInputText readonly type="text">
-        <button (click)="copyToClipboard()" class="copy-button" pButton>
-          <i class="pi pi-copy"></i> Copy
-        </button>
-      </div>
-
-      <p class="share-text">Or share on:</p>
-      <div class="social-buttons">
-        <button (click)="shareOnFacebook()" class="facebook-button" pButton>
-          <i class="pi pi-facebook"></i> Facebook
-        </button>
-        <button (click)="shareOnTwitter()" class="twitter-button" pButton>
-          <i class="pi pi-twitter"></i> Twitter
-        </button>
-        <button (click)="shareOnWhatsApp()" class="whatsapp-button" pButton>
-          <i class="pi pi-whatsapp"></i> WhatsApp
-        </button>
-      </div>
-    </div>
-  </p-dialog>
-
-  <!-- CALENDAR MODAL -->
-  <p-dialog [(visible)]="displayCalendarDialog" [closable]="true" [header]="'Add to Calendar'" [modal]="true">
-    <div class="calendar-modal-container">
-      <p>Choose where to add this auction to your calendar:</p>
-
-      <div class="calendar-buttons">
-        <button (click)="addToGoogleCalendar()" class="calendar-button google" pButton>
-          <i class="pi pi-google"></i> Google Calendar
-        </button>
-
-        <button (click)="addToOutlookCalendar()" class="calendar-button outlook" pButton>
-          <i class="pi pi-calendar"></i> Outlook / Apple Calendar
-        </button>
-
-        <button (click)="addToCalendar()" class="calendar-button ics" pButton>
-          <i class="pi pi-download"></i> Download .ICS File
-        </button>
-      </div>
-    </div>
-  </p-dialog>
 </div>
+
+<p-toast class="custom-toast"></p-toast>
