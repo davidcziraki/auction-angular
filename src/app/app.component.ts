@@ -295,13 +295,15 @@ export class AppComponent implements OnInit {
   }
 
   async forgotPassword() {
-    if (!this.emailLogin) {
+    const email = this.loginForm.get('email')?.value;
+
+    if (!email) {
       alert('Please enter your email first.');
       return;
     }
 
     try {
-      await this.authService.sendPasswordReset(this.emailLogin);
+      await this.authService.sendPasswordReset(email);
       alert('Password reset email sent. Please check your inbox.');
     } catch (error) {
       console.error('Error sending password reset email:', error);

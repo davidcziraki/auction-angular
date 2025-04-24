@@ -187,127 +187,176 @@
 <p-toast></p-toast>
 
 
-<!-- Login/Register Dialog -->
-<p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" class="auth-dialog">
-  <div class="auth-container">
-    <div class="auth-header">
-      <img alt="Logo" class="auth-logo" src="logo.ico">
-      <div class="auth-title">
-        <span *ngIf="!isRegistering">Welcome Back</span>
-        <span *ngIf="isRegistering">Register</span>
-      </div>
-      <span class="auth-subtitle">
-        <span *ngIf="!isRegistering">Don't have an account?</span>
-        <span *ngIf="isRegistering">Already have an account?</span>
-      </span>
-      <a (click)="toggleForm()" class="auth-toggle">
-        <span *ngIf="!isRegistering">Create today!</span>
-        <span *ngIf="isRegistering">Back to Sign In</span>
-      </a>
-    </div>
+<div class="auth-dialog">
+  <!-- Login/Register Dialog -->
+  <p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" [style]="{ width: '25rem' }">
+    <div class="auth-container">
+      <div class="auth-header">
 
-    <!-- Login Form -->
-    <div *ngIf="!isRegistering" [formGroup]="loginForm">
-      <label for="emailLogin">Email</label>
-      <input formControlName="email" id="emailLogin" pInputText placeholder="Email address" type="text">
-
-      <!-- Validation message for email -->
-      <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-        <small *ngIf="loginForm.get('email')?.hasError('required')">Email is required.</small>
-        <small *ngIf="loginForm.get('email')?.hasError('email')">Please enter a valid email.</small>
-      </div>
-
-      <label for="passwordLogin">Password</label>
-      <input formControlName="password" id="passwordLogin" pInputText placeholder="Password" type="password">
-
-      <!-- Validation message for password -->
-      <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-        <small *ngIf="loginForm.get('password')?.hasError('required')">Password is required.</small>
-
-      </div>
-
-      <div class="auth-options">
-        <div class="auth-remember">
-          <p-checkbox [(ngModel)]="rememberMe" [binary]="true" [ngModelOptions]="{standalone: true}"
-                      id="rememberme1"></p-checkbox>
-          <label for="rememberme1">Remember me</label>
+        <div class="brand-overlay">
+          <div class="brand-text">CarLicit</div>
+          <div class="brand-subtext">Premium Car Auctions</div>
         </div>
-        <a (click)="forgotPassword()" class="auth-forgot">Forgot password?</a>
+
+
       </div>
 
-      <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+      <!-- Login Form -->
+      <div *ngIf="!isRegistering" [formGroup]="loginForm" class="auth-form">
+        <div class="form-group">
+          <label for="emailLogin">Email</label>
+          <input class="auth-input" formControlName="email" id="emailLogin" pInputText
+                 placeholder="Enter your email address"
+                 type="text">
 
-      <button (click)="login()" class="auth-button" icon="pi pi-user" label="Sign In" pButton pRipple></button>
+          <!-- Validation message for email -->
+          <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="validator-container">
+            <small *ngIf="loginForm.get('email')?.hasError('required')" class="validator-text">Email is
+              required.</small>
+            <small *ngIf="loginForm.get('email')?.hasError('email')" class="validator-text">Please enter a valid
+              email.</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="passwordLogin">Password</label>
+          <input class="auth-input" formControlName="password" id="passwordLogin" pInputText
+                 placeholder="Enter your password" type="password">
+
+          <!-- Validation message for password -->
+          <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+               class="validator-container">
+            <small *ngIf="loginForm.get('password')?.hasError('required')" class="validator-text">Password is
+              required.</small>
+          </div>
+        </div>
+
+        <div class="auth-options">
+          <div class="auth-remember">
+            <p-checkbox [(ngModel)]="rememberMe" [binary]="true" [ngModelOptions]="{standalone: true}"
+                        id="rememberme1"></p-checkbox>
+            <label for="rememberme1">Remember me</label>
+          </div>
+          <a (click)="forgotPassword()" class="auth-forgot">Forgot password?</a>
+
+        </div>
+
+        <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+
+        <button (click)="login()" class="auth-button" pButton pRipple>
+          <i class="pi pi-user"></i>
+          <span>Sign In</span>
+        </button>
+
+        <p class="rememberme1">
+          Don't have an account? <a (click)="toggleForm()" class="auth-forgot">Create Account</a>
+        </p>
+
+
+      </div>
+
+
+      <!-- Registration Form -->
+      <div *ngIf="isRegistering" [formGroup]="registerForm" class="auth-form">
+        <div class="form-group">
+          <label for="emailRegister">Email</label>
+          <input class="auth-input" formControlName="email" id="emailRegister" pInputText
+                 placeholder="Enter your email address" type="email">
+
+          <!-- Validation message for registration email -->
+          <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+               class="validator-container">
+            <small *ngIf="registerForm.get('email')?.hasError('required')" class="validator-text">Email is
+              required.</small>
+            <small *ngIf="registerForm.get('email')?.hasError('email')" class="validator-text">Please enter a valid
+              email.</small>
+          </div>
+        </div>
+
+        <!-- First Name -->
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input class="auth-input" formControlName="firstName" id="firstName" pInputText
+                 placeholder="Enter your first name"
+                 type="text"/>
+
+          <!-- Validation message for first name -->
+          <div *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
+               class="validator-container">
+            <small *ngIf="registerForm.get('firstName')?.hasError('required')" class="validator-text">First Name is
+              required.</small>
+            <small *ngIf="registerForm.get('firstName')?.hasError('pattern')" class="validator-text">Only letters,
+              spaces, apostrophes and hyphens are allowed.</small>
+          </div>
+        </div>
+
+        <!-- Surname -->
+        <div class="form-group">
+          <label for="lastName">Surname</label>
+          <input class="auth-input" formControlName="lastName" id="lastName" pInputText
+                 placeholder="Enter your surname"
+                 type="text"/>
+
+          <!-- Validation message for last name -->
+          <div *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched"
+               class="validator-container">
+            <small *ngIf="registerForm.get('lastName')?.hasError('required')" class="validator-text">Surname is
+              required.</small>
+            <small *ngIf="registerForm.get('lastName')?.hasError('pattern')" class="validator-text">Only letters,
+              spaces, apostrophes and hyphens are allowed.</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Date of Birth</label>
+          <input class="auth-input" formControlName="dob" id="dob" pInputText placeholder="Select your date of birth"
+                 type="date">
+
+          <!-- Validation message for date of birth -->
+          <div *ngIf="registerForm.get('dob')?.invalid && registerForm.get('dob')?.touched"
+               class="validator-container">
+            <small *ngIf="registerForm.get('dob')?.hasError('required')" class="validator-text">Date of Birth is
+              required.</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="passwordRegister">Password</label>
+          <input class="auth-input" formControlName="password" id="passwordRegister" pInputText
+                 placeholder="Create a strong password" type="password">
+
+          <!-- Validation message for password -->
+          <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+               class="validator-container">
+            <small *ngIf="registerForm.get('password')?.hasError('required')" class="validator-text">Password is
+              required.</small>
+            <small *ngIf="registerForm.get('password')?.hasError('minlength')" class="validator-text">Password must be
+              at least 6 characters long.</small>
+            <small *ngIf="registerForm.get('password')?.errors?.['invalidPassword']" class="validator-text">
+              {{ registerForm.get('password')?.errors?.['invalidPassword'] }}
+            </small>
+          </div>
+        </div>
+
+        <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+
+        <!-- Register button, disabled until form is valid -->
+        <button
+          (click)="register()"
+          [disabled]="!registerForm.valid"
+          class="auth-button"
+          pButton
+          pRipple>
+          <i class="pi pi-user"></i>
+          <span>Register</span>
+        </button>
+
+        <p class="rememberme1">
+          Already have an account? <a (click)="toggleForm()" class="auth-forgot">Sign in</a>
+        </p>
+
+      </div>
     </div>
+  </p-dialog>
 
-    <!-- Registration Form -->
-    <div *ngIf="isRegistering" [formGroup]="registerForm">
-      <label for="emailRegister">Email</label>
-      <input formControlName="email" id="emailRegister" pInputText placeholder="Email address" type="email">
-
-      <!-- Validation message for registration email -->
-      <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-        <small *ngIf="registerForm.get('email')?.hasError('required')">Email is required.</small>
-        <small *ngIf="registerForm.get('email')?.hasError('email')">Please enter a valid email.</small>
-      </div>
-      <!-- First Name -->
-      <label for="firstName">First Name</label>
-      <input formControlName="firstName" id="firstName" pInputText placeholder="First Name" type="text"/>
-
-      <!-- Validation message for first name -->
-      <div *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
-        <small *ngIf="registerForm.get('firstName')?.hasError('required')">First Name is required.</small>
-        <small *ngIf="registerForm.get('firstName')?.hasError('pattern')">Only letters, spaces, apostrophes and
-          hyphens are allowed.</small>
-      </div>
-
-      <!-- Surname -->
-      <label for="lastName">Surname</label>
-      <input formControlName="lastName" id="lastName" pInputText placeholder="Surname" type="text"/>
-
-      <!-- Validation message for last name -->
-      <div *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
-        <small *ngIf="registerForm.get('lastName')?.hasError('required')">Surname is required.</small>
-        <small *ngIf="registerForm.get('lastName')?.hasError('pattern')">Only letters, spaces, apostrophes and hyphens
-          are allowed.</small>
-      </div>
-
-      <label for="dob">Date of Birth</label>
-      <input formControlName="dob" id="dob" pInputText placeholder="Date of Birth" type="date">
-
-      <!-- Validation message for date of birth -->
-      <div *ngIf="registerForm.get('dob')?.invalid && registerForm.get('dob')?.touched">
-        <small *ngIf="registerForm.get('dob')?.hasError('required')">Date of Birth is required.</small>
-      </div>
-
-      <label for="passwordRegister">Password</label>
-      <input formControlName="password" id="passwordRegister" pInputText placeholder="Password" type="password">
-
-      <!-- Validation message for password -->
-      <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-        <small *ngIf="registerForm.get('password')?.hasError('required')">Password is required.</small>
-        <small *ngIf="registerForm.get('password')?.hasError('minlength')">Password must be at least 6 characters
-          long.</small>
-        <small *ngIf="registerForm.get('password')?.errors?.['invalidPassword']">
-          {{ registerForm.get('password')?.errors?.['invalidPassword'] }}
-        </small>
-
-      </div>
-
-      <p *ngIf="authError" class="auth-error">{{ authError }}</p>
-
-      <!-- Register button, disabled until form is valid -->
-      <button
-        (click)="register()"
-        [disabled]="!registerForm.valid"
-        class="auth-button"
-        icon="pi pi-user"
-        label="Register"
-        pButton
-        pRipple>
-      </button>
-    </div>
-
-
-  </div>
-</p-dialog>
+</div>
