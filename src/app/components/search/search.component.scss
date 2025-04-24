@@ -1,6 +1,6 @@
 .breadcrumb {
-  padding-left: 2%;
-  
+  text-align: center;
+
   @media screen and (max-width: 768px) {
 
     padding-top: 2%;
@@ -46,6 +46,7 @@
   @media screen and (min-width: 768px) {
     //padding-left: 32%;
     //padding-right: 32%;
+    align-content: center;
   }
 }
 
@@ -435,7 +436,7 @@
 // Responsive adjustments
 @media (max-width: 640px) {
   .auction-grid {
-    padding: 1rem;
+    padding: 3rem !Important;
     gap: 1rem;
   }
 

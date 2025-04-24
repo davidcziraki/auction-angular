@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Router, RouterLink } from '@angular/router';
@@ -47,7 +47,6 @@ import { passwordValidator } from '../../app.component';
   providers: [MessageService],
 })
 export class HomeComponent {
-  isCtaVisible: boolean = false;
   searchInput: string = '';
   auctions: Auction[] = [];
   authState$!: Observable<User | null>;
@@ -55,7 +54,7 @@ export class HomeComponent {
   loadedImages: Set<string> = new Set();
   displayMode: string = '';
   isLoading: boolean = true;
-  skeletonArray = new Array(7); // Simulating 5 loading items
+  skeletonArray = new Array(6);
   rememberMe: boolean = false;
   // Dialog state
   displayDialog: boolean = false;
@@ -73,6 +72,7 @@ export class HomeComponent {
   registerForm!: FormGroup;
   authError = '';
   userFirestore: UserModel | null = null;
+  scrollOffset = 0;
   private countdownInterval?: number;
 
   constructor(
@@ -82,19 +82,6 @@ export class HomeComponent {
     private authService: AuthService,
     private fb: FormBuilder,
   ) {}
-
-  @HostListener('window:scroll', [])
-  onScroll(): void {
-    const ctaSection = document.querySelector('.cta-section') as HTMLElement;
-    if (!ctaSection) return;
-
-    const rect = ctaSection.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-
-    if (rect.top < windowHeight * 0.95) {
-      this.isCtaVisible = true;
-    }
-  }
 
   ngOnInit(): void {
     this.authState$ = this.authService.authState$;
@@ -258,14 +245,14 @@ export class HomeComponent {
 
       // Determine which auctions to display
       if (favoriteAuctions.length > 0) {
-        this.auctions = favoriteAuctions.slice(0, 4);
+        this.auctions = favoriteAuctions.slice(0, 6);
         this.displayMode = 'favorites';
       } else if (popularOrEndingSoonAuctions.length > 0) {
-        this.auctions = popularOrEndingSoonAuctions.slice(0, 4);
+        this.auctions = popularOrEndingSoonAuctions.slice(0, 6);
         this.displayMode = 'trending';
       } else {
         // Show a random selection if no favorites or popular/ending soon auctions
-        this.auctions = activeAuctions.slice(0, 4);
+        this.auctions = activeAuctions.slice(0, 6);
         this.displayMode = 'random';
       }
 

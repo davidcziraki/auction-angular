@@ -3,8 +3,6 @@
 </div>
 
 <div class="search-container-wrapper">
-
-
   <div class="search-container p-shadow-3">
     <div class="search-bar-wrapper">
       <div class="search-input-container">
@@ -109,52 +107,82 @@
 
 
   <div class="auction-grid">
-    <div *ngFor="let auction of filteredAuctions" class="auction-card">
-      <div [routerLink]="['/auction', auction.id]" class="auction-image-wrapper">
-        <img [src]="auction.mainImageUrl" alt="{{ auction.year }} {{ auction.make }} {{ auction.model }}"
-             class="auction-image"/>
+    <!-- Show Skeletons while loading -->
+    <ng-container *ngIf="isLoading; else auctionGrid">
+      <div *ngFor="let _ of skeletonArray" class="auction-card">
+        <div class="auction-image-wrapper">
+          <p-skeleton class="mb-2" height="10rem" width="100%"></p-skeleton>
+        </div>
 
-        <div class="auction-badges">
-          <span *ngIf="auction.isPopular" class="badge badge-popular">Popular</span>
-          <span *ngIf="auction.isEndingSoon" class="badge badge-ending">Ending Soon</span>
+        <div class="auction-content">
+          <p-skeleton class="mb-2" height="1.5rem" width="70%"></p-skeleton>
+
+          <div class="auction-features">
+            <p-skeleton class="mb-1" height="1rem" width="40%"></p-skeleton>
+            <p-skeleton height="1rem" width="40%"></p-skeleton>
+          </div>
+
+          <div class="auction-price">
+            <p-skeleton height="1rem" width="60%"></p-skeleton>
+          </div>
+
+          <div class="auction-footer">
+            <p-skeleton height="1rem" width="6rem"></p-skeleton>
+            <p-skeleton class="ml-2" shape="circle" size="2rem"></p-skeleton>
+          </div>
         </div>
       </div>
+    </ng-container>
 
-      <div class="auction-content">
-        <h3 class="auction-title">{{ auction.year }} {{ auction.make }} {{ auction.model }}</h3>
+    <!-- Actual Auction Cards -->
+    <ng-template #auctionGrid>
+      <div *ngFor="let auction of filteredAuctions" class="auction-card">
+        <div [routerLink]="['/auction', auction.id]" class="auction-image-wrapper">
+          <img [src]="auction.mainImageUrl" alt="{{ auction.year }} {{ auction.make }} {{ auction.model }}"
+               class="auction-image"/>
 
-        <div class="auction-features">
-          <div class="feature-item">
-            <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
-            <span>{{ auction.transmission }}</span>
-          </div>
-
-          <div class="feature-item">
-            <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
-            <span>{{ auction.mileage | number }} miles</span>
+          <div class="auction-badges">
+            <span *ngIf="auction.isPopular" class="badge badge-popular">Popular</span>
+            <span *ngIf="auction.isEndingSoon" class="badge badge-ending">Ending Soon</span>
           </div>
         </div>
 
-        <div class="auction-price">
-          <span class="price-label">Current Bid:</span>
-          <span class="price-value">HUF {{ auction.price | number }}</span>
-        </div>
+        <div class="auction-content">
+          <h3 class="auction-title">{{ auction.year }} {{ auction.make }} {{ auction.model }}</h3>
 
-        <div class="auction-footer">
-          <div *ngIf="auction.countdown" class="auction-timer">
-            <i class="pi pi-clock"></i>
-            <span>{{ auction.countdown }}</span>
+          <div class="auction-features">
+            <div class="feature-item">
+              <img alt="Transmission Icon" class="feature-icon" src="icons/transmission.png"/>
+              <span>{{ auction.transmission }}</span>
+            </div>
+
+            <div class="feature-item">
+              <img alt="Speedometer Icon" class="feature-icon" src="icons/speedometer.png"/>
+              <span>{{ auction.mileage | number }} miles</span>
+            </div>
           </div>
 
-          <button
-            (click)="toggleFavourite(auction); $event.preventDefault()"
-            [class.favorite-active]="auction.isFavourite"
-            class="favorite-button">
-            <i [ngClass]="auction.isFavourite ? 'pi-heart-fill' : 'pi-heart'" class="pi"></i>
-          </button>
+          <div class="auction-price">
+            <span class="price-label">Current Bid:</span>
+            <span class="price-value">HUF {{ auction.price | number }}</span>
+          </div>
+
+          <div class="auction-footer">
+            <div *ngIf="auction.countdown" class="auction-timer">
+              <i class="pi pi-clock"></i>
+              <span>{{ auction.countdown }}</span>
+            </div>
+
+            <button
+              (click)="toggleFavourite(auction); $event.preventDefault()"
+              [class.favorite-active]="auction.isFavourite"
+              class="favorite-button">
+              <i [ngClass]="auction.isFavourite ? 'pi-heart-fill' : 'pi-heart'" class="pi"></i>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </ng-template>
   </div>
 
 

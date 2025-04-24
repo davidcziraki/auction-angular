@@ -17,6 +17,7 @@ import { Slider } from 'primeng/slider';
 import { InputText } from 'primeng/inputtext';
 import { Chip } from 'primeng/chip';
 import { Button, ButtonDirective } from 'primeng/button';
+import { Skeleton } from 'primeng/skeleton';
 
 @Component({
   selector: 'app-search',
@@ -36,6 +37,7 @@ import { Button, ButtonDirective } from 'primeng/button';
     Chip,
     ButtonDirective,
     Button,
+    Skeleton,
   ],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
@@ -71,6 +73,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   maxPrice: number = 100000000;
   priceRange: number[] = [0, 100000000];
   initialPriceRange: number[] = [0, 100000000];
+  skeletonArray = new Array(15);
   private countdownInterval?: number;
 
   constructor(

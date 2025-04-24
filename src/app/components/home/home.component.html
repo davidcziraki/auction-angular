@@ -31,30 +31,31 @@
 
 
 <div class="auction-container">
+  <h2 *ngIf="!displayMode" class="title">Recommended Auctions</h2>
   <h2 *ngIf="displayMode === 'favorites'" class="title">Your Favorite Auctions</h2>
   <h2 *ngIf="displayMode === 'trending'" class="title">Trending Auctions</h2>
   <h2 *ngIf="displayMode === 'random'" class="title">Recommended Auctions</h2>
 
-  <!-- Show Skeletons when loading -->
-  <div *ngIf="isLoading" class="auction-list">
-    <div *ngFor="let _ of skeletonArray" class="auction-card">
-      <div class="auction-image-container">
-        <p-skeleton height="150px" styleClass="mb-2" width="100%"/>
-      </div>
-
-      <div class="auction-details">
-        <p-skeleton height="1.5rem" styleClass="mb-2" width="60%"/>
-        <p-skeleton height="1rem" styleClass="mb-2" width="40%"/>
-
-        <div class="auction-footer">
-          <p-skeleton height="1rem" width="5rem"/>
-          <p-skeleton shape="circle" size="2rem"/>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <div class="auction-grid">
+    <!-- Show Skeletons when loading -->
+    <ng-container *ngIf="isLoading">
+      <div *ngFor="let _ of skeletonArray" class="auction-card">
+        <div class="auction-image-wrapper">
+          <p-skeleton height="100%" styleClass="mb-2" width="100%"></p-skeleton>
+        </div>
+        <div class="auction-content">
+          <p-skeleton height="1.5rem" styleClass="mb-2" width="60%"></p-skeleton>
+          <p-skeleton height="1rem" styleClass="mb-2" width="40%"></p-skeleton>
+          <div class="auction-footer">
+            <p-skeleton height="1rem" width="5rem"></p-skeleton>
+            <p-skeleton shape="circle" size="2rem"></p-skeleton>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Actual Auctions -->
     <div *ngFor="let auction of auctions" class="auction-card">
       <div [routerLink]="['/auction', auction.id]" class="auction-image-wrapper">
         <img [src]="auction.mainImageUrl" alt="{{ auction.year }} {{ auction.make }} {{ auction.model }}"
@@ -174,7 +175,7 @@
   </div>
 </div>
 
-<section [class.visible]="isCtaVisible" class="cta-section">
+<section class="cta-section">
   <div class="cta-content">
     <h2>Ready to Sell Your Car?</h2>
     <p>Join thousands of successful sellers who found the right buyers at the right price on our platform. Get started
