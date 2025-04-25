@@ -126,11 +126,19 @@
           <p *ngIf="authError" class="auth-error">{{ authError }}</p>
 
 
-          <!--          <div class="turnstile">-->
-          <!--            <div class="cf-turnstile" data-sitekey="0x4AAAAAABT_nxQVh49n8gzG"></div>-->
-          <!--          </div>-->
+          <!-- Cloudflare Turnstile Captcha -->
+          <div class="turnstile">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAABT_nxQVh49n8gzG"></div>
+            <ngx-turnstile
+              (resolved)="sendCaptchaResponse($event)"
+              [siteKey]="siteKey"
+              [tabIndex]="0"
+              theme="auto">
+            </ngx-turnstile>
+          </div>
 
-          <button (click)="login()" class="auth-button" pButton pRipple>
+
+          <button (click)="login()" [disabled]="!captchaResolved" class="auth-button" pButton pRipple>
             <i class="pi pi-user"></i>
             <span>Sign In</span>
           </button>
@@ -227,10 +235,23 @@
 
           <p *ngIf="authError" class="auth-error">{{ authError }}</p>
 
+
+          <!-- Cloudflare Turnstile Captcha -->
+          <div class="turnstile">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAABT_nxQVh49n8gzG"></div>
+            <ngx-turnstile
+              (resolved)="sendCaptchaResponse($event)"
+              [siteKey]="siteKey"
+              [tabIndex]="0"
+              theme="auto">
+            </ngx-turnstile>
+          </div>
+
+
           <!-- Register button, disabled until form is valid -->
           <button
             (click)="register()"
-            [disabled]="!registerForm.valid"
+            [disabled]="!registerForm.valid || !captchaResolved"
             class="auth-button"
             pButton
             pRipple>

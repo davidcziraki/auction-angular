@@ -5,7 +5,7 @@
   <meta content="
     default-src 'self';
     connect-src 'self' https://api.stripe.com https://maps.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com https://*.cloudfunctions.net https://www.regcheck.org.uk/api/reg.asmx/Check;
-    frame-src 'self' https://checkout.stripe.com https://*.js.stripe.com https://js.stripe.com https://hooks.stripe.com https://connect-js.stripe.com https://*.firebaseapp.com https://m.stripe.network;
+  frame-src 'self' https://checkout.stripe.com https://*.js.stripe.com https://js.stripe.com https://hooks.stripe.com https://connect-js.stripe.com https://*.firebaseapp.com https://m.stripe.network https://challenges.cloudflare.com;
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.stripe.com https://*.js.stripe.com https://js.stripe.com https://maps.googleapis.com https://connect-js.stripe.com https://*.firebaseapp.com https://*.googleapis.com https://m.stripe.network https://challenges.cloudflare.com;
     img-src 'self' data: https://*.stripe.com https://*.googleapis.com https://www.regcheck.org.uk;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
@@ -18,10 +18,6 @@
   <link href="favicon.ico" rel="icon" type="image/x-icon">
   <link href="styles.css" rel="stylesheet">
   <script src="https://js.stripe.com/v3/"></script>
-  <script
-    defer
-    src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback"
-  ></script>
 </head>
 <body>
 <app-root></app-root>

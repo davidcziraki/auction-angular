@@ -30,6 +30,7 @@ import { UserModel } from './models/user';
 import { AuctionService } from './services/auction.service';
 import { Panel } from 'primeng/panel';
 import { Toast } from 'primeng/toast';
+import { NgxTurnstileModule } from 'ngx-turnstile';
 
 @Component({
   selector: 'app-root',
@@ -50,6 +51,7 @@ import { Toast } from 'primeng/toast';
     ReactiveFormsModule,
     Panel,
     Toast,
+    NgxTurnstileModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -88,6 +90,8 @@ export class AppComponent implements OnInit {
   items$: Observable<any[]>;
 
   displayCookies = true;
+  captchaResolved: boolean = false; // To disable submit until captcha is solved
+  siteKey: string = '0x4AAAAAABT_0t9n9Hgk3lSY';
 
   constructor(
     private authService: AuthService,
@@ -109,6 +113,18 @@ export class AppComponent implements OnInit {
   rejectCookies() {
     this.displayCookies = false;
     localStorage.setItem('cookieConsent', 'rejected');
+  }
+
+  // This method will handle the captcha response
+  sendCaptchaResponse(captchaResponse: string | null) {
+    if (captchaResponse) {
+      console.log('Captcha resolved with response:', captchaResponse);
+      // Set the resolved flag to true after successful resolution
+      this.captchaResolved = true;
+    } else {
+      console.log('Captcha response was null');
+      this.captchaResolved = false;
+    }
   }
 
   showDialog() {
