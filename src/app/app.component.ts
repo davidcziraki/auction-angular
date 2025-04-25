@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { MenubarModule } from 'primeng/menubar';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { NgIf } from '@angular/common';
 import { getIdTokenResult, User } from '@angular/fire/auth';
 import { AuthService } from './services/auth.service';
@@ -28,6 +28,8 @@ import { Ripple } from 'primeng/ripple';
 import { FirestoreService } from './services/firestore.service';
 import { UserModel } from './models/user';
 import { AuctionService } from './services/auction.service';
+import { Panel } from 'primeng/panel';
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
@@ -46,9 +48,12 @@ import { AuctionService } from './services/auction.service';
     Ripple,
     RouterLink,
     ReactiveFormsModule,
+    Panel,
+    Toast,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  providers: [MessageService],
 })
 export class AppComponent implements OnInit {
   loginForm!: FormGroup;
@@ -82,15 +87,28 @@ export class AppComponent implements OnInit {
   firestore: Firestore = inject(Firestore);
   items$: Observable<any[]>;
 
+  displayCookies = true;
+
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,
     private auctionService: AuctionService,
+    private messageService: MessageService,
     private router: Router,
     private fb: FormBuilder,
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
+  }
+
+  acceptCookies() {
+    this.displayCookies = false;
+    localStorage.setItem('cookieConsent', 'accepted');
+  }
+
+  rejectCookies() {
+    this.displayCookies = false;
+    localStorage.setItem('cookieConsent', 'rejected');
   }
 
   showDialog() {
@@ -102,6 +120,9 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    const consent = localStorage.getItem('cookieConsent');
+    this.displayCookies = consent === null; // Only show if no choice has been made
+
     this.auctionService.checkAuctionsPeriodically();
 
     this.authState$ = this.authService.authState$;
@@ -266,6 +287,14 @@ export class AppComponent implements OnInit {
       .then(() => {
         this.userFirestore = newUser;
         this.displayDialog = false;
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Registration Successful',
+          detail:
+            'A confirmation email has been sent to your email address. Please check your inbox and verify your email to complete registration.',
+          key: 'br',
+          sticky: true,
+        });
       })
 
       .catch((error) => {

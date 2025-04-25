@@ -26,7 +26,7 @@
               {{ userFirestore?.forename }} {{ userFirestore?.surname }}
             </p>
             <ng-template #loginText>
-              <p (click)="showDialog()" class="logged-in-text" style="cursor: pointer;">Login</p>
+              <p (click)="showDialog()" class="logged-in-text" style="cursor: pointer;">Sign In</p>
             </ng-template>
 
             <!--            [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"-->
@@ -124,6 +124,11 @@
           </div>
 
           <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+
+
+          <!--          <div class="turnstile">-->
+          <!--            <div class="cf-turnstile" data-sitekey="0x4AAAAAABT_nxQVh49n8gzG"></div>-->
+          <!--          </div>-->
 
           <button (click)="login()" class="auth-button" pButton pRipple>
             <i class="pi pi-user"></i>
@@ -292,3 +297,82 @@
   </footer>
 
 </div>
+
+
+<!--COOKIES CONSENT MODAL-->
+<p-dialog
+  [(visible)]="displayCookies"
+  [closable]="false"
+  [dismissableMask]="false"
+  [modal]="true"
+  [style]="{ width: '35rem' }"
+  header="We use cookies on our site">
+
+  <p-panel [toggleable]="true" header="Why we use cookies">
+    <p>
+      Like most websites we use analytics cookies on your device to improve your experience and understand how we can
+      make
+      our website better. This includes personalising the vehicles you see, seeing where you are to bring you localised
+      content and using data on the pages you visit to make the website better.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" header="Consent and Advertisers">
+    <p>
+      We work with our partners to help us process your data, and we require your consent for any use of it. If you
+      don’t
+      want us to store or share your data with advertisers, you can decline by selecting reject all below.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="Your experience without cookies">
+    <p>
+      Without analytics cookies, we won't be able to provide you with a personalised experience. Your choices are only
+      applied to CarLicit and you can change them at any time by clicking Manage Cookies in the footer.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="What is stored or read on your device">
+    <p>
+      Cookies, device or similar online identifiers (e.g. login-based identifiers, randomly assigned identifiers,
+      network
+      based identifiers) together with other information (e.g. browser type and information, language, screen size,
+      supported technologies etc.) can be stored or read on your device to recognise it each time it connects to an app
+      or
+      to a website, for one or several of the purposes presented here.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="Geolocation and device characteristics">
+    <p>
+      Precise geolocation and information about device characteristics can be used.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="Personalised advertising and content">
+    <p>
+      Advertising and content can be personalised based on your profile. Your activity on this service can be used to
+      build or improve a profile about you for personalised advertising and content. Advertising and content performance
+      can be measured. Reports can be generated based on your activity and those of others. Your activity on this
+      service
+      can help develop and improve products and services.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="More information">
+    <p>
+      View our <a href="/privacy-policy" target="_blank">Privacy policy</a> and <a href="/cookie-policy"
+                                                                                   target="_blank">Cookie
+      policy</a> for more details. You can manage your cookie choices at any time by visiting the cookie setting area.
+    </p>
+  </p-panel>
+
+  <div class="flex justify-end gap-3 mt-4">
+    <button (click)="rejectCookies()" class="p-button-outlined p-button-danger" label="Reject All" pButton
+            type="button"></button>
+    <button (click)="acceptCookies()" class="p-button-success" label="Accept All" pButton type="button"></button>
+  </div>
+</p-dialog>
+
+
+<p-toast></p-toast>
