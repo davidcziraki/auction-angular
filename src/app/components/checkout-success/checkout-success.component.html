@@ -1,4 +1,15 @@
-<div>
-  <h2>Payment Successful!</h2>
-  <p>Thank you for your purchase. Your session ID is: {{ sessionId }}</p>
+<div class="payment-success-container">
+  <i class="pi pi-check-circle success-icon"></i>
+
+  <h2 class="success-title">Payment Successful!</h2>
+  <p class="success-message">
+    Thank you for your purchase. We've received your payment and your order is now being processed. Our administration
+    team will be in touch with you shortly to confirm the details of your order.
+  </p>
+
+  <div *ngIf="sessionId" class="session-id-box">
+    <strong>Session ID:</strong> {{ sessionId }}
+  </div>
+
+
 </div>

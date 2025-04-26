@@ -1,16 +1,20 @@
-<div class="account-tabs">
-  <p-tabView>
-    <p-tabPanel header="Account Settings">
+<p-tabs [value]="tabValue">
+  <p-tablist>
+    <p-tab [value]="0">Account Management</p-tab>
+    <p-tab [value]="1">Auction History</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel [value]="0">
       <div [formGroup]="accountSettingsForm" class="account-management">
         <h2>Account Management</h2>
 
         <div *ngFor="let field of ['email', 'forename', 'surname', 'password']" class="account-field">
-          <label>{{ field.charAt(0).toUpperCase() + field.slice(1) }}</label>
+          <label class="field-label">{{ field.charAt(0).toUpperCase() + field.slice(1) }}</label>
 
           <div class="field-container">
-            <span *ngIf="!editingFields.has(field)">
-              {{ field === 'password' ? '*************' : accountSettingsForm.get(field)?.value }}
-            </span>
+        <span *ngIf="!editingFields.has(field)">
+          {{ field === 'password' ? '*************' : accountSettingsForm.get(field)?.value }}
+        </span>
 
             <input
               *ngIf="editingFields.has(field) && field !== 'password'"
@@ -25,98 +29,106 @@
               type="password"
             />
 
-            <!-- Validation Message -->
             <div *ngIf="accountSettingsForm.get(field)?.invalid && accountSettingsForm.get(field)?.touched"
                  class="error-message">
               <small *ngIf="accountSettingsForm.get(field)?.errors?.['required']">{{ field }} is required</small>
               <small *ngIf="field === 'email' && accountSettingsForm.get(field)?.errors?.['email']">Invalid email
                 address</small>
-              <small *ngIf="field === 'password' && accountSettingsForm.get(field)?.errors?.['minlength']">Password must
-                be at least 6 characters long, contain an uppercase letter, a lowercase letter, a number, and a special
-                character.</small>
+              <small *ngIf="field === 'password' && accountSettingsForm.get(field)?.errors?.['minlength']">
+                Password must be at least 6 characters long, contain an uppercase letter, a lowercase letter, a number,
+                and a special character.
+              </small>
             </div>
 
             <button (click)="editField(field)" class="edit-button" icon="pi pi-pencil" pButton>Edit</button>
           </div>
         </div>
+
         <div *ngIf="editingFields.size > 0" class="button-group">
-          <button
-            (click)="saveChanges()"
-            [disabled]="!areEditedFieldsValid()"
-            class="save-button"
-            pButton
-          >
-            Save
-          </button>
+          <button (click)="saveChanges()" [disabled]="!areEditedFieldsValid()" class="save-button" pButton>Save</button>
           <button (click)="cancelEdit()" class="cancel-button" pButton>Cancel</button>
         </div>
 
-
         <div class="delete-account">
-          <button (click)="confirmDeleteAccount()" class="p-button p-button-danger">Delete Account</button>
+          <h3 class="delete-title">Delete Account</h3>
+          <p class="delete-description">Deleting your account will remove all your data and cannot be undone.</p>
+          <button (click)="confirmDeleteAccount()" pButton severity="danger">Delete Account</button>
         </div>
       </div>
-    </p-tabPanel>
+    </p-tabpanel>
 
-    <p-tabPanel header="Past Won Auctions">
+
+    <p-tabpanel [value]="1">
       <div class="auctions-container">
         <h2>Past Won Auctions</h2>
-        <p-table [paginator]="true" [rows]="5" [value]="wonAuctions">
-          <ng-template pTemplate="header">
-            <tr>
-              <th>Image</th>
-              <th>Auction Item</th>
-              <th>Winning Bid</th>
-              <th>End Date</th>
-              <th>Action</th>
-            </tr>
-          </ng-template>
-          <ng-template let-auction pTemplate="body">
-            <tr>
-              <td>
-                <img
-                  [src]="auction.mainImageUrl"
-                  alt="Car Image"
-                  height="120"
-                  style="object-fit: cover; border-radius: 4px;"
-                  width="170"/>
-              </td>
-              <td>{{ auction.year }} {{ auction.make }} {{ auction.model }}</td>
-              <td><b>{{ auction.price | currency: 'HUF ' }}</b></td>
-              <td>{{ auction.endtime | date:'medium' }}</td>
-              <td>
-                <ng-container *ngIf="auction.paid === 'yes'; else payButton">
+        <!-- DESKTOP TABLE -->
+        <ng-container *ngIf="!isMobileView">
+          <p-table [paginator]="true" [rows]="5" [value]="wonAuctions" class="responsive-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Image</th>
+                <th>Auction Item</th>
+                <th>Winning Bid</th>
+                <th>End Date</th>
+                <th>Action</th>
+              </tr>
+            </ng-template>
+            <ng-template let-auction pTemplate="body">
+              <tr>
+                <td><img [src]="auction.mainImageUrl" alt="Car Image" class="car-image"/></td>
+                <td>{{ auction.year }} {{ auction.make }} {{ auction.model }}</td>
+                <td><b>{{ auction.price | currency: 'HUF ' }}</b></td>
+                <td>{{ auction.endtime | date:'medium' }}</td>
+                <td>
+                  <ng-container *ngIf="auction.paid === 'yes'; else payButton">
+                    <button class="p-button p-button-secondary" disabled>Paid</button>
+                    <button class="p-button p-button-info">Add Delivery</button>
+                  </ng-container>
+                  <ng-template #payButton>
+                    <button (click)="goToCart(auction.id)" class="p-button p-button-success">Pay</button>
+                  </ng-template>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </ng-container>
+
+        <!-- MOBILE CARD LAYOUT -->
+        <ng-container *ngIf="isMobileView">
+          <div class="mobile-auctions">
+            <div *ngFor="let auction of wonAuctions" class="mobile-auction-card">
+              <img [src]="auction.mainImageUrl" alt="Car Image"/>
+              <div class="details">
+                <p><strong>{{ auction.year }} {{ auction.make }} {{ auction.model }}</strong></p>
+                <p>Winning Bid: <b>{{ auction.price | currency: 'HUF ' }}</b></p>
+                <p>Ended: {{ auction.endtime | date:'medium' }}</p>
+
+                <ng-container *ngIf="auction.paid === 'yes'; else mobilePay">
                   <button class="p-button p-button-secondary" disabled>Paid</button>
-                  <button class="p-button p-button-info">
-                    Add Delivery
-                  </button>
+                  <button class="p-button p-button-info">Add Delivery</button>
                 </ng-container>
-
-                <ng-template #payButton>
-                  <button
-                    (click)="goToCart(auction.id)"
-                    class="p-button p-button-success">
-                    Pay
-                  </button>
+                <ng-template #mobilePay>
+                  <button (click)="goToCart(auction.id)" class="p-button p-button-success">Pay</button>
                 </ng-template>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       </div>
-    </p-tabPanel>
+    </p-tabpanel>
 
-  </p-tabView>
-</div>
+  </p-tabpanels>
+</p-tabs>
+
 
 <!-- Delete Confirmation Modal -->
-<p-dialog [(visible)]="displayDeleteModal" [closable]="false" [modal]="true" [style]="{width: '30vw'}"
+<p-dialog [(visible)]="displayDeleteModal" [closable]="false" [modal]="true"
           header="Confirm Deletion">
   <p>Are you sure you want to delete your account? This action cannot be undone.</p>
 
   <div class="flex justify-end gap-2 mt-4">
     <p-button (click)="cancelDelete()" class="p-button-secondary" label="Cancel"></p-button>
-    <p-button (click)="deleteAccount()" class="p-button-primary" label="Delete"></p-button>
+    <p-button (click)="deleteAccount()" label="Delete" severity="danger"></p-button>
   </div>
 </p-dialog>
 

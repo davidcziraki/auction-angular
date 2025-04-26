@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TabPanel, TabView } from 'primeng/tabview';
 import { TableModule } from 'primeng/table';
-import { CurrencyPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { Observable } from 'rxjs';
 import { User } from '@angular/fire/auth';
@@ -18,11 +16,13 @@ import {
 } from '@angular/forms';
 import { Button, ButtonDirective } from 'primeng/button';
 import { AuctionService } from '../../../services/auction.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { MessagesModule } from 'primeng/messages';
 import { Toast } from 'primeng/toast';
 import { Dialog } from 'primeng/dialog';
+import { TabsModule } from 'primeng/tabs';
+import { CurrencyPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-account-manage',
@@ -30,23 +30,25 @@ import { Dialog } from 'primeng/dialog';
   styleUrl: './account-manage.component.scss',
   providers: [MessageService],
   imports: [
-    TabView,
-    TabPanel,
     TableModule,
-    CurrencyPipe,
-    DatePipe,
     FormsModule,
-    NgIf,
-    ButtonDirective,
-    NgForOf,
     MessagesModule,
     Toast,
     Button,
     Dialog,
     ReactiveFormsModule,
+    TabsModule,
+    NgForOf,
+    NgIf,
+    ButtonDirective,
+    CurrencyPipe,
+    DatePipe,
   ],
 })
 export class AccountManageComponent implements OnInit {
+  tabValue: number = 0;
+  isMobileView = false;
+
   wonAuctions: any[] = [];
   authState$!: Observable<User | null>;
   user: User | null = null;
@@ -67,9 +69,20 @@ export class AccountManageComponent implements OnInit {
     private router: Router,
     private messageService: MessageService,
     private fb: FormBuilder,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
+    this.checkScreenSize();
+    window.addEventListener('resize', this.checkScreenSize.bind(this));
+
+    this.route.queryParamMap.subscribe((params) => {
+      const tabParam = params.get('tab');
+      if (tabParam) {
+        this.tabValue = parseInt(tabParam, 10); // or whatever your logic is
+      }
+    });
+
     this.authService.authState$.subscribe(async (user) => {
       if (user) {
         this.user = user;
@@ -94,6 +107,10 @@ export class AccountManageComponent implements OnInit {
         [Validators.required, Validators.minLength(6), passwordValidator()],
       ],
     });
+  }
+
+  checkScreenSize(): void {
+    this.isMobileView = window.innerWidth <= 768;
   }
 
   // Fetch user details and initialize form

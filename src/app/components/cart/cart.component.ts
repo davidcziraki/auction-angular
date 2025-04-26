@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FirestoreService } from '../../services/firestore.service';
 import { Auction } from '../../models/auction';
 import { getAuth } from '@angular/fire/auth';
@@ -10,11 +10,13 @@ import { PaymentService } from '../../services/payment.service';
 
 @Component({
   selector: 'app-cart',
-  imports: [DatePipe, NgIf, DecimalPipe],
+  imports: [DatePipe, NgIf, DecimalPipe, RouterLink],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.scss',
 })
 export class CartComponent implements OnDestroy, AfterViewInit {
+  isLoading: boolean = true;
+
   auctionId: string | null = null;
   auction: Auction | null = null;
   vatAmount: number = 0;
@@ -33,6 +35,8 @@ export class CartComponent implements OnDestroy, AfterViewInit {
   ) {}
 
   async ngAfterViewInit() {
+    this.isLoading = true;
+
     this.stripe = await loadStripe(
       'pk_test_51Qz6yCKigABo6LYNncGHQE1npiAbeZXiVNm3WwYPVTI4A67o9rIgtalMkCLhgK0NLoniDRJHfjxNOgsDXMAo0wBr00asmo1tbC',
     );
@@ -43,7 +47,9 @@ export class CartComponent implements OnDestroy, AfterViewInit {
     }
 
     console.log('Stripe initialized successfully!');
-    this.fetchAuctionDetails();
+    await this.fetchAuctionDetails();
+    await this.proceedToPayment();
+    this.isLoading = false;
   }
 
   calculateTotals(price: number) {
@@ -59,9 +65,11 @@ export class CartComponent implements OnDestroy, AfterViewInit {
 
     this.hideCheckoutCard = true;
 
+    // ✅ Unmount previous instance if it exists
     if (this.checkoutInstance) {
-      console.warn('Checkout already initialized');
-      return;
+      console.warn('Unmounting existing Stripe Checkout instance...');
+      this.checkoutInstance.unmount(); // 🧼 Cleanup before reinitializing
+      this.checkoutInstance = null;
     }
 
     try {
@@ -96,24 +104,42 @@ export class CartComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    console.log('[Checkout] Component destroyed');
     this.auctionSubscription?.unsubscribe();
+
+    if (this.checkoutInstance) {
+      console.log('[Checkout] Destroying Stripe Checkout instance...');
+      this.checkoutInstance.destroy?.(); // If supported
+      this.checkoutInstance = null;
+    }
   }
 
-  private fetchAuctionDetails() {
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
-    const currentUserID = currentUser?.uid as string;
+  private fetchAuctionDetails(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      const currentUserID = currentUser?.uid as string;
 
-    this.auctionId = this.route.snapshot.paramMap.get('id');
-    if (this.auctionId) {
-      this.auctionSubscription = this.firestoreService
-        .getAuction(this.auctionId, currentUserID)
-        .subscribe((auction) => {
-          this.auction = auction;
-          if (this.auction?.price) {
-            this.calculateTotals(this.auction.price);
-          }
-        });
-    }
+      this.auctionId = this.route.snapshot.paramMap.get('id');
+      if (this.auctionId) {
+        this.auctionSubscription = this.firestoreService
+          .getAuction(this.auctionId, currentUserID)
+          .subscribe({
+            next: (auction) => {
+              this.auction = auction;
+              if (this.auction?.price) {
+                this.calculateTotals(this.auction.price);
+              }
+              resolve(); // ✅ Resolves the promise once data is ready
+            },
+            error: (error) => {
+              console.error('Failed to load auction:', error);
+              reject(error);
+            },
+          });
+      } else {
+        reject('Auction ID not found in route');
+      }
+    });
   }
 }

@@ -31,7 +31,11 @@ export const routes: Routes = [
     component: CartComponent,
     canActivate: [AngularFireAuthGuard],
   },
-  { path: 'checkout-success', component: CheckoutSuccessComponent },
+  {
+    path: 'checkout-success',
+    component: CheckoutSuccessComponent,
+    canActivate: [AngularFireAuthGuard],
+  },
 
   {
     path: 'account',
@@ -46,4 +50,5 @@ export const routes: Routes = [
     data: { authGuardPipe: adminOnly },
   },
   { path: 'contact', component: ContactComponent },
+  { path: '**', redirectTo: '/home' },
 ];
