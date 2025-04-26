@@ -5,7 +5,7 @@
     <ng-template pTemplate="content">
       <p>Have questions? Reach out to us!</p>
 
-      <form #contactForm="ngForm" (ngSubmit)="submitForm()">
+      <form #contactForm="ngForm" (ngSubmit)="submitForm(contactForm)">
         <!-- Name Field -->
         <div class="field">
           <label for="name">Name</label>
@@ -19,9 +19,7 @@
             required
             type="text"
           />
-          <small *ngIf="name.invalid && name.touched" class="p-error"
-          >Name is required</small
-          >
+          <small *ngIf="name.invalid && name.touched" class="p-error">Name is required</small>
         </div>
 
         <!-- Email Field -->
@@ -38,9 +36,7 @@
             required
             type="email"
           />
-          <small *ngIf="email.invalid && email.touched" class="p-error"
-          >Valid email is required</small
-          >
+          <small *ngIf="email.invalid && email.touched" class="p-error">Valid email is required</small>
         </div>
 
         <!-- Message Field -->
@@ -52,13 +48,10 @@
             class="w-full"
             id="message"
             name="message"
-
             required
             rows="4"
           ></textarea>
-          <small *ngIf="message.invalid && message.touched" class="p-error"
-          >Message is required</small
-          >
+          <small *ngIf="message.invalid && message.touched" class="p-error">Message is required</small>
         </div>
 
         <!-- Submit Button -->

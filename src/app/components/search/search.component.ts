@@ -1,30 +1,79 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Auction } from '../../models/auction';
-import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { DecimalPipe, NgClass, NgForOf, NgIf } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { FirestoreService } from '../../services/firestore.service';
 import { Toast } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { MessageService, SelectItem } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { getAuth, User } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { DropdownModule } from 'primeng/dropdown';
+import { MultiSelect } from 'primeng/multiselect';
+import { Slider } from 'primeng/slider';
+import { InputText } from 'primeng/inputtext';
+import { Chip } from 'primeng/chip';
+import { Button, ButtonDirective } from 'primeng/button';
+import { Skeleton } from 'primeng/skeleton';
 
 @Component({
   selector: 'app-search',
-  imports: [NgForOf, NgIf, RouterLink, ProgressSpinner, Toast, NgClass],
+  imports: [
+    NgForOf,
+    NgIf,
+    RouterLink,
+    ProgressSpinner,
+    Toast,
+    NgClass,
+    FormsModule,
+    DropdownModule,
+    MultiSelect,
+    Slider,
+    InputText,
+    DecimalPipe,
+    Chip,
+    ButtonDirective,
+    Button,
+    Skeleton,
+  ],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
   providers: [MessageService],
 })
 export class SearchComponent implements OnInit, OnDestroy {
   auctions: Auction[] = [];
+  filteredAuctions: Auction[] = [];
+  loadedImages: Set<string> = new Set();
   user: User | null = null;
   authState$!: Observable<User | null>;
-
-  loadedImages: Set<string> = new Set();
   isLoading: boolean = false;
+
+  searchInput: string = '';
+  searchQuery: string = '';
+  searchApplied: boolean = false;
+  showEndedAuctions: boolean = true;
+
+  // Sort options
+  sortOptions: SelectItem[] = [
+    { label: 'Newest', value: 'newest' },
+    { label: 'Price: Low to High', value: 'price_asc' },
+    { label: 'Price: High to Low', value: 'price_desc' },
+    { label: 'Ending Soonest', value: 'ending_soonest' },
+  ];
+
+  selectedSort: string = 'newest';
+  // Make filter
+  uniqueMakes: SelectItem[] = [];
+  selectedMakes: string[] = [];
+  // Price range
+  minPrice: number = 0;
+  maxPrice: number = 100000000;
+  priceRange: number[] = [0, 100000000];
+  initialPriceRange: number[] = [0, 100000000];
+  skeletonArray = new Array(15);
   private countdownInterval?: number;
 
   constructor(
@@ -32,15 +81,30 @@ export class SearchComponent implements OnInit, OnDestroy {
     private firestoreService: FirestoreService,
     private authService: AuthService,
     private messageService: MessageService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     this.authState$ = this.authService.authState$;
 
+    // Wait for the user to load first
     this.authState$.subscribe(async (user) => {
       this.user = user;
 
+      // Load auctions first
       await this.loadAuctions(user?.uid);
+
+      // Once auctions are loaded, check for query params and filter
+      this.route.queryParams.subscribe((params) => {
+        if (params['q']) {
+          this.searchQuery = params['q'];
+          this.searchInput = params['q']; // Ensure input field is populated with the query param
+          this.searchApplied = true;
+
+          // After search input is updated, apply the filters
+          this.filterAuctions();
+        }
+      });
     });
   }
 
@@ -50,16 +114,84 @@ export class SearchComponent implements OnInit, OnDestroy {
     }
   }
 
+  applySearch() {
+    this.searchQuery = this.searchInput.trim();
+    if (this.searchQuery) {
+      this.searchApplied = true;
+      this.filterAuctions();
+    }
+  }
+
+  clearSearch() {
+    this.searchInput = '';
+    this.searchQuery = '';
+    this.searchApplied = false;
+    this.filterAuctions();
+  }
+
+  initializeFilters(): void {
+    // This would typically be populated from actual data
+    // For example, getting min/max prices from your data service
+    this.minPrice = 0;
+    this.maxPrice = 100000000;
+    this.priceRange = [this.minPrice, this.maxPrice];
+    this.initialPriceRange = [this.minPrice, this.maxPrice];
+  }
+
+  hasActiveFilters(): boolean {
+    return (
+      this.searchQuery !== '' ||
+      this.selectedMakes.length > 0 ||
+      this.isPriceRangeFiltered()
+    );
+  }
+
+  isPriceRangeFiltered(): boolean {
+    return (
+      this.priceRange[0] !== this.initialPriceRange[0] ||
+      this.priceRange[1] !== this.initialPriceRange[1]
+    );
+  }
+
+  removeMake(make: string): void {
+    this.selectedMakes = this.selectedMakes.filter((m) => m !== make);
+    this.filterAuctions();
+  }
+
+  resetPriceRange(): void {
+    this.priceRange = [...this.initialPriceRange];
+    this.filterAuctions();
+  }
+
+  clearAllFilters(): void {
+    this.searchQuery = '';
+    this.selectedMakes = [];
+    this.priceRange = [...this.initialPriceRange];
+    this.selectedSort = 'newest';
+    this.filterAuctions();
+  }
+
   async loadAuctions(userId?: string) {
     try {
       this.isLoading = true;
 
       // Fetch auctions with or without user ID
-      const auctionData = await this.firestoreService.getAuctions(userId);
+      this.auctions = await this.firestoreService.getAuctions(userId);
+      this.filteredAuctions = [...this.auctions];
 
-      // Preload images
+      // Set up price range for filtering
+      this.minPrice = Math.min(...this.auctions.map((a) => a.price));
+      this.maxPrice = Math.max(...this.auctions.map((a) => a.price));
+      this.priceRange = [this.minPrice, this.maxPrice];
+
+      // Extract unique makes for filtering dropdown
+      this.uniqueMakes = [...new Set(this.auctions.map((a) => a.make))].map(
+        (make) => ({ label: make, value: make }),
+      );
+
+      // Preload images asynchronously
       await Promise.all(
-        auctionData.map(
+        this.auctions.map(
           (auction) =>
             new Promise<void>((resolve) => {
               if (!auction.imageUrl) {
@@ -81,13 +213,61 @@ export class SearchComponent implements OnInit, OnDestroy {
         ),
       );
 
-      this.auctions = auctionData;
+      // Start countdown timers for auctions
       this.startGlobalCountdown();
+
+      // Apply filter after loading auctions
+      this.filterAuctions();
     } catch (error) {
       console.error('Error loading auctions:', error);
     } finally {
       this.isLoading = false;
     }
+  }
+
+  filterAuctions() {
+    this.filteredAuctions = this.auctions.filter((auction) => {
+      const matchesSearch =
+        auction.make.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        auction.model.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        auction.year.toString().includes(this.searchQuery);
+
+      const matchesMake =
+        this.selectedMakes.length === 0 ||
+        this.selectedMakes.includes(auction.make);
+
+      const matchesPrice =
+        auction.price >= this.priceRange[0] &&
+        auction.price <= this.priceRange[1];
+
+      const isAuctionEnded = auction.status?.toLowerCase() !== 'active';
+
+      return (
+        matchesSearch &&
+        matchesMake &&
+        matchesPrice &&
+        (this.showEndedAuctions || !isAuctionEnded)
+      );
+    });
+
+    this.sortAuctions();
+  }
+
+  sortAuctions() {
+    this.filteredAuctions.sort((a, b) => {
+      switch (this.selectedSort) {
+        case 'price_asc':
+          return a.price - b.price;
+        case 'price_desc':
+          return b.price - a.price;
+        case 'newest':
+          return b.year - a.year;
+        case 'ending_soonest': // Sorting auctions by ending soonest
+          return a.endTimeDate.getTime() - b.endTimeDate.getTime();
+        default:
+          return 0;
+      }
+    });
   }
 
   isImageLoaded(auctionId: string): boolean {

@@ -15,11 +15,27 @@ export class StorageService {
   private db = inject(Firestore);
 
   /** Upload image and return URL */
-  async uploadImage(auctionId: string, file: File): Promise<string> {
+  async uploadMainImage(auctionId: string, file: File): Promise<string> {
     const resizedFile = await this.resizeImage(file, 640, 480);
-    const imageRef = ref(this.storage, `auction-images/${auctionId}.jpg`);
+    const imageRef = ref(this.storage, `auction-images/${auctionId}/main.jpg`);
     await uploadBytes(imageRef, resizedFile);
     return getDownloadURL(imageRef);
+  }
+
+  /** Upload multiple images and return their URLs */
+  async uploadImages(auctionId: string, files: File[]): Promise<string[]> {
+    const uploadPromises = files.map(async (file, index) => {
+      const resizedFile = await this.resizeImage(file, 640, 480); // Resize each file
+      const imageRef = ref(
+        this.storage,
+        `auction-images/${auctionId}/${index + 1}.jpg`,
+      ); // Store each image with a unique name (e.g., 1.jpg, 2.jpg, etc.)
+      await uploadBytes(imageRef, resizedFile);
+      return getDownloadURL(imageRef); // Return the download URL of the uploaded image
+    });
+
+    // Wait for all image uploads to complete and return their URLs
+    return Promise.all(uploadPromises);
   }
 
   /** Delete auction image from Firebase Storage */

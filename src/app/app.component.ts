@@ -1,10 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { collection, collectionData, Firestore } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { MenubarModule } from 'primeng/menubar';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { NgIf } from '@angular/common';
 import { getIdTokenResult, User } from '@angular/fire/auth';
 import { AuthService } from './services/auth.service';
@@ -12,13 +12,25 @@ import { Avatar } from 'primeng/avatar';
 import { Menu } from 'primeng/menu';
 import { Dialog } from 'primeng/dialog';
 import { Checkbox } from 'primeng/checkbox';
-import { FormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { InputText } from 'primeng/inputtext';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { FirestoreService } from './services/firestore.service';
 import { UserModel } from './models/user';
 import { AuctionService } from './services/auction.service';
+import { Panel } from 'primeng/panel';
+import { Toast } from 'primeng/toast';
+import { NgxTurnstileModule } from 'ngx-turnstile';
 
 @Component({
   selector: 'app-root',
@@ -36,11 +48,19 @@ import { AuctionService } from './services/auction.service';
     ButtonDirective,
     Ripple,
     RouterLink,
+    ReactiveFormsModule,
+    Panel,
+    Toast,
+    NgxTurnstileModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  providers: [MessageService],
 })
 export class AppComponent implements OnInit {
+  loginForm!: FormGroup;
+  registerForm!: FormGroup;
+
   title = 'finalyear';
   menuItems: MenuItem[] | undefined;
   authState$!: Observable<User | null>;
@@ -54,7 +74,7 @@ export class AppComponent implements OnInit {
   // Dialog state
   displayDialog: boolean = false;
   isRegistering: boolean = false;
-  passwordError = '';
+  authError = '';
 
   // Form fields
   emailLogin: string = '';
@@ -69,13 +89,42 @@ export class AppComponent implements OnInit {
   firestore: Firestore = inject(Firestore);
   items$: Observable<any[]>;
 
+  displayCookies = true;
+  captchaResolved: boolean = false; // To disable submit until captcha is solved
+  siteKey: string = '0x4AAAAAABT_0t9n9Hgk3lSY';
+
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,
     private auctionService: AuctionService,
+    private messageService: MessageService,
+    private router: Router,
+    private fb: FormBuilder,
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
+  }
+
+  acceptCookies() {
+    this.displayCookies = false;
+    localStorage.setItem('cookieConsent', 'accepted');
+  }
+
+  rejectCookies() {
+    this.displayCookies = false;
+    localStorage.setItem('cookieConsent', 'rejected');
+  }
+
+  // This method will handle the captcha response
+  sendCaptchaResponse(captchaResponse: string | null) {
+    if (captchaResponse) {
+      console.log('Captcha resolved with response:', captchaResponse);
+      // Set the resolved flag to true after successful resolution
+      this.captchaResolved = true;
+    } else {
+      console.log('Captcha response was null');
+      this.captchaResolved = false;
+    }
   }
 
   showDialog() {
@@ -87,6 +136,9 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    const consent = localStorage.getItem('cookieConsent');
+    this.displayCookies = consent === null; // Only show if no choice has been made
+
     this.auctionService.checkAuctionsPeriodically();
 
     this.authState$ = this.authService.authState$;
@@ -95,25 +147,43 @@ export class AppComponent implements OnInit {
       this.user = user;
       this.isLoggedIn = !!user;
 
-      if (user) {
-        if (this.user?.email) {
-          const userDetails = await this.firestoreService.getUserDetailsByEmail(
-            this.user.email,
-          );
-
-          if (userDetails) {
-            this.userFirestore = { ...userDetails };
-          }
-        }
-
-        const tokenResult = await getIdTokenResult(user);
-        this.isAdmin$.next(!!tokenResult.claims['admin']);
+      if (user?.email) {
+        this.userFirestore = await this.firestoreService.getUserDetailsByEmail(
+          user.email,
+        );
       } else {
-        this.isAdmin$.next(false);
+        this.userFirestore = null;
       }
+
+      this.isAdmin$.next(
+        user ? !!(await getIdTokenResult(user)).claims['admin'] : false,
+      );
 
       this.setMenuItems();
       this.updateUserMenu();
+    });
+
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]],
+    });
+
+    this.registerForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      firstName: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Za-zÀ-ÿ\s'-]+$/)],
+      ],
+      lastName: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Za-zÀ-ÿ\s'-]+$/)],
+      ],
+
+      dob: ['', Validators.required],
+      password: [
+        '',
+        [Validators.required, Validators.minLength(6), passwordValidator()],
+      ],
     });
   }
 
@@ -122,18 +192,9 @@ export class AppComponent implements OnInit {
       { label: 'Home', icon: 'pi pi-fw pi-home', routerLink: '/home' },
       { label: 'Auctions', icon: 'pi pi-fw pi-search', routerLink: '/search' },
       { label: 'Guide', icon: 'pi pi-fw pi-info-circle', routerLink: '/guide' },
-      ...(this.isLoggedIn
-        ? [
-            {
-              label: 'Account',
-              icon: 'pi pi-fw pi-warehouse',
-              routerLink: 'user-management',
-            },
-          ]
-        : []),
       {
         label: 'Contact',
-        icon: 'pi pi-fw pi-address-book',
+        icon: 'pi pi-fw pi-envelope',
         routerLink: 'contact',
       },
       ...(this.isAdmin$.value
@@ -149,12 +210,32 @@ export class AppComponent implements OnInit {
         label: 'Seller Hub',
         icon: 'pi pi-fw pi-briefcase',
         routerLink: '/seller-hub',
+        command: () => {
+          if (this.isLoggedIn) {
+            this.router.navigate(['/seller-hub']);
+          } else {
+            this.showDialog(); // Open login modal
+          }
+        },
       },
     ];
   }
 
   updateUserMenu() {
     this.userMenu = [
+      ...(this.user
+        ? [
+            {
+              label: 'Account',
+              icon: 'pi pi-fw pi-user',
+              command: () => {
+                if (this.isLoggedIn) {
+                  this.router.navigate(['/account']);
+                }
+              },
+            },
+          ]
+        : []),
       {
         label: this.user ? 'Logout' : 'Login',
         icon: this.user ? 'pi pi-sign-out' : 'pi pi-sign-in',
@@ -164,50 +245,81 @@ export class AppComponent implements OnInit {
   }
 
   login() {
+    if (this.loginForm.invalid) return;
+
+    const { email, password } = this.loginForm.value;
+
     this.authService
-      .loginUser(this.emailLogin, this.passwordLogin, this.rememberMe)
-      .then((user) => {
+      .loginUser(email, password, this.rememberMe)
+      .then(() => {
         this.displayDialog = false;
       })
       .catch((error) => {
         console.error('Login error:', error);
+
+        const errorMessage = error?.message || '';
+
+        if (errorMessage.includes('auth/user-not-found')) {
+          this.authError = 'No user found with this email.';
+        } else if (errorMessage.includes('auth/invalid-credential')) {
+          this.authError = 'Incorrect password.';
+        } else if (errorMessage.includes('auth/invalid-email')) {
+          this.authError = 'Invalid email format.';
+        } else {
+          this.authError = 'Login failed. Please try again.';
+        }
       });
   }
 
   register() {
-    this.passwordError = '';
+    this.authError = '';
+    let newUser: UserModel;
 
-    // Validate password strength
-    if (!this.validatePassword(this.passwordRegister)) {
-      this.passwordError =
-        'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and be at least 6 characters long.';
-      return;
-    }
+    if (this.registerForm.invalid) return;
+
+    const { email, firstName, lastName, dob, password } =
+      this.registerForm.value;
 
     this.authService
-      .createUser(this.emailRegister, this.passwordRegister)
+      .createUser(email, password)
       .then((user) => {
-        const newUser: UserModel = {
-          forename: this.firstName,
-          surname: this.lastName,
-          DOB: new Date(this.dob),
-          email: this.emailRegister,
+        if (!user) {
+          console.error('User creation failed');
+          return null;
+        }
+
+        newUser = {
+          forename: firstName,
+          surname: lastName,
+          DOB: new Date(dob),
+          email,
           userID: user.uid,
           admin: false,
         };
 
-        this.firestoreService
-          .addUser(newUser)
-          .then(() => {
-            console.log('User registered successfully.');
-            this.displayDialog = false;
-          })
-          .catch((error) => {
-            console.error('Error adding user:', error);
-          });
+        return this.authService.loginUser(email, password, true);
       })
+      .then(() => this.firestoreService.addUser(newUser))
+      .then(() => {
+        this.userFirestore = newUser;
+        this.displayDialog = false;
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Registration Successful',
+          detail:
+            'A confirmation email has been sent to your email address. Please check your inbox and verify your email to complete registration.',
+          key: 'br',
+          sticky: true,
+        });
+      })
+
       .catch((error) => {
-        console.error('Registration error:', error);
+        if (error.code === 'auth/email-already-in-use') {
+          this.authError = 'This email address is already in use.';
+        } else {
+          this.authError = 'Registration failed. Please try again.';
+          console.error(error);
+        }
       });
   }
 
@@ -216,6 +328,7 @@ export class AppComponent implements OnInit {
       .logout()
       .then(() => {
         this.user = null;
+        this.userFirestore = null;
       })
       .catch((error) => {
         console.error('Logout error:', error);
@@ -227,22 +340,32 @@ export class AppComponent implements OnInit {
   }
 
   async forgotPassword() {
-    if (!this.emailLogin) {
+    const email = this.loginForm.get('email')?.value;
+
+    if (!email) {
       alert('Please enter your email first.');
       return;
     }
 
     try {
-      await this.authService.sendPasswordReset(this.emailLogin);
+      await this.authService.sendPasswordReset(email);
       alert('Password reset email sent. Please check your inbox.');
     } catch (error) {
       console.error('Error sending password reset email:', error);
       alert('Failed to send reset email. Please try again.');
     }
   }
+}
 
-  validatePassword(password: string): boolean {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
-    return regex.test(password);
-  }
+export function passwordValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const password = control.value;
+    const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{6,}$/;
+    return pattern.test(password)
+      ? null
+      : {
+          invalidPassword:
+            'Password must be at least 6 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.',
+        };
+  };
 }

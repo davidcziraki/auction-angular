@@ -2,27 +2,33 @@
   <div class="card">
 
     <div class="menubar-container">
-      <p-menubar [model]="menuItems">
+      <p-menubar [model]="menuItems" class="menubar">
         <ng-template pTemplate="start">
-          <img alt="Logo" class="menu-logo" src="logo.png"/>
+          <div [routerLink]="['/home']" class="logo" style="cursor: pointer;">CarLicit.</div>
         </ng-template>
+
+
+        <ng-template pTemplate="center">
+          <!-- Menu centered in the middle -->
+          <div class="menu-container">
+            <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
+          </div>
+        </ng-template>
+
 
         <ng-template pTemplate="end">
           <div class="flex items-center gap-4">
             <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
 
-            <!-- Avatar and Logged In As Text -->
 
             <!-- Conditionally display "Logged in as" or "Log in" -->
             <p *ngIf="user; else loginText" class="logged-in-text">
               {{ userFirestore?.forename }} {{ userFirestore?.surname }}
             </p>
             <ng-template #loginText>
-              <p class="ml-2 cursor-pointer">
-                <a (click)="showDialog() "
-                >Log in / Register</a>
-              </p>
+              <p (click)="showDialog()" class="logged-in-text" style="cursor: pointer;">Sign In</p>
             </ng-template>
+
             <!--            [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"-->
 
             <!-- Avatar -->
@@ -62,69 +68,206 @@
     <router-outlet></router-outlet> <!-- Main content -->
   </div>
 
+  <div class="auth-dialog">
+    <!-- Login/Register Dialog -->
+    <p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" [style]="{ width: '25rem' }">
+      <div class="auth-container">
+        <div class="auth-header">
 
-  <!-- Login/Register Dialog -->
-  <p-dialog [(visible)]="displayDialog" [closable]="true" [modal]="true" class="auth-dialog">
-    <div class="auth-container">
-      <div class="auth-header">
-        <img alt="Logo" class="auth-logo" src="logo.ico">
-        <div class="auth-title">
-          <span *ngIf="!isRegistering">Welcome Back</span>
-          <span *ngIf="isRegistering">Register</span>
-        </div>
-        <span class="auth-subtitle">
-        <span *ngIf="!isRegistering">Don't have an account?</span>
-        <span *ngIf="isRegistering">Already have an account?</span>
-      </span>
-        <a (click)="toggleForm()" class="auth-toggle">
-          <span *ngIf="!isRegistering">Create today!</span>
-          <span *ngIf="isRegistering">Back to Sign In</span>
-        </a>
-      </div>
-
-      <!-- Login Form -->
-      <div *ngIf="!isRegistering">
-        <label for="emailLogin">Email</label>
-        <input [(ngModel)]="emailLogin" id="emailLogin" pInputText placeholder="Email address" type="text">
-
-        <label for="passwordLogin">Password</label>
-        <input [(ngModel)]="passwordLogin" id="passwordLogin" pInputText placeholder="Password" type="password">
-
-        <div class="auth-options">
-          <div class="auth-remember">
-            <p-checkbox [(ngModel)]="rememberMe" [binary]="true" id="rememberme1"></p-checkbox>
-            <label for="rememberme1">Remember me</label>
+          <div class="brand-overlay">
+            <img alt="Logo" class="auth-logo" src="logo2.png">
+            <div class="brand-text">CarLicit</div>
+            <div class="brand-subtext">Premium Car Auctions</div>
           </div>
-          <a (click)="forgotPassword()" class="auth-forgot">Forgot password?</a>
+
+
+        </div>
+
+        <!-- Login Form -->
+        <div *ngIf="!isRegistering" [formGroup]="loginForm" class="auth-form">
+          <div class="form-group">
+            <label for="emailLogin">Email</label>
+            <input class="auth-input" formControlName="email" id="emailLogin" pInputText
+                   placeholder="Enter your email address"
+                   type="text">
+
+            <!-- Validation message for email -->
+            <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="validator-container">
+              <small *ngIf="loginForm.get('email')?.hasError('required')" class="validator-text">Email is
+                required.</small>
+              <small *ngIf="loginForm.get('email')?.hasError('email')" class="validator-text">Please enter a valid
+                email.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="passwordLogin">Password</label>
+            <input class="auth-input" formControlName="password" id="passwordLogin" pInputText
+                   placeholder="Enter your password" type="password">
+
+            <!-- Validation message for password -->
+            <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                 class="validator-container">
+              <small *ngIf="loginForm.get('password')?.hasError('required')" class="validator-text">Password is
+                required.</small>
+            </div>
+          </div>
+
+          <div class="auth-options">
+            <div class="auth-remember">
+              <p-checkbox [(ngModel)]="rememberMe" [binary]="true" [ngModelOptions]="{standalone: true}"
+                          id="rememberme1"></p-checkbox>
+              <label for="rememberme1">Remember me</label>
+            </div>
+            <a (click)="forgotPassword()" class="auth-forgot">Forgot password?</a>
+
+          </div>
+
+          <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+
+
+          <!-- Cloudflare Turnstile Captcha -->
+          <div class="turnstile">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAABT_nxQVh49n8gzG"></div>
+            <ngx-turnstile
+              (resolved)="sendCaptchaResponse($event)"
+              [siteKey]="siteKey"
+              [tabIndex]="0"
+              theme="auto">
+            </ngx-turnstile>
+          </div>
+
+          <button (click)="login()" class="auth-button" pButton pRipple>
+            <!--          <button (click)="login()" [disabled]="!captchaResolved" class="auth-button" pButton pRipple>-->
+            <i class="pi pi-user"></i>
+            <span>Sign In</span>
+          </button>
+
+          <p class="rememberme1">
+            Don't have an account? <a (click)="toggleForm()" class="auth-forgot">Create Account</a>
+          </p>
+
+
         </div>
 
 
-        <button (click)="login()" class="auth-button" icon="pi pi-user" label="Sign In" pButton pRipple></button>
+        <!-- Registration Form -->
+        <div *ngIf="isRegistering" [formGroup]="registerForm" class="auth-form">
+          <div class="form-group">
+            <label for="emailRegister">Email</label>
+            <input class="auth-input" formControlName="email" id="emailRegister" pInputText
+                   placeholder="Enter your email address" type="email">
+
+            <!-- Validation message for registration email -->
+            <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+                 class="validator-container">
+              <small *ngIf="registerForm.get('email')?.hasError('required')" class="validator-text">Email is
+                required.</small>
+              <small *ngIf="registerForm.get('email')?.hasError('email')" class="validator-text">Please enter a valid
+                email.</small>
+            </div>
+          </div>
+
+          <!-- First Name -->
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input class="auth-input" formControlName="firstName" id="firstName" pInputText
+                   placeholder="Enter your first name"
+                   type="text"/>
+
+            <!-- Validation message for first name -->
+            <div *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
+                 class="validator-container">
+              <small *ngIf="registerForm.get('firstName')?.hasError('required')" class="validator-text">First Name is
+                required.</small>
+              <small *ngIf="registerForm.get('firstName')?.hasError('pattern')" class="validator-text">Only letters,
+                spaces, apostrophes and hyphens are allowed.</small>
+            </div>
+          </div>
+
+          <!-- Surname -->
+          <div class="form-group">
+            <label for="lastName">Surname</label>
+            <input class="auth-input" formControlName="lastName" id="lastName" pInputText
+                   placeholder="Enter your surname"
+                   type="text"/>
+
+            <!-- Validation message for last name -->
+            <div *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched"
+                 class="validator-container">
+              <small *ngIf="registerForm.get('lastName')?.hasError('required')" class="validator-text">Surname is
+                required.</small>
+              <small *ngIf="registerForm.get('lastName')?.hasError('pattern')" class="validator-text">Only letters,
+                spaces, apostrophes and hyphens are allowed.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input class="auth-input" formControlName="dob" id="dob" pInputText placeholder="Select your date of birth"
+                   type="date">
+
+            <!-- Validation message for date of birth -->
+            <div *ngIf="registerForm.get('dob')?.invalid && registerForm.get('dob')?.touched"
+                 class="validator-container">
+              <small *ngIf="registerForm.get('dob')?.hasError('required')" class="validator-text">Date of Birth is
+                required.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="passwordRegister">Password</label>
+            <input class="auth-input" formControlName="password" id="passwordRegister" pInputText
+                   placeholder="Create a strong password" type="password">
+
+            <!-- Validation message for password -->
+            <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+                 class="validator-container">
+              <small *ngIf="registerForm.get('password')?.hasError('required')" class="validator-text">Password is
+                required.</small>
+              <small *ngIf="registerForm.get('password')?.hasError('minlength')" class="validator-text">Password must be
+                at least 6 characters long.</small>
+              <small *ngIf="registerForm.get('password')?.errors?.['invalidPassword']" class="validator-text">
+                {{ registerForm.get('password')?.errors?.['invalidPassword'] }}
+              </small>
+            </div>
+          </div>
+
+          <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+
+
+          <!-- Cloudflare Turnstile Captcha -->
+          <div class="turnstile">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAABT_nxQVh49n8gzG"></div>
+            <ngx-turnstile
+              (resolved)="sendCaptchaResponse($event)"
+              [siteKey]="siteKey"
+              [tabIndex]="0"
+              theme="auto">
+            </ngx-turnstile>
+          </div>
+
+
+          <!-- Register button, disabled until form is valid -->
+          <button
+            (click)="register()"
+            [disabled]="!registerForm.valid || !captchaResolved"
+            class="auth-button"
+            pButton
+            pRipple>
+            <i class="pi pi-user"></i>
+            <span>Register</span>
+          </button>
+
+          <p class="rememberme1">
+            Already have an account? <a (click)="toggleForm()" class="auth-forgot">Sign in</a>
+          </p>
+
+        </div>
       </div>
+    </p-dialog>
 
-      <!-- Registration Form -->
-      <div *ngIf="isRegistering">
-        <label for="emailRegister">Email</label>
-        <input [(ngModel)]="emailRegister" id="emailRegister" pInputText placeholder="Email address" type="email">
-
-        <label for="firstName">First Name</label>
-        <input [(ngModel)]="firstName" id="firstName" pInputText placeholder="First Name" type="text">
-
-        <label for="lastName">Surname</label>
-        <input [(ngModel)]="lastName" id="lastName" pInputText placeholder="Surname" type="text">
-
-        <label for="dob">Date of Birth</label>
-        <input [(ngModel)]="dob" id="dob" pInputText placeholder="Date of Birth" type="date">
-
-        <label for="passwordRegister">Password</label>
-        <input [(ngModel)]="passwordRegister" id="passwordRegister" pInputText placeholder="Password" type="password">
-
-        <p *ngIf="passwordError" class="auth-error">{{ passwordError }}</p>
-
-        <button (click)="register()" class="auth-button" icon="pi pi-user" label="Register" pButton pRipple></button>
-      </div>
-    </div>
-  </p-dialog>
+  </div>
 
 
   <footer class="footer">
@@ -152,8 +295,8 @@
         <h5>Support</h5>
         <ul>
           <li><a routerLink="/contact">Contact Us</a></li>
-          <li><a routerLink="/user-management">Account Management</a></li>
-          <li><a routerLink="/careers">Careers</a></li>
+          <li><a routerLink="/account">Account</a></li>
+          <li><a routerLink="/contact">Careers</a></li>
         </ul>
       </div>
 
@@ -175,3 +318,82 @@
   </footer>
 
 </div>
+
+
+<!--COOKIES CONSENT MODAL-->
+<p-dialog
+  [(visible)]="displayCookies"
+  [closable]="false"
+  [dismissableMask]="false"
+  [modal]="true"
+  [style]="{ width: '35rem' }"
+  header="We use cookies on our site">
+
+  <p-panel [toggleable]="true" header="Why we use cookies">
+    <p>
+      Like most websites we use analytics cookies on your device to improve your experience and understand how we can
+      make
+      our website better. This includes personalising the vehicles you see, seeing where you are to bring you localised
+      content and using data on the pages you visit to make the website better.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" header="Consent and Advertisers">
+    <p>
+      We work with our partners to help us process your data, and we require your consent for any use of it. If you
+      don’t
+      want us to store or share your data with advertisers, you can decline by selecting reject all below.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="Your experience without cookies">
+    <p>
+      Without analytics cookies, we won't be able to provide you with a personalised experience. Your choices are only
+      applied to CarLicit and you can change them at any time by clicking Manage Cookies in the footer.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="What is stored or read on your device">
+    <p>
+      Cookies, device or similar online identifiers (e.g. login-based identifiers, randomly assigned identifiers,
+      network
+      based identifiers) together with other information (e.g. browser type and information, language, screen size,
+      supported technologies etc.) can be stored or read on your device to recognise it each time it connects to an app
+      or
+      to a website, for one or several of the purposes presented here.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="Geolocation and device characteristics">
+    <p>
+      Precise geolocation and information about device characteristics can be used.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="Personalised advertising and content">
+    <p>
+      Advertising and content can be personalised based on your profile. Your activity on this service can be used to
+      build or improve a profile about you for personalised advertising and content. Advertising and content performance
+      can be measured. Reports can be generated based on your activity and those of others. Your activity on this
+      service
+      can help develop and improve products and services.
+    </p>
+  </p-panel>
+
+  <p-panel [toggleable]="true" collapsed header="More information">
+    <p>
+      View our <a href="/privacy-policy" target="_blank">Privacy policy</a> and <a href="/cookie-policy"
+                                                                                   target="_blank">Cookie
+      policy</a> for more details. You can manage your cookie choices at any time by visiting the cookie setting area.
+    </p>
+  </p-panel>
+
+  <div class="flex justify-end gap-3 mt-4">
+    <button (click)="rejectCookies()" class="p-button-outlined p-button-danger" label="Reject All" pButton
+            type="button"></button>
+    <button (click)="acceptCookies()" class="p-button-success" label="Accept All" pButton type="button"></button>
+  </div>
+</p-dialog>
+
+
+<p-toast></p-toast>

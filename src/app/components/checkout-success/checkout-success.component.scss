@@ -1,0 +1,51 @@
+.payment-success-container {
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem;
+  border-radius: 1rem;
+  background-color: #f0fdf4;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.success-icon {
+  font-size: 3rem;
+  color: #16a34a;
+  margin-bottom: 1rem;
+}
+
+.success-title {
+  color: #15803d;
+  margin-bottom: 0.5rem;
+}
+
+.success-message {
+  color: #065f46;
+  margin-bottom: 1.5rem;
+}
+
+.session-id-box {
+  background: #ecfdf5;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  color: #064e3b;
+  margin-bottom: 2rem;
+}
+
+.back-to-account-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background-color: #16a34a;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.back-to-account-btn:hover {
+  background-color: #15803d;
+}

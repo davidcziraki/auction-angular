@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TableModule } from 'primeng/table';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { Auction } from '../../../models/auction';
 import { StorageService } from '../../../services/storage.service';
@@ -13,8 +13,10 @@ import { FirestoreService } from '../../../services/firestore.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
-import { NgIf } from '@angular/common';
+import { NgForOf, NgIf } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
+import { Select } from 'primeng/select';
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-admin',
@@ -30,6 +32,10 @@ import { DatePickerModule } from 'primeng/datepicker';
     FileUploadModule,
     NgIf,
     DatePickerModule,
+    NgForOf,
+    ReactiveFormsModule,
+    Select,
+    Toast,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -38,22 +44,52 @@ import { DatePickerModule } from 'primeng/datepicker';
 export class AdminComponent implements OnInit {
   // NEW AUCTION
   newAuctionDialog = false;
-  selectedImage: File | null = null;
+  selectedImages: File[] = [];
+  imagePreviews: string[] = [];
+  mainImage: File | null = null;
+  mainImageIndex: number | null = null;
+  mainImagePreview: string | null = null;
+
+  transmissionOptions = [
+    { label: 'Manual', value: 'Manual' },
+    { label: 'Automatic', value: 'Automatic' },
+  ];
+
+  fuelTypeOptions = [
+    { label: 'Petrol', value: 'Petrol' },
+    { label: 'Diesel', value: 'Diesel' },
+    { label: 'Electric', value: 'Electric' },
+    { label: 'Hybrid', value: 'Hybrid' },
+  ];
 
   newAuction: Auction = {
-    name: '',
+    registration: '',
+    make: '',
+    model: '',
+    year: new Date().getFullYear(), // Default to current year
     seller: '',
     endTimeDate: new Date(),
     price: 0,
+    mileage: 0,
+    transmission: '',
+    colour: '',
+    fuel: '',
     status: 'active',
   };
 
   selectedAuction: Auction = {
-    name: '',
+    registration: '',
+    make: '',
+    model: '',
+    year: new Date().getFullYear(),
     seller: '',
     endtime: Timestamp.now(),
     endTimeDate: new Date(),
     price: 0,
+    mileage: 0,
+    transmission: '',
+    colour: '',
+    fuel: '',
     status: 'active',
   };
 
@@ -63,6 +99,9 @@ export class AdminComponent implements OnInit {
   selectedFilter: string = 'all';
   searchQuery: string = '';
   displayEditModal: boolean = false;
+  displayApplicationsModal = false;
+  displayImagesModal: boolean = false;
+  applicationImages: string[] = [];
 
   public newTheme = themeAlpine.withPart(colorSchemeDarkBlue);
 
@@ -71,11 +110,10 @@ export class AdminComponent implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: 'imageUrl',
+      field: 'mainImageUrl',
       headerName: 'Image',
       cellRenderer: (params: { value: any }) => {
-        const imageUrl = params.value ? params.value : 'placeholder.png';
-        return `<img src="${params.value}" width="250" height="160" style="border-radius: 10px; " alt="">`;
+        return `<img src="${params.value}" width="250" height="160" style="border-radius: 10px;" alt="">`;
       },
       autoHeight: true,
       width: 300,
@@ -83,57 +121,37 @@ export class AdminComponent implements OnInit {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-      }, // Center image
+      },
     },
-    {
-      field: 'name',
-      filter: true,
-      cellStyle: { display: 'flex', alignItems: 'center' },
-    },
-    {
-      field: 'seller',
-      filter: true,
-      cellStyle: { display: 'flex', alignItems: 'center' },
-    },
-    {
-      field: 'endTimeDate',
-      filter: true,
-      cellStyle: { display: 'flex', alignItems: 'center' },
-    },
+    { field: 'make', headerName: 'Make', filter: true },
+    { field: 'model', headerName: 'Model', filter: true },
+    { field: 'year', headerName: 'Year', filter: true },
     {
       field: 'price',
-      filter: true,
       headerName: 'Price (HUF)',
-      valueFormatter: (params) => {
-        return new Intl.NumberFormat('hu-HU', {
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('hu-HU', {
           style: 'currency',
           currency: 'HUF',
-        }).format(params.value);
-      },
-      cellStyle: { display: 'flex', alignItems: 'center', textAlign: 'right' }, // Aligns numbers & centers vertically
+        }).format(params.value),
+      cellStyle: { textAlign: 'right' },
     },
+    { field: 'seller', headerName: 'Seller', filter: true },
+
     {
       field: 'status',
       headerName: 'Status',
       cellRenderer: (params: { value: string }) => {
-        if (!params.value) return '';
-
-        const capitalizedStatus =
-          params.value.charAt(0).toUpperCase() +
-          params.value.slice(1).toLowerCase();
-
         let color =
-          capitalizedStatus === 'Completed'
+          params.value.toLowerCase() === 'completed'
             ? 'green'
-            : capitalizedStatus === 'Expired'
+            : params.value.toLowerCase() === 'expired'
               ? 'orange'
-              : capitalizedStatus === 'Active'
-                ? 'gray'
-                : 'gray';
+              : 'gray';
 
-        return `<span style="background:${color}; color: white; padding: 5px 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">${capitalizedStatus}</span>`;
+        return `<span style="background:${color}; color: white; padding: 5px 10px; border-radius: 10px;">${params.value}</span>`;
       },
-      cellStyle: { display: 'flex', alignItems: 'center' }, // Ensures text inside the cell is centered
+      cellStyle: { display: 'flex', alignItems: 'center' },
     },
     {
       field: 'actions',
@@ -145,23 +163,12 @@ export class AdminComponent implements OnInit {
         <button class="btn btn-danger delete-auction" data-id="${auctionId}">Delete</button>
       `;
       },
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
       onCellClicked: (params: any) => {
         if (params.event.target.classList.contains('delete-auction')) {
-          const auction = params.data;
-          if (auction) {
-            this.onDeleteAuction(auction);
-          }
+          this.onDeleteAuction(params.data);
         }
         if (params.event.target.classList.contains('edit-auction')) {
-          const auction = params.data;
-          if (auction) {
-            this.openEditModal(auction);
-          }
+          this.openEditModal(params.data);
         }
       },
     },
@@ -196,23 +203,28 @@ export class AdminComponent implements OnInit {
       const matchesStatus =
         this.selectedFilter === 'all' ||
         auction.status.toLowerCase() === this.selectedFilter;
-      const matchesSearch = auction.name
-        .toLowerCase()
-        .includes(this.searchQuery.toLowerCase());
+      const matchesSearch =
+        auction.make.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        auction.model.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        auction.year.toString().includes(this.searchQuery);
 
       return matchesStatus && matchesSearch;
     });
   }
 
   openNewAuctionDialog() {
-    const now = Timestamp.now();
-
     this.newAuction = {
-      name: '',
+      registration: '',
+      make: '',
+      model: '',
+      year: new Date().getFullYear(), // Default to current year
       seller: '',
-      endtime: now,
-      endTimeDate: now.toDate(),
+      endTimeDate: new Date(),
       price: 0,
+      mileage: 0,
+      transmission: '',
+      colour: '',
+      fuel: '',
       status: 'active',
     };
 
@@ -230,8 +242,12 @@ export class AdminComponent implements OnInit {
   }
 
   async createAuction() {
+    // Validate required fields
     if (
-      !this.newAuction.name ||
+      !this.newAuction.registration ||
+      !this.newAuction.make ||
+      !this.newAuction.model ||
+      !this.newAuction.year ||
       !this.newAuction.seller ||
       !this.newAuction.endTimeDate ||
       !this.newAuction.price
@@ -240,38 +256,79 @@ export class AdminComponent implements OnInit {
       return;
     }
 
-    this.newAuction.endtime = Timestamp.fromDate(this.newAuction.endTimeDate);
-
     try {
+      // Add the auction to Firestore and get the auction ID
       const auctionId = await this.firestoreService.addAuction(this.newAuction);
       if (!auctionId) {
         throw new Error('Failed to create auction.');
       }
 
-      if (this.selectedImage) {
-        const imageUrl = await this.storageService.uploadImage(
-          auctionId,
-          this.selectedImage,
-        );
-        if (imageUrl) {
-          await this.firestoreService.updateAuction(auctionId, { imageUrl });
+      // Initialize variables for storing the URLs
+      let imageUrls: string[] = [];
+      let mainImageUrl: string = ''; // Initialize to an empty string to avoid null assignment
+
+      // Handle image uploads
+      if (this.selectedImages.length > 0) {
+        // If a main image has been selected, upload it first
+        if (this.mainImage) {
+          mainImageUrl = await this.storageService.uploadMainImage(
+            auctionId,
+            this.mainImage,
+          ); // Upload main image
         }
+
+        // Upload other images and get their URLs
+        const otherImageUrls = await this.storageService.uploadImages(
+          auctionId,
+          this.selectedImages.filter(
+            (_, index) => index !== this.mainImageIndex,
+          ), // Exclude the main image from other images
+        );
+
+        // Combine the main image URL with other image URLs
+        imageUrls = [mainImageUrl, ...otherImageUrls];
+
+        // Update the auction document with image URLs and the main image URL
+        await this.firestoreService.updateAuction(auctionId, {
+          imageUrls: imageUrls,
+          mainImageUrl: mainImageUrl, // Store the main image URL
+        });
       }
 
+      // Close the dialog and refresh the auction list
       this.newAuctionDialog = false;
-      this.fetchAuctions(); // Refresh list
+      this.fetchAuctions(); // Refresh the auction list after creation
     } catch (error) {
       console.error('Error creating auction:', error);
     }
   }
 
-  onImageSelected(event: any) {
-    console.log('File selection event:', event);
+  // Handle image selection and generate previews
+  onImagesSelected(event: any) {
+    this.selectedImages = Array.from(event.files);
+    const imagePreviewPromises = this.selectedImages.map((file: File) => {
+      const reader = new FileReader();
+      return new Promise<string>((resolve) => {
+        reader.onload = (e: any) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    });
 
-    if (event.files && event.files.length > 0) {
-      this.selectedImage = event.files[0]; // ✅ Store the file
-      console.log('Selected file:', this.selectedImage);
-    }
+    Promise.all(imagePreviewPromises).then((previews: string[]) => {
+      this.imagePreviews = previews;
+    });
+  }
+
+  // Handle the main image selection
+  onMainImageSelected(event: any) {
+    const file = event.files[0];
+    this.mainImage = file;
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.mainImagePreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   async onDeleteAuction(auction: Auction) {
@@ -305,18 +362,27 @@ export class AdminComponent implements OnInit {
     if (!this.selectedAuction || !this.selectedAuction.id) return;
 
     try {
-      // Create an update object with the changed fields
       const updates: Partial<Auction> = { ...this.selectedAuction };
 
-      // If an image is selected, upload it and add the URL to updates
-      if (this.selectedImage) {
-        updates.imageUrl = await this.storageService.uploadImage(
+      // Check if there are selected images to upload
+      if (this.selectedImages && this.selectedImages.length > 0) {
+        // Upload images and get their URLs
+        updates.imageUrls = await this.storageService.uploadImages(
           this.selectedAuction.id,
-          this.selectedImage,
+          this.selectedImages,
         );
       }
 
-      // Call Firestore service to update the auction
+      // Check if a new main image is selected
+      if (this.mainImage) {
+        // Upload the main image and get its URL
+        updates.mainImageUrl = await this.storageService.uploadMainImage(
+          this.selectedAuction.id,
+          this.mainImage, // Upload the selected main image
+        );
+      }
+
+      // Update the auction in Firestore with the new data
       await this.firestoreService.updateAuction(
         this.selectedAuction.id,
         updates,
@@ -329,7 +395,7 @@ export class AdminComponent implements OnInit {
       });
 
       this.displayEditModal = false;
-      await this.fetchAuctions();
+      await this.fetchAuctions(); // Refresh the auctions list after updating
     } catch (error) {
       console.error('Error updating auction:', error);
       this.messageService.add({
@@ -338,5 +404,50 @@ export class AdminComponent implements OnInit {
         detail: 'Failed to update auction!',
       });
     }
+  }
+
+  async viewApplications() {
+    try {
+      this.auctions = await this.firestoreService.getApplicationsAdmin(); // Fetch applications
+      this.displayApplicationsModal = true; // Open the modal
+    } catch (error) {
+      console.error('Error loading applications:', error);
+    }
+  }
+
+  async approveApplication(application: any) {
+    try {
+      await this.firestoreService.approveApplication(application.id); // Using application.id
+      console.log('Application approved:', application.id);
+      await this.viewApplications();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Application approved successfully',
+      });
+    } catch (error) {
+      console.error('Error approving application:', error);
+    }
+  }
+
+  async rejectApplication(application: any) {
+    try {
+      await this.firestoreService.denyApplication(application.id); // Using application.id
+      console.log('Application rejected:', application.id);
+      await this.viewApplications();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Application rejected successfully',
+      });
+    } catch (error) {
+      console.error('Error rejecting application:', error);
+    }
+  }
+
+  // Handle opening the image modal with selected images
+  openImagesModal(images: string[]): void {
+    this.applicationImages = images; // Store the images to display
+    this.displayImagesModal = true; // Show the modal
   }
 }

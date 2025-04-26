@@ -1,13 +1,12 @@
 <div class="how-it-works">
   <h2>How it works</h2>
 
-  <!-- Toggle Button for Buyer/Seller Guide -->
+
   <div class="toggle-container">
-    <div class="toggle-wrapper">
-      <p-inputSwitch [(ngModel)]="isBuyerGuide"></p-inputSwitch>
-    </div>
-    <span *ngIf="isBuyerGuide">Buyer</span>
-    <span *ngIf="!isBuyerGuide">Seller</span>
+    <p-button (click)="toggleRole(true)" [severity]="!isBuyerGuide ? 'secondary' : 'primary'"
+              label="Buyer"></p-button>
+    <p-button (click)="toggleRole(false)" [severity]="isBuyerGuide ? 'secondary' : 'primary'"
+              label="Seller"></p-button>
   </div>
 
   <div *ngIf="isBuyerGuide" class="grid-container">
@@ -54,7 +53,9 @@
       </div>
       <h3>01</h3>
       <h4>List your car</h4>
-      <p>Upload high-quality photos and a detailed description of your car. Set a starting bid and auction
+      <p>Upload high-quality photos and a detailed description of your car at our <b>Seller Hub</b>. Set a starting bid
+        and
+        auction
         duration.</p>
     </div>
 
