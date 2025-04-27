@@ -25,6 +25,7 @@ import { Auction } from '../../models/auction';
 import { StorageService } from '../../services/storage.service';
 import { Dialog } from 'primeng/dialog';
 import { FileUpload } from 'primeng/fileupload';
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 
 @Component({
   selector: 'app-seller-hub',
@@ -47,12 +48,19 @@ import { FileUpload } from 'primeng/fileupload';
     NgForOf,
     Dialog,
     FileUpload,
+    Tabs,
+    TabList,
+    Tab,
+    TabPanels,
+    TabPanel,
   ],
   templateUrl: './seller-hub.component.html',
   styleUrl: './seller-hub.component.scss',
   providers: [MessageService, DatePipe],
 })
 export class SellerHubComponent implements OnInit {
+  tabValue: number = 0;
+
   carDetailsForm!: FormGroup;
   user: User | null = null;
   auctions: Auction[] = [];
@@ -234,10 +242,6 @@ export class SellerHubComponent implements OnInit {
     this.imagePreviews = [];
     this.mainImage = null;
     this.mainImagePreview = null;
-  }
-
-  toggleButton(isNewApplication: boolean) {
-    this.isNewApplication = isNewApplication;
   }
 
   async loadAllAuctions(): Promise<void> {
