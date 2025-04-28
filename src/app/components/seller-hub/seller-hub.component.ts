@@ -26,6 +26,8 @@ import { StorageService } from '../../services/storage.service';
 import { Dialog } from 'primeng/dialog';
 import { FileUpload } from 'primeng/fileupload';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
+import { PaymentService } from '../../services/payment.service';
+import { loadConnectAndInitialize } from '@stripe/connect-js';
 
 @Component({
   selector: 'app-seller-hub',
@@ -97,6 +99,7 @@ export class SellerHubComponent implements OnInit {
     private messageService: MessageService,
     private datePipe: DatePipe,
     private storageService: StorageService,
+    private paymentService: PaymentService,
   ) {}
 
   ngOnInit(): void {
@@ -104,6 +107,8 @@ export class SellerHubComponent implements OnInit {
       if (user) {
         this.user = user;
         await this.loadAllAuctions();
+
+        await this.handleStripeConnect();
       } else {
         console.error('User is not authenticated');
       }
@@ -290,4 +295,196 @@ export class SellerHubComponent implements OnInit {
         return 'danger';
     }
   }
+
+
+  // async handleStripeConnect() {
+  //   try {
+  //     // Step 1: Create Stripe account
+  //     const response = await this.paymentService.createStripeAccount().toPromise();
+  //
+  //     if (!response) {
+  //       throw new Error('No response from createStripeAccount');
+  //     }
+  //
+  //     const account = response.account;
+  //     console.log('Stripe account created:', account);
+  //
+  //     // Step 2: Create the account session to get client_secret
+  //     const sessionResponse = await this.paymentService.createAccountSession(account).toPromise();
+  //
+  //     if (!sessionResponse) {
+  //       throw new Error('No response from createAccountSession');
+  //     }
+  //
+  //     const clientSecret = sessionResponse.client_secret;
+  //     console.log('Stripe account session created:', clientSecret);
+  //
+  //     // Step 3: Initialize the Stripe Connect embedded onboarding flow
+  //     const instance = loadConnectAndInitialize({
+  //       publishableKey: 'pk_test_51Qz6yCKigABo6LYNncGHQE1npiAbeZXiVNm3WwYPVTI4A67o9rIgtalMkCLhgK0NLoniDRJHfjxNOgsDXMAo0wBr00asmo1tbC',
+  //       fetchClientSecret: async () => {
+  //         try {
+  //           const fetchedClientSecret = await this.paymentService.fetchClientSecret(account);
+  //           if (!fetchedClientSecret) {
+  //             throw new Error('Failed to fetch client secret');
+  //           }
+  //           return fetchedClientSecret;
+  //         } catch (error) {
+  //           console.error('Error during fetchClientSecret:', error);
+  //           return ''; // Return empty string or handle accordingly
+  //         }
+  //       },
+  //       appearance: {
+  //         overlays: 'drawer',
+  //         variables: {
+  //           colorPrimary: '#1f2c51',
+  //           fontFamily: "Inter",
+  //         },
+  //       },
+  //       // locale: 'hu', // Set the language to Hungarian
+  //
+  //     });
+  //
+  //     // Step 4: Append the onboarding component to the container
+  //     const container = document.getElementById('embedded-onboarding-container');
+  //     const embeddedOnboardingComponent = instance.create('account-onboarding');
+  //
+  //     embeddedOnboardingComponent.setOnExit(() => {
+  //       const balancesComponent = instance.create('balances');
+  //       const balancesContainer = document.getElementById('balances-container');
+  //       balancesContainer?.appendChild(balancesComponent);
+  //
+  //       console.log('User exited the onboarding flow');
+  //     });
+  //
+  //     container?.appendChild(embeddedOnboardingComponent);
+  //
+  //
+  //   } catch (error) {
+  //     console.error('Error creating Stripe connected account:', error);
+  //   }
+  // }
+
+  async handleStripeConnect() {
+    const userAccountId = this.user?.email;
+
+    if (!userAccountId) {
+      console.error('User account ID not found');
+      return;
+    }
+
+    const userDetails = await this.firestoreService.getUserDetailsByEmail(userAccountId);
+
+    if (!userDetails) {
+      console.error('User details not found');
+      return;
+    }
+
+    const stripeAccountId = userDetails.stripe_id;
+
+    if (!stripeAccountId) {
+      console.log('Stripe account not found, starting onboarding process.');
+
+      try {
+        // Step 1: Create Stripe account
+        const response = await this.paymentService.createStripeAccount().toPromise();
+
+        if (!response) {
+          throw new Error('No response from createStripeAccount');
+        }
+
+        const accountId = response.account;
+        console.log('Stripe account created:', accountId);
+
+        // Step 2: Create the account session to get ID
+        const sessionResponse = await this.paymentService.createAccountSession(accountId).toPromise();
+        console.log(sessionResponse)
+        if (!sessionResponse) {
+          throw new Error('No response from createAccountSession');
+        }
+
+        await this.firestoreService.saveStripeId(userAccountId, accountId);
+
+        // Step 3: Initialize the Stripe Connect embedded onboarding flow
+        const instance = loadConnectAndInitialize({
+          publishableKey: 'pk_test_51Qz6yCKigABo6LYNncGHQE1npiAbeZXiVNm3WwYPVTI4A67o9rIgtalMkCLhgK0NLoniDRJHfjxNOgsDXMAo0wBr00asmo1tbC',
+          fetchClientSecret: async () => {
+            try {
+              const fetchedClientSecret = await this.paymentService.fetchClientSecret(accountId);
+              if (!fetchedClientSecret) {
+                throw new Error('Failed to fetch client secret');
+              }
+              return fetchedClientSecret;
+            } catch (error) {
+              console.error('Error during fetchClientSecret:', error);
+              return ''; // Return empty string or handle accordingly
+            }
+          },
+          appearance: {
+            overlays: 'drawer',
+            variables: {
+              colorPrimary: '#1f2c51',
+              fontFamily: "Inter",
+            },
+          },
+        });
+
+        // Step 4: Append the onboarding component to the container
+        const container = document.getElementById('embedded-onboarding-container');
+        const embeddedOnboardingComponent = instance.create('account-onboarding');
+
+        embeddedOnboardingComponent.setOnExit(() => {
+          const balancesComponent = instance.create('balances');
+          const balancesContainer = document.getElementById('balances-container');
+          balancesContainer?.appendChild(balancesComponent);
+
+          console.log('User exited the onboarding flow');
+        });
+
+        container?.appendChild(embeddedOnboardingComponent);
+
+      } catch (error) {
+        console.error('Error creating Stripe connected account:', error);
+      }
+    } else {
+      console.log('Stripe account already connected, showing balance.');
+
+      // Step 5: If user already has a stripe ID, show the balance component
+      const instance = loadConnectAndInitialize({
+        publishableKey: 'pk_test_51Qz6yCKigABo6LYNncGHQE1npiAbeZXiVNm3WwYPVTI4A67o9rIgtalMkCLhgK0NLoniDRJHfjxNOgsDXMAo0wBr00asmo1tbC',
+        fetchClientSecret: async () => {
+          try {
+            const fetchedClientSecret = await this.paymentService.fetchClientSecret(stripeAccountId);
+            if (!fetchedClientSecret) {
+              throw new Error('Failed to fetch client secret');
+            }
+            return fetchedClientSecret;
+          } catch (error) {
+            console.error('Error during fetchClientSecret:', error);
+            return ''; // Handle accordingly
+          }
+        },
+        appearance: {
+          overlays: 'drawer',
+          variables: {
+            colorPrimary: '#1f2c51',
+            fontFamily: "Inter",
+          },
+        },
+      });
+      const notificationBanner = instance.create('notification-banner');
+      const notificationContainer = document.getElementById('notification-banner-container');
+      notificationContainer?.appendChild(notificationBanner);
+
+      const balancesComponent = instance.create('balances');
+      const balancesContainer = document.getElementById('balances-container');
+      balancesContainer?.appendChild(balancesComponent);
+
+      const payments = instance.create('payments');
+      const paymentsContainer = document.getElementById('payments-container');
+      paymentsContainer?.appendChild(payments);
+    }
+  }
+
+
 }

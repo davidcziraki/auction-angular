@@ -23,6 +23,8 @@ export const routes: Routes = [
     path: 'seller-hub',
     component: SellerHubComponent,
     canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: adminOnly },
+
   },
 
   { path: 'auction/:id', component: AuctionDetailComponent },

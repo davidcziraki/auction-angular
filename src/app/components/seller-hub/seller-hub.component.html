@@ -7,6 +7,42 @@
   </p-tablist>
   <p-tabpanels>
     <p-tabpanel [value]="0">
+      <!--      <p-button (onClick)="createStripeConnectedAccount()" label="Create Stripe Account"></p-button>-->
+
+      <!-- Stripe Onboarding Flow -->
+      <div id="container">
+        <div class="container">
+          <div class="banner">
+            <h2></h2>
+          </div>
+          <div class="content">
+
+<!--            <div>-->
+<!--              <button (click)="handleStripeConnect()" id="sign-up-button">Sign up</button>-->
+<!--            </div>-->
+            <div id="embedded-onboarding-container"></div>
+            <p class="error hidden" id="error">Something went wrong!</p>
+            <div class="dev-callout hidden" id="dev-callout">
+              <p class="hidden" id="connected-account-id"></p>
+              <p class="hidden" id="creating-connected-account">Creating a connected account...</p>
+            </div>
+            <div class="info-callout">
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <h1 id="notification-banner-action-warning"></h1>
+
+      <div id="notification-banner-container"></div>
+
+
+      <div id="balances-container"></div>
+
+      <div id="payments-container"></div>
 
     </p-tabpanel>
 

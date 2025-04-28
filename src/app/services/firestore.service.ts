@@ -412,4 +412,33 @@ export class FirestoreService {
       console.error('Error denying application:', error);
     }
   }
+
+
+  /** Save the stripe_secret to the authenticated user's Firestore document */
+  async saveStripeId(userId: string, stripeId: string): Promise<void> {
+    try {
+      // Fetch the user's document from Firestore by userId
+      const userRef = doc(this.firestore, 'users', userId);
+      const userSnap = await getDoc(userRef);
+
+      // If the user doesn't exist, throw an error
+      if (!userSnap.exists()) {
+        console.error(`User with ID ${userId} does not exist.`);
+        return;
+      }
+
+      // Update the user's document with the stripe_secret
+      await updateDoc(userRef, {
+        stripe_id: stripeId, // Add stripe_secret field
+      });
+
+      console.log(`Stripe secret for user ID ${userId} saved successfully.`);
+    } catch (error) {
+      console.error('Error saving Stripe secret:', error);
+    }
+  }
+
+
+
+
 }

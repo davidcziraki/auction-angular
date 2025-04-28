@@ -5,4 +5,5 @@ export interface UserModel {
   email: string;
   userID: string;
   admin: boolean;
+  stripe_id?: string;
 }

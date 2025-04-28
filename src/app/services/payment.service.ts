@@ -22,4 +22,43 @@ export class PaymentService {
       `${this.apiBase}/verifyPayment?session_id=${sessionId}`,
     );
   }
+
+  createStripeAccount() {
+    return this.http.post<{ account: string }>(
+      `${this.apiBase}/api/account`,
+      {},
+    );
+  }
+
+  createAccountSession(accountId: string) {
+    return this.http.post<{ client_secret: string }>(
+      `${this.apiBase}/api/account_session`,
+      {
+        account: accountId,
+      },
+    );
+  }
+
+  // Function to fetch the client secret
+  async fetchClientSecret(accountId: string): Promise<string> {
+    try {
+      const response = await this.http
+        .post<{ client_secret: string }>(
+          `${this.apiBase}/api/account_session`,
+          { account: accountId }
+        )
+        .toPromise();
+
+      if (!response || !response.client_secret) {
+        throw new Error('Client secret not found');
+      }
+
+      return response.client_secret; // Return the client secret
+    } catch (error) {
+      console.error('Error fetching client secret:', error);
+      throw new Error('Failed to fetch client secret'); // Throw error if the request fails
+    }
+  }
+
+
 }
