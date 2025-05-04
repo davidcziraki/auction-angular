@@ -196,7 +196,7 @@
       <div class="auth-header">
 
         <div class="brand-overlay">
-          <img alt="Logo" class="auth-logo" src="logo2.png">
+          <img alt="Logo" class="auth-logo" src="logo.png">
           <div class="brand-text">CarLicit</div>
           <div class="brand-subtext">Premium Car Auctions</div>
         </div>
@@ -245,6 +245,18 @@
         </div>
 
         <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+
+<!--        &lt;!&ndash; Cloudflare Turnstile Captcha &ndash;&gt;-->
+<!--        <div class="turnstile">-->
+<!--          <div class="cf-turnstile" data-sitekey="0x4AAAAAABT_nxQVh49n8gzG"></div>-->
+<!--          <ngx-turnstile-->
+<!--            (resolved)="sendCaptchaResponse($event)"-->
+<!--            [siteKey]="siteKey"-->
+<!--            [tabIndex]="0"-->
+<!--            theme="auto">-->
+<!--          </ngx-turnstile>-->
+<!--        </div>-->
+
 
         <button (click)="login()" class="auth-button" pButton pRipple>
           <i class="pi pi-user"></i>
@@ -342,6 +354,17 @@
         </div>
 
         <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+
+<!--        &lt;!&ndash; Cloudflare Turnstile Captcha &ndash;&gt;-->
+<!--        <div class="turnstile">-->
+<!--          <div class="cf-turnstile" data-sitekey="0x4AAAAAABT_nxQVh49n8gzG"></div>-->
+<!--          <ngx-turnstile-->
+<!--            (resolved)="sendCaptchaResponse($event)"-->
+<!--            [siteKey]="siteKey"-->
+<!--            [tabIndex]="0"-->
+<!--            theme="auto">-->
+<!--          </ngx-turnstile>-->
+<!--        </div>-->
 
         <!-- Register button, disabled until form is valid -->
         <button

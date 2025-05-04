@@ -17,19 +17,22 @@
 
 
         <ng-template pTemplate="end">
-          <div class="flex items-center gap-4">
+          <div>
             <p-menu #menu [model]="userMenu" [popup]="true"></p-menu>
 
+            <div class="end-bar">
 
-            <!-- Conditionally display "Logged in as" or "Log in" -->
-            <p *ngIf="user; else loginText" class="logged-in-text">
-              {{ userFirestore?.forename }} {{ userFirestore?.surname }}
-            </p>
-            <ng-template #loginText>
-              <p (click)="showDialog()" class="logged-in-text" style="cursor: pointer;">Sign In</p>
-            </ng-template>
+            <div class="end-bar-login">
+              <!-- Conditionally display "Logged in as" or "Log in" -->
+              <i class="pi pi-sign-in sign-in-icon" *ngIf="!user"></i>
+              <p *ngIf="user; else loginText" class="logged-in-text">
+                {{ userFirestore?.forename }} {{ userFirestore?.surname }}
+              </p>
+            </div>
 
-            <!--            [image]="user ? 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png' : 'blankpic.png'"-->
+              <ng-template #loginText>
+                <p (click)="showDialog()" class="logged-in-text" style="cursor: pointer;">Sign In</p>
+              </ng-template>
 
             <!-- Avatar -->
             <div class="flex items-center">
@@ -40,6 +43,8 @@
                 styleClass="cursor-pointer align-self-center"
               />
             </div>
+
+          </div>
           </div>
         </ng-template>
       </p-menubar>
@@ -75,7 +80,7 @@
         <div class="auth-header">
 
           <div class="brand-overlay">
-            <img alt="Logo" class="auth-logo" src="logo2.png">
+            <img alt="Logo" class="auth-logo" src="logo.png">
             <div class="brand-text">CarLicit</div>
             <div class="brand-subtext">Premium Car Auctions</div>
           </div>
@@ -304,9 +309,9 @@
       <div class="footer-section">
         <h5>Follow Us</h5>
         <div class="social-icons">
-          <a href="https://facebook.com" target="_blank"><i class="pi pi-facebook"></i></a>
-          <a href="https://twitter.com" target="_blank"><i class="pi pi-twitter"></i></a>
-          <a href="https://instagram.com" target="_blank"><i class="pi pi-instagram"></i></a>
+          <a href="https://www.facebook.com/profile.php?id=61575543130836" target="_blank"><i class="pi pi-facebook"></i></a>
+<!--          <a href="https://twitter.com" target="_blank"><i class="pi pi-twitter"></i></a>-->
+          <a href="https://www.instagram.com/carlicit.hu/" target="_blank"><i class="pi pi-instagram"></i></a>
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { UserModel } from '../../models/user';
 import { passwordValidator } from '../../app.component';
+import {NgxTurnstileModule} from "ngx-turnstile";
 
 @Component({
   selector: 'app-home',
@@ -41,6 +42,7 @@ import { passwordValidator } from '../../app.component';
     Dialog,
     InputText,
     ReactiveFormsModule,
+    NgxTurnstileModule,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -74,6 +76,9 @@ export class HomeComponent {
   userFirestore: UserModel | null = null;
   scrollOffset = 0;
   private countdownInterval?: number;
+  captchaResolved: boolean = false; // To disable submit until captcha is solved
+  siteKey: string = '0x4AAAAAABT_0t9n9Hgk3lSY';
+
 
   constructor(
     private router: Router,
@@ -111,6 +116,18 @@ export class HomeComponent {
         [Validators.required, Validators.minLength(6), passwordValidator()],
       ],
     });
+  }
+
+  // This method will handle the captcha response
+  sendCaptchaResponse(captchaResponse: string | null) {
+    if (captchaResponse) {
+      console.log('Captcha resolved with response:', captchaResponse);
+      // Set the resolved flag to true after successful resolution
+      this.captchaResolved = true;
+    } else {
+      console.log('Captcha response was null');
+      this.captchaResolved = false;
+    }
   }
 
   async forgotPassword() {
@@ -188,8 +205,7 @@ export class HomeComponent {
           surname: lastName,
           DOB: new Date(dob),
           email,
-          userID: user.uid,
-          admin: false,
+          id: user.uid,
         };
 
         return this.authService.loginUser(email, password, true);

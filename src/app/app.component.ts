@@ -31,6 +31,7 @@ import { AuctionService } from './services/auction.service';
 import { Panel } from 'primeng/panel';
 import { Toast } from 'primeng/toast';
 import { NgxTurnstileModule } from 'ngx-turnstile';
+import {Meta, Title} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -61,7 +62,6 @@ export class AppComponent implements OnInit {
   loginForm!: FormGroup;
   registerForm!: FormGroup;
 
-  title = 'finalyear';
   menuItems: MenuItem[] | undefined;
   authState$!: Observable<User | null>;
   user: User | null = null;
@@ -100,6 +100,8 @@ export class AppComponent implements OnInit {
     private messageService: MessageService,
     private router: Router,
     private fb: FormBuilder,
+    private title: Title,
+    private meta: Meta
   ) {
     const aCollection = collection(this.firestore, 'items');
     this.items$ = collectionData(aCollection);
@@ -133,9 +135,24 @@ export class AppComponent implements OnInit {
 
   toggleForm() {
     this.isRegistering = !this.isRegistering;
+
+    // Reset the forms to clear any previous values
+    if (!this.isRegistering) {
+      this.loginForm.reset();
+    } else {
+      this.registerForm.reset();
+    }
   }
 
+
   ngOnInit() {
+
+    this.title.setTitle('CarLicit | Online Car Auctions – Buy & Sell Used Cars');
+    this.meta.updateTag({
+      name: 'description',
+      content: "Buy and sell cars online with ease. CarLicit offers secure auctions, real-time bidding, and a streamlined listing process. Join now and start bidding.",
+    });
+
     const consent = localStorage.getItem('cookieConsent');
     this.displayCookies = consent === null; // Only show if no choice has been made
 
@@ -147,9 +164,9 @@ export class AppComponent implements OnInit {
       this.user = user;
       this.isLoggedIn = !!user;
 
-      if (user?.email) {
-        this.userFirestore = await this.firestoreService.getUserDetailsByEmail(
-          user.email,
+      if (user?.uid) {
+        this.userFirestore = await this.firestoreService.getUserDetails(
+          user.uid,
         );
       } else {
         this.userFirestore = null;
@@ -239,8 +256,17 @@ export class AppComponent implements OnInit {
       {
         label: this.user ? 'Logout' : 'Login',
         icon: this.user ? 'pi pi-sign-out' : 'pi pi-sign-in',
-        command: () => (this.user ? this.logout() : this.showDialog()),
-      },
+        command: () => {
+          if (this.user) {
+            this.logout();
+            // Force page refresh after logout
+            this.router.navigate(['/home']);
+          } else {
+            this.showDialog();
+          }
+        },
+      }
+
     ];
   }
 
@@ -293,8 +319,7 @@ export class AppComponent implements OnInit {
           surname: lastName,
           DOB: new Date(dob),
           email,
-          userID: user.uid,
-          admin: false,
+          id: user.uid,
         };
 
         return this.authService.loginUser(email, password, true);

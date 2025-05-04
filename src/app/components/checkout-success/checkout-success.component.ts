@@ -35,7 +35,7 @@ export class CheckoutSuccessComponent implements OnInit {
 
         setTimeout(() => {
           this.router.navigate(['/account'], { queryParams: { tabValue: 1 } });
-        }, 5000); // 2 second delay for UX
+        }, 5000);
       },
       error: (error) => {
         console.error('Payment verification failed:', error);

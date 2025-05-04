@@ -61,4 +61,12 @@ export class PaymentService {
   }
 
 
+
+  createListingFee(docId: string) {
+    return this.http.post<{ clientSecret: string }>(
+      `${this.apiBase}/createListingFee`,
+      { docId }
+    );
+  }
+
 }

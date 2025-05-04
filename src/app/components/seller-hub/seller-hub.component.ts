@@ -28,6 +28,8 @@ import { FileUpload } from 'primeng/fileupload';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 import { PaymentService } from '../../services/payment.service';
 import { loadConnectAndInitialize } from '@stripe/connect-js';
+import {Observable} from 'rxjs';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-seller-hub',
@@ -61,10 +63,12 @@ import { loadConnectAndInitialize } from '@stripe/connect-js';
   providers: [MessageService, DatePipe],
 })
 export class SellerHubComponent implements OnInit {
-  tabValue: number = 0;
-
-  carDetailsForm!: FormGroup;
+  authState$!: Observable<User | null>;
   user: User | null = null;
+
+  tabValue: number = 0;
+  carDetailsForm!: FormGroup;
+
   auctions: Auction[] = [];
   isNewApplication: boolean = true;
 
@@ -100,19 +104,23 @@ export class SellerHubComponent implements OnInit {
     private datePipe: DatePipe,
     private storageService: StorageService,
     private paymentService: PaymentService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.authService.authState$.subscribe(async (user) => {
+    this.authState$ = this.authService.authState$;
+
+    this.authState$.subscribe(async (user) => {
       if (user) {
         this.user = user;
         await this.loadAllAuctions();
-
         await this.handleStripeConnect();
       } else {
         console.error('User is not authenticated');
       }
     });
+
+
 
     this.carDetailsForm = this.fb.group({
       mobile: [
@@ -232,6 +240,8 @@ export class SellerHubComponent implements OnInit {
 
       await this.loadAllAuctions();
       this.clearForm();
+      this.router.navigate(['cart', auctionId]);
+
     } catch (error) {
       console.error('Error submitting auction:', error);
     }
@@ -297,83 +307,15 @@ export class SellerHubComponent implements OnInit {
   }
 
 
-  // async handleStripeConnect() {
-  //   try {
-  //     // Step 1: Create Stripe account
-  //     const response = await this.paymentService.createStripeAccount().toPromise();
-  //
-  //     if (!response) {
-  //       throw new Error('No response from createStripeAccount');
-  //     }
-  //
-  //     const account = response.account;
-  //     console.log('Stripe account created:', account);
-  //
-  //     // Step 2: Create the account session to get client_secret
-  //     const sessionResponse = await this.paymentService.createAccountSession(account).toPromise();
-  //
-  //     if (!sessionResponse) {
-  //       throw new Error('No response from createAccountSession');
-  //     }
-  //
-  //     const clientSecret = sessionResponse.client_secret;
-  //     console.log('Stripe account session created:', clientSecret);
-  //
-  //     // Step 3: Initialize the Stripe Connect embedded onboarding flow
-  //     const instance = loadConnectAndInitialize({
-  //       publishableKey: 'pk_test_51Qz6yCKigABo6LYNncGHQE1npiAbeZXiVNm3WwYPVTI4A67o9rIgtalMkCLhgK0NLoniDRJHfjxNOgsDXMAo0wBr00asmo1tbC',
-  //       fetchClientSecret: async () => {
-  //         try {
-  //           const fetchedClientSecret = await this.paymentService.fetchClientSecret(account);
-  //           if (!fetchedClientSecret) {
-  //             throw new Error('Failed to fetch client secret');
-  //           }
-  //           return fetchedClientSecret;
-  //         } catch (error) {
-  //           console.error('Error during fetchClientSecret:', error);
-  //           return ''; // Return empty string or handle accordingly
-  //         }
-  //       },
-  //       appearance: {
-  //         overlays: 'drawer',
-  //         variables: {
-  //           colorPrimary: '#1f2c51',
-  //           fontFamily: "Inter",
-  //         },
-  //       },
-  //       // locale: 'hu', // Set the language to Hungarian
-  //
-  //     });
-  //
-  //     // Step 4: Append the onboarding component to the container
-  //     const container = document.getElementById('embedded-onboarding-container');
-  //     const embeddedOnboardingComponent = instance.create('account-onboarding');
-  //
-  //     embeddedOnboardingComponent.setOnExit(() => {
-  //       const balancesComponent = instance.create('balances');
-  //       const balancesContainer = document.getElementById('balances-container');
-  //       balancesContainer?.appendChild(balancesComponent);
-  //
-  //       console.log('User exited the onboarding flow');
-  //     });
-  //
-  //     container?.appendChild(embeddedOnboardingComponent);
-  //
-  //
-  //   } catch (error) {
-  //     console.error('Error creating Stripe connected account:', error);
-  //   }
-  // }
-
   async handleStripeConnect() {
-    const userAccountId = this.user?.email;
+    const userAccountId = this.user?.uid;
 
     if (!userAccountId) {
       console.error('User account ID not found');
       return;
     }
 
-    const userDetails = await this.firestoreService.getUserDetailsByEmail(userAccountId);
+    const userDetails = await this.firestoreService.getUserDetails(userAccountId);
 
     if (!userDetails) {
       console.error('User details not found');

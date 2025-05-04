@@ -52,7 +52,7 @@ export class FirestoreService {
   /**  Add new user to Firestore */
   async addUser(user: UserModel): Promise<void> {
     try {
-      const userRef = doc(this.firestore, 'users', user.email);
+      const userRef = doc(this.firestore, 'users', user.id);
       await setDoc(userRef, user);
     } catch (error) {
       console.error('Error adding user:', error);
@@ -179,10 +179,28 @@ export class FirestoreService {
     );
   }
 
+  /** Get a single application with real-time updates */
+  getApplication(id: string): Observable<Auction | null> {
+    console.log(`Listening for real-time updates on application ID: ${id}`);
+    const applicationRef = doc(this.firestore, 'applications', id);
+
+    return docData(applicationRef, { idField: 'id' }).pipe(
+      map((data: any) => {
+        if (!data) return null;
+        return {
+          id,
+          ...data,
+          endTimeDate: data.endtime?.toDate?.() ?? new Date(),
+        } as Auction;
+      }),
+    );
+  }
+
+
   /**  Fetch user details by email */
-  async getUserDetailsByEmail(email: string): Promise<UserModel | null> {
+  async getUserDetails(id: string): Promise<UserModel | null> {
     try {
-      const userSnap = await getDoc(doc(this.firestore, `users/${email}`));
+      const userSnap = await getDoc(doc(this.firestore, `users/${id}`));
       return userSnap.exists() ? (userSnap.data() as UserModel) : null;
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -192,11 +210,11 @@ export class FirestoreService {
 
   /**  Update user details */
   async updateUserDetails(
-    email: string,
+    id: string,
     updates: Partial<UserModel>,
   ): Promise<void> {
     try {
-      await updateDoc(doc(this.firestore, `users/${email}`), updates);
+      await updateDoc(doc(this.firestore, `users/${id}`), updates);
     } catch (error) {
       console.error('Error updating user details:', error);
     }

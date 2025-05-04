@@ -3,7 +3,6 @@ export interface UserModel {
   surname: string;
   DOB: Date;
   email: string;
-  userID: string;
-  admin: boolean;
   stripe_id?: string;
+  id: string;
 }

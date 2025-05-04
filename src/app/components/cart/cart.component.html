@@ -13,38 +13,64 @@
     <div class="checkout-card">
       <!-- Image Section -->
       <div class="checkout-image-container">
-        <img *ngIf="auction?.mainImageUrl"
-             [routerLink]="['/auction', auctionId]" [src]="auction?.mainImageUrl" alt="Auction Image"
-             class="checkout-image"/>
+        <ng-container *ngIf="auction?.mainImageUrl">
+          <img
+            *ngIf="!handlingApplication"
+            [routerLink]="['/auction', auctionId]"
+            [src]="auction?.mainImageUrl"
+            alt="Auction Image"
+            class="checkout-image" />
+          <img
+            *ngIf="handlingApplication"
+            [src]="auction?.mainImageUrl"
+            alt="Application Image"
+            class="checkout-image" />
+        </ng-container>
       </div>
 
-      <!-- Auction Details -->
+      <!-- Auction/Application Details -->
       <div class="checkout-details">
-        <h3 [routerLink]="['/auction', auctionId]"
-            class="checkout-item-title">{{ auction?.year }} {{ auction?.make }} {{ auction?.model }}</h3>
+        <h3
+          *ngIf="!handlingApplication"
+          [routerLink]="['/auction', auctionId]"
+          class="checkout-item-title">
+          {{ auction?.year }} {{ auction?.make }} {{ auction?.model }}
+        </h3>
+        <h3
+          *ngIf="handlingApplication"
+          class="checkout-item-title">
+          {{ auction?.year }} {{ auction?.make }} {{ auction?.model }}
+        </h3>
 
         <div class="checkout-info">
-          <p><span class="auction-info">Auction Ended:</span> {{ auction?.endTimeDate | date:'medium' }}</p>
-          <p><span class="auction-info">Winning Bid:</span> HUF {{ auction?.price | number }}</p>
+          <p><span class="auction-info">Auction End Date:</span> {{ auction?.endTimeDate | date:'medium' }}</p>
+          <p *ngIf="!handlingApplication">
+            <span class="auction-info">Winning Bid:</span> HUF {{ auction?.price | number }}
+          </p>
+          <p *ngIf="handlingApplication">
+            <span class="auction-info">Listing Fee:</span> HUF 25,000
+          </p>
         </div>
 
         <!-- Price Breakdown -->
-        <div class="price-summary">
-          <p class="info-line"><span class="checkout-label">Subtotal:</span> HUF {{ auction?.price | number }}</p>
-          <p class="info-line"><span class="checkout-label">VAT (27%):</span> HUF {{ vatAmount | number }}</p>
-          <p class="info-line"><span class="checkout-label">Shipping:</span> HUF {{ shippingCost | number }}</p>
-          <hr/>
-          <p class="total-cost info-line"><span class="checkout-label">Total:</span> HUF {{ totalCost | number }}</p>
-        </div>
+        <ng-container *ngIf="!handlingApplication">
+          <div class="price-summary">
+            <p class="info-line"><span class="checkout-label">Subtotal:</span> HUF {{ auction?.price | number }}</p>
+            <p class="info-line"><span class="checkout-label">VAT (27%):</span> HUF {{ vatAmount | number }}</p>
+            <p class="info-line"><span class="checkout-label">Shipping:</span> HUF {{ shippingCost | number }}</p>
+            <hr />
+            <p class="total-cost info-line"><span class="checkout-label">Total:</span> HUF {{ totalCost | number }}</p>
+          </div>
+        </ng-container>
 
-        <!-- Proceed to Payment Button -->
-        <!--        <button (click)="proceedToPayment()" class="checkout-btn">-->
-        <!--          Pay with Stripe-->
-        <!--        </button>-->
-
-
+        <ng-container *ngIf="handlingApplication">
+          <div class="price-summary">
+            <p class="info-line"><span class="checkout-label">Total Fee:</span> HUF 25,000</p>
+          </div>
+        </ng-container>
       </div>
     </div>
+
   </div>
   <!-- Stripe Payment Element -->
   <div id="checkout">

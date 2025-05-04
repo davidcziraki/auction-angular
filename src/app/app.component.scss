@@ -46,6 +46,21 @@ html, body {
   color: #1f2c51 !important;
 }
 
+.end-bar{
+  display:flex;
+  gap: 25px;
+
+}
+
+.end-bar-login{
+  display:flex;
+  gap: 15px;
+};
+
+.sign-in-icon{
+  align-content: center;
+}
+
 
 .footer {
   text-align: center;

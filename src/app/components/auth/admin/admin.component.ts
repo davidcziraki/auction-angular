@@ -17,6 +17,7 @@ import { NgForOf, NgIf } from '@angular/common';
 import { DatePickerModule } from 'primeng/datepicker';
 import { Select } from 'primeng/select';
 import { Toast } from 'primeng/toast';
+import {Badge} from 'primeng/badge';
 
 @Component({
   selector: 'app-admin',
@@ -36,6 +37,7 @@ import { Toast } from 'primeng/toast';
     ReactiveFormsModule,
     Select,
     Toast,
+    Badge,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',

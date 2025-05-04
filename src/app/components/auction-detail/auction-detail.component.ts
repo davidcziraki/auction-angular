@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { AuctionService } from '../../services/auction.service';
 import { Observable } from 'rxjs';
 import { MessageService } from 'primeng/api';
-import { getAuth } from '@angular/fire/auth';
+import {getAuth, User} from '@angular/fire/auth';
 import { FirestoreService } from '../../services/firestore.service';
 import { Toast } from 'primeng/toast';
 import { Dialog } from 'primeng/dialog';
@@ -38,7 +38,7 @@ export class AuctionDetailComponent {
 
   auction$!: Observable<Auction | null>;
   vehicleDetails: any;
-  currentUser: any;
+  currentUser: User | null = null;
 
   activeTab = 'details';
 

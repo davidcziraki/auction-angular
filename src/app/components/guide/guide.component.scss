@@ -65,11 +65,7 @@
   padding: 2rem;
 }
 
-@media (min-width: 768px) {
-  .hero-content {
-    text-align: left;
-  }
-}
+
 
 .hero-title {
   display: block;
@@ -114,7 +110,7 @@
 
 
 .responsive-image {
-  width: 100%;
+  width: 60%;
   max-width: 100%;
   height: auto;
   clip-path: polygon(8% 0, 100% 0%, 100% 100%, 0 100%);
@@ -128,7 +124,7 @@
     flex: 1;
     overflow: hidden;
     display: flex;
-    justify-content: center;
+    justify-content: end;
     align-items: center;
   }
 

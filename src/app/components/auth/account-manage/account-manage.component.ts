@@ -87,7 +87,7 @@ export class AccountManageComponent implements OnInit {
       if (user) {
         this.user = user;
         this.userData['email'] = user.email || '';
-        await this.loadUserDetails(user.email || '');
+        await this.loadUserDetails(user.uid || '');
       }
     });
 
@@ -114,10 +114,10 @@ export class AccountManageComponent implements OnInit {
   }
 
   // Fetch user details and initialize form
-  async loadUserDetails(email: string) {
+  async loadUserDetails(id: string) {
     try {
       const userDetails =
-        await this.firestoreService.getUserDetailsByEmail(email);
+        await this.firestoreService.getUserDetails(id);
       if (userDetails) {
         this.userData['forename'] = userDetails.forename || 'N/A';
         this.userData['surname'] = userDetails.surname || 'N/A';
@@ -143,23 +143,33 @@ export class AccountManageComponent implements OnInit {
     this.accountSettingsForm.get(field)?.markAsTouched();
   }
 
-  // Save changes to Firestore and Auth
+// Save changes to Firestore and Auth
   async saveChanges() {
     try {
+      const userAccountId = this.user?.uid;
+
+      if (!userAccountId) {
+        console.error('User account ID not found');
+        return;
+      }
+
       const updates: any = {};
       const email = this.accountSettingsForm.get('email')?.value;
+
+      // Array to hold promises for concurrent execution
+      const updatePromises: Promise<any>[] = [];
 
       for (const field of this.editingFields) {
         const value = this.accountSettingsForm.get(field)?.value;
 
-        if (field === 'email') {
-          await this.authService.updateUserEmail(value);
-          console.log('Email updated successfully');
+        if (field === 'email' && value) {
+          updatePromises.push(this.authService.updateUserEmail(value));
+          console.log('Email update operation queued');
         }
 
         if (field === 'password' && value) {
-          await this.authService.updateUserPassword(value);
-          console.log('Password updated successfully');
+          updatePromises.push(this.authService.updateUserPassword(value));
+          console.log('Password update operation queued');
         }
 
         if (field === 'forename' || field === 'surname') {
@@ -167,8 +177,12 @@ export class AccountManageComponent implements OnInit {
         }
       }
 
+      // Wait for all auth updates to complete
+      await Promise.all(updatePromises);
+
+      // If there are any user detail updates for Firestore, perform them
       if (Object.keys(updates).length > 0) {
-        await this.firestoreService.updateUserDetails(email, updates);
+        await this.firestoreService.updateUserDetails(userAccountId, updates);
         console.log('User details updated successfully in Firestore:', updates);
       }
 
@@ -177,6 +191,7 @@ export class AccountManageComponent implements OnInit {
       console.error('Error updating user:', error);
     }
   }
+
 
   // Cancel editing and revert to original data
   cancelEdit() {

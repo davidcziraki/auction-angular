@@ -379,6 +379,7 @@
           <th>Colour</th>
           <th>Fuel</th>
           <th>Starting Price (HUF)</th>
+          <th>Fee Paid</th>
           <th>Actions</th>
         </tr>
       </ng-template>
@@ -410,6 +411,12 @@
           <td>{{ application.colour }}</td>
           <td>{{ application.fuel }}</td>
           <td>{{ application.price }}</td>
+          <td>
+            <p-badge
+              [value]="application.fee_paid ? 'Yes' : 'No'"
+              [severity]="application.fee_paid ? 'success' : 'danger'">
+            </p-badge>
+          </td>
           <td>
             <!-- Approve / Reject Buttons for each row -->
             <p-button
